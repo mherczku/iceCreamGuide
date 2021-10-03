@@ -131,7 +131,6 @@ class LoginFragment : RainbowCakeFragment<LoginViewState, LoginViewModel>() {
                 hideProgressDialog()
                 toast("Login Successful")
                 navigator?.replace(MapFragment())
-                //startActivity(Intent(this@MainActivity, PostsActivity::class.java))
             }
             .addOnFailureListener { exception ->
                 hideProgressDialog()
