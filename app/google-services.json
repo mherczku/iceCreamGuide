@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "503719823478",
+    "project_id": "icecreamfire-c3507",
+    "storage_bucket": "icecreamfire-c3507.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:503719823478:android:8fd68203ef3148602cb757",
+        "android_client_info": {
+          "package_name": "com.example.blankhilt"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "503719823478-n7btg6cajjldjtui2p2gtn2gjh30igmp.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCBLDOMLOpWHrxOKrH8rca0FLpLUhQcYIk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "503719823478-n7btg6cajjldjtui2p2gtn2gjh30igmp.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
