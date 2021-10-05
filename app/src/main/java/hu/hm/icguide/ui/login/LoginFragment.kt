@@ -15,8 +15,8 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import dagger.hilt.android.AndroidEntryPoint
-import hu.hm.icguide.extension.validateNonEmpty
-import hu.hm.icguide.ui.maps.MapFragment
+import hu.hm.icguide.extensions.validateNonEmpty
+import hu.hm.icguide.ui.list.ListFragment
 
 @AndroidEntryPoint
 class LoginFragment : RainbowCakeFragment<LoginViewState, LoginViewModel>() {
@@ -130,7 +130,7 @@ class LoginFragment : RainbowCakeFragment<LoginViewState, LoginViewModel>() {
             .addOnSuccessListener {
                 hideProgressDialog()
                 toast("Login Successful")
-                navigator?.replace(MapFragment())
+                navigator?.replace(ListFragment())
             }
             .addOnFailureListener { exception ->
                 hideProgressDialog()

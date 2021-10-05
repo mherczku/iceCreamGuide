@@ -1,12 +1,10 @@
 package hu.hm.icguide.ui.maps
 
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
-import androidx.fragment.app.Fragment
 import co.zsmb.rainbowcake.base.RainbowCakeFragment
 import co.zsmb.rainbowcake.hilt.getViewModelFromFactory
+import co.zsmb.rainbowcake.navigation.navigator
 import com.example.icguide.R
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -14,6 +12,7 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import dagger.hilt.android.AndroidEntryPoint
+import hu.hm.icguide.ui.add.AddFragment
 
 @AndroidEntryPoint
 class MapFragment : RainbowCakeFragment<MapViewState, MapViewModel>() {
@@ -59,9 +58,26 @@ class MapFragment : RainbowCakeFragment<MapViewState, MapViewModel>() {
          * install it inside the SupportMapFragment. This method will only be triggered once the
          * user has installed Google Play services and returned to the app.
          */
+
+        googleMap.uiSettings.isZoomControlsEnabled = true
+        googleMap.uiSettings.isCompassEnabled = true
+        googleMap.uiSettings.isTiltGesturesEnabled = true
+        googleMap.uiSettings.isRotateGesturesEnabled = true
+        googleMap.uiSettings.isScrollGesturesEnabled = true
+
+        googleMap.setOnInfoWindowLongClickListener {
+            navigator?.replace(AddFragment(it.position))
+        }
+
         val sydney = LatLng(-34.0, 151.0)
         googleMap.addMarker(MarkerOptions().position(sydney).title("Marker in Sydney"))
         googleMap.moveCamera(CameraUpdateFactory.newLatLng(sydney))
+        googleMap.setOnMapClickListener {
+            googleMap.addMarker(MarkerOptions().position(it).title("New marker ${it.latitude}")    )
+        }
+
+        //TODO every shop a marker
+        //TODO current position, click --> new marker --> Add new shop
     }
 
 
