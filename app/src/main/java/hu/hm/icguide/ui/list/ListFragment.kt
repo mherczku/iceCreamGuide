@@ -60,12 +60,11 @@ class ListFragment : RainbowCakeFragment<ListViewState, ListViewModel>(), Naviga
 
             R.id.action_drawer_one -> {
                 navigator?.add(AddFragment(LatLng(12.1, 12.1)))
-                //TODO binding.drawerLayout.closeDrawers()
             }
             R.id.action_drawer_two -> {
                 navigator?.add(MapFragment())
             }
-            R.id.action_drawer_two -> {
+            R.id.action_drawer_three -> {
                 //TODO navigator?.add(SettingsFragment())
                             }
             R.id.action_drawer_four -> {

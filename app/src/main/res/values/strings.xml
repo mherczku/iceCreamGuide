@@ -12,4 +12,8 @@
     <string name="menu_item_two">Rendez AZ</string>
     <string name="menu_item_three">Egyéb</string>
     <string name="add_marker_btn">Új felvétele</string>
+    <string name="rationale_dialog_title">Attention!</string>
+    <string name="location_permission_explanation">The map needs to access your location to work properly.</string>
+    <string name="exit">Exit</string>
+    <string name="proceed">Proceed</string>
 </resources>
