@@ -84,14 +84,11 @@ class AddFragment(private val position: LatLng) : RainbowCakeFragment<AddViewSta
         }
 
         val newShop = NetworkShop(
-            binding.addNameTextField.editText?.text.toString(),
-            binding.addAddressTextField.editText?.text.toString(),
-            GeoPoint(position.latitude, position.longitude),
-            binding.ratingBar.rating,
-            1,
-            null
+            name = binding.addNameTextField.editText?.text.toString(),
+            address = binding.addAddressTextField.editText?.text.toString(),
+            geoPoint = GeoPoint(position.latitude, position.longitude),
+            rate = binding.ratingBar.rating
         )
-
 
         if (!imageSet) {
             viewModel.uploadShop(newShop, this, this)

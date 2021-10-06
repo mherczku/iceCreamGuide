@@ -7,52 +7,58 @@ import androidx.core.view.GravityCompat
 import co.zsmb.rainbowcake.base.RainbowCakeFragment
 import co.zsmb.rainbowcake.hilt.getViewModelFromFactory
 import co.zsmb.rainbowcake.navigation.navigator
-import co.zsmb.rainbowcake.navigation.popUntil
 import com.example.icguide.R
 import com.example.icguide.databinding.FragmentListBinding
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.AndroidEntryPoint
+import hu.hm.icguide.network.NetworkShop
 import hu.hm.icguide.ui.add.AddFragment
 import hu.hm.icguide.ui.login.LoginFragment
 import hu.hm.icguide.ui.maps.MapFragment
 
-
 @AndroidEntryPoint
-class ListFragment : RainbowCakeFragment<ListViewState, ListViewModel>(), NavigationView.OnNavigationItemSelectedListener {
+class ListFragment : RainbowCakeFragment<ListViewState, ListViewModel>(),
+    NavigationView.OnNavigationItemSelectedListener {
 
     override fun provideViewModel() = getViewModelFromFactory()
     override fun getViewResource() = R.layout.fragment_list
 
     private lateinit var binding: FragmentListBinding
+    private lateinit var adapter: ShopAdapter
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding = FragmentListBinding.bind(view)
         setupToolbar()
         binding.navigationView.setNavigationItemSelectedListener(this)
+        setupRecyclerView()
+        viewModel.initShopsListener(adapter)
 
         // TODO Setup views
     }
 
+    override fun onStart() {
+        super.onStart()
+        viewModel.load()
+    }
 
+    override fun render(viewState: ListViewState) {
+        //adapter.submitList(viewState.shops)
+        // TODO Render state
+    }
+
+    private fun setupRecyclerView() {
+        adapter = ShopAdapter()
+        binding.shopList.adapter = adapter
+    }
 
     private fun setupToolbar() {
         binding.toolbar.setNavigationOnClickListener {
             binding.drawerLayout.openDrawer(GravityCompat.START)
         }
         binding.toolbar.inflateMenu(R.menu.menu_list)
-    }
-
-    override fun onStart() {
-        super.onStart()
-
-        viewModel.load()
-    }
-
-    override fun render(viewState: ListViewState) {
-        // TODO Render state
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
@@ -66,9 +72,9 @@ class ListFragment : RainbowCakeFragment<ListViewState, ListViewModel>(), Naviga
             }
             R.id.action_drawer_three -> {
                 //TODO navigator?.add(SettingsFragment())
-                            }
+            }
             R.id.action_drawer_four -> {
-                //TODO logout FirebaseAuth.getInstance()
+                FirebaseAuth.getInstance().signOut()
                 navigator?.replace(LoginFragment())
             }
         }
@@ -77,3 +83,5 @@ class ListFragment : RainbowCakeFragment<ListViewState, ListViewModel>(), Naviga
     }
 
 }
+
+

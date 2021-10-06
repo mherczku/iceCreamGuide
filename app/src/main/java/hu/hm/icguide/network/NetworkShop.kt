@@ -1,13 +1,15 @@
 package hu.hm.icguide.network
 
 import com.google.firebase.firestore.GeoPoint
+import java.io.Serializable
 
 
 data class NetworkShop(
-    val name: String,
-    val address: String,
-    val geoPoint: GeoPoint,
-    val rate: Float,
-    val ratings: Int,
-    var photo: String?
+    var id: String = "",
+    var name: String = "",
+    var address: String = "",
+    var geoPoint: GeoPoint = GeoPoint(0.0, 0.0),
+    var rate: Float = 5F,
+    var ratings: Int = 1,
+    var photo: String? = null
 )

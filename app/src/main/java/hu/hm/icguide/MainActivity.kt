@@ -1,6 +1,7 @@
 package hu.hm.icguide
 
 import android.os.Bundle
+import android.widget.Toast
 import co.zsmb.rainbowcake.navigation.SimpleNavActivity
 import com.example.icguide.R
 import dagger.hilt.android.AndroidEntryPoint
