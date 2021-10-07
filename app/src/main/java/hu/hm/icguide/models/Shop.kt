@@ -6,7 +6,7 @@ data class Shop(
     val id: Long,
     var name: String,
     var address: String,
-    var geopoint: GeoPoint,
+    var geoPoint: GeoPoint,
     var rate: Float,
     var ratings: Int,
     var photo: String?

@@ -19,7 +19,6 @@ import com.google.android.gms.tasks.OnSuccessListener
 import com.google.firebase.firestore.GeoPoint
 import dagger.hilt.android.AndroidEntryPoint
 import hu.hm.icguide.extensions.validateNonEmpty
-import hu.hm.icguide.network.NetworkShop
 
 
 @AndroidEntryPoint
@@ -83,11 +82,13 @@ class AddFragment(private val position: LatLng) : RainbowCakeFragment<AddViewSta
             return
         }
 
-        val newShop = NetworkShop(
+        val newShop = AddPresenter.UploadShop(
             name = binding.addNameTextField.editText?.text.toString(),
             address = binding.addAddressTextField.editText?.text.toString(),
             geoPoint = GeoPoint(position.latitude, position.longitude),
-            rate = binding.ratingBar.rating
+            rate = binding.ratingBar.rating,
+            ratings = 1,
+            photo = ""
         )
 
         if (!imageSet) {

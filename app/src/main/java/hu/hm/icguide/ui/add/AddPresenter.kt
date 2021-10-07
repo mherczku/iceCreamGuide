@@ -4,10 +4,10 @@ import android.graphics.Bitmap
 import co.zsmb.rainbowcake.withIOContext
 import com.google.android.gms.tasks.OnFailureListener
 import com.google.android.gms.tasks.OnSuccessListener
+import com.google.firebase.firestore.GeoPoint
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
-import hu.hm.icguide.network.NetworkShop
 import java.io.ByteArrayOutputStream
 import java.net.URLEncoder
 import java.util.*
@@ -19,7 +19,16 @@ class AddPresenter @Inject constructor() {
         ""
     }
 
-    fun uploadShop(newShop: NetworkShop, onSuccessListener: OnSuccessListener<Any>, onFailureListener: OnFailureListener) {
+    data class UploadShop(
+        val name: String,
+        val address: String,
+        val geoPoint: GeoPoint,
+        var photo: String,
+        val rate: Float,
+        val ratings: Int
+    )
+
+    fun uploadShop(newShop: UploadShop, onSuccessListener: OnSuccessListener<Any>, onFailureListener: OnFailureListener) {
         val db = Firebase.firestore
 
         db.collection("shops")
@@ -28,7 +37,7 @@ class AddPresenter @Inject constructor() {
             .addOnFailureListener(onFailureListener)
     }
 
-    fun uploadShopWithImage(newShop: NetworkShop, bitmap: Bitmap, onSuccessListener: OnSuccessListener<Any>, onFailureListener: OnFailureListener) {
+    fun uploadShopWithImage(newShop: UploadShop, bitmap: Bitmap, onSuccessListener: OnSuccessListener<Any>, onFailureListener: OnFailureListener) {
         val baos = ByteArrayOutputStream()
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos)
         val imageInBytes = baos.toByteArray()

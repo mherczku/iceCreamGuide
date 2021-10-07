@@ -1,25 +1,20 @@
 package hu.hm.icguide.ui.list
 
-import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.icguide.R
 import com.example.icguide.databinding.RowShopBinding
-import hu.hm.icguide.models.Shop
 import hu.hm.icguide.network.NetworkShop
 
 class ShopAdapter : ListAdapter<NetworkShop, ShopAdapter.ViewHolder>(ShopComparator){
 
-
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
         ViewHolder(RowShopBinding.inflate(LayoutInflater.from(parent.context), parent, false))
-        //TODO ViewHolder(RowShopBinding.bind(parent.rootView))
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val shop = getItem(position)
@@ -32,7 +27,6 @@ class ShopAdapter : ListAdapter<NetworkShop, ShopAdapter.ViewHolder>(ShopCompara
                 .placeholder(R.drawable.placeholder)
                 .into(holder.shopImage)
         }
-
     }
 
     inner class ViewHolder(binding: RowShopBinding) : RecyclerView.ViewHolder(binding.root) {

@@ -3,6 +3,7 @@ package hu.hm.icguide.ui.list
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
+import android.widget.Toast
 import androidx.core.view.GravityCompat
 import co.zsmb.rainbowcake.base.RainbowCakeFragment
 import co.zsmb.rainbowcake.hilt.getViewModelFromFactory
@@ -12,9 +13,15 @@ import com.example.icguide.databinding.FragmentListBinding
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.DocumentChange
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import dagger.hilt.android.AndroidEntryPoint
-import hu.hm.icguide.network.NetworkShop
+import hu.hm.icguide.network.NetworkModule
 import hu.hm.icguide.ui.add.AddFragment
+import hu.hm.icguide.ui.list.ListPresenter.Companion.EDIT_SHOP
+import hu.hm.icguide.ui.list.ListPresenter.Companion.NEW_SHOP
+import hu.hm.icguide.ui.list.ListPresenter.Companion.REMOVE_SHOP
 import hu.hm.icguide.ui.login.LoginFragment
 import hu.hm.icguide.ui.maps.MapFragment
 
@@ -34,19 +41,21 @@ class ListFragment : RainbowCakeFragment<ListViewState, ListViewModel>(),
         setupToolbar()
         binding.navigationView.setNavigationItemSelectedListener(this)
         setupRecyclerView()
-        viewModel.initShopsListener(adapter)
-
         // TODO Setup views
     }
 
     override fun onStart() {
         super.onStart()
         viewModel.load()
+        initShopsListener()
     }
 
     override fun render(viewState: ListViewState) {
-        //adapter.submitList(viewState.shops)
+        println("render: ${viewState.shops.size}")
+        adapter.submitList(viewState.shops)
+        binding.swipeRefreshLayout.isRefreshing = viewState.isRefreshing
         // TODO Render state
+
     }
 
     private fun setupRecyclerView() {
@@ -59,6 +68,11 @@ class ListFragment : RainbowCakeFragment<ListViewState, ListViewModel>(),
             binding.drawerLayout.openDrawer(GravityCompat.START)
         }
         binding.toolbar.inflateMenu(R.menu.menu_list)
+
+        binding.swipeRefreshLayout.setOnRefreshListener {
+            viewModel.refreshList()
+            binding.swipeRefreshLayout.isRefreshing = false
+        }
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
@@ -80,6 +94,35 @@ class ListFragment : RainbowCakeFragment<ListViewState, ListViewModel>(),
         }
         binding.drawerLayout.closeDrawer(GravityCompat.START)
         return true
+    }
+
+
+    private fun initShopsListener() {
+
+        val db = Firebase.firestore
+        db.collection("shops")
+            .addSnapshotListener { snapshots, e ->
+                if (e != null) {
+                    Toast.makeText(context, "FireStore hiba", Toast.LENGTH_SHORT).show()
+                    return@addSnapshotListener
+                }
+
+                for (dc in snapshots!!.documentChanges) {
+                    when (dc.type) {
+                        DocumentChange.Type.ADDED -> viewModel.dataChanged(
+                            dc.document,
+                            NEW_SHOP
+                        )
+                        DocumentChange.Type.MODIFIED -> viewModel.dataChanged(
+                            dc.document,
+                            EDIT_SHOP
+                        )
+                        DocumentChange.Type.REMOVED -> viewModel.dataChanged(
+                            dc.document, REMOVE_SHOP
+                        )
+                    }
+                }
+            }
     }
 
 }
