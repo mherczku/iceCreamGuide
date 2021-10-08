@@ -13,7 +13,7 @@ class AddViewModel @Inject constructor(
 ) : RainbowCakeViewModel<AddViewState>(AddViewState()) {
 
     fun load() = execute {
-        viewState = AddViewState(addPresenter.getData())
+        viewState = AddViewState()
     }
 
     fun uploadShop(newShop: AddPresenter.UploadShop, onSuccessListener: OnSuccessListener<Any>, onFailureListener: OnFailureListener) {

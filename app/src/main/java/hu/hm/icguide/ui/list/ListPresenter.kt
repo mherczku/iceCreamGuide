@@ -2,10 +2,11 @@ package hu.hm.icguide.ui.list
 
 import com.google.firebase.firestore.QueryDocumentSnapshot
 import com.google.firebase.firestore.ktx.toObject
+import hu.hm.icguide.interactors.FirebaseInteractor
 import hu.hm.icguide.network.NetworkShop
 import javax.inject.Inject
 
-class ListPresenter @Inject constructor() {
+class ListPresenter @Inject constructor(private val firebaseInteractor: FirebaseInteractor) {
 
     companion object{
         const val NEW_SHOP = "NEW_DATA"
@@ -34,6 +35,10 @@ class ListPresenter @Inject constructor() {
             REMOVE_SHOP -> list.remove(shop)
         }
         return list
+    }
+
+    fun initShopListeners(listener: FirebaseInteractor.DataChangedListener) {
+        firebaseInteractor.initShopsListener(listener)
     }
 
 }

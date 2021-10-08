@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">IceCreamGuide</string>
+    <string name="app_name">Fagyi</string>
     <string name="list_title">Fagylaltozók</string>
     <string name="arrow_icon_desc">arrowIcon</string>
     <string name="rate_icon_desc">rateIcon</string>
@@ -12,8 +12,37 @@
     <string name="menu_item_two">Rendez AZ</string>
     <string name="menu_item_three">Egyéb</string>
     <string name="add_marker_btn">Új felvétele</string>
-    <string name="rationale_dialog_title">Attention!</string>
-    <string name="location_permission_explanation">The map needs to access your location to work properly.</string>
-    <string name="exit">Exit</string>
-    <string name="proceed">Proceed</string>
+    <string name="rationale_dialog_title">Figyelem!</string>
+    <string name="location_permission_explanation">A térképnek szüksége van a helyadatokhoz, hogy megfelelően működjön.</string>
+    <string name="exit">Kilépés</string>
+    <string name="proceed">Tovább</string>
+    <string name="permission_granted">Engedély megadva</string>
+    <string name="permission_denied">Engedély megtagadva</string>
+
+
+
+    <!-- Preference Titles -->
+    <string name="messages_header">Messages</string>
+    <string name="sync_header">Sync</string>
+
+    <!-- Messages Preferences -->
+    <string name="signature_title">Your signature</string>
+    <string name="reply_title">Default reply action</string>
+
+    <!-- Sync Preferences -->
+    <string name="sync_title">Sync email periodically</string>
+    <string name="attachment_title">Download incoming attachments</string>
+    <string name="attachment_summary_on">Automatically download attachments for incoming emails
+    </string>
+    <string name="attachment_summary_off">Only download attachments when manually requested</string>
+
+
+    <string name="add_new_shop_here">Fagylaltozó felvétele ide</string>
+    <string name="name_address_empty">Név vagy cím üres</string>
+    <string name="shop_added">Új fagylaltozó felvéve</string>
+    <string name="add_unsuccessful">Felvétel sikertelen</string>
+    <string name="shop_name">Fagylaltozó neve</string>
+    <string name="shops_address">Fagylaltozó címe</string>
+    <string name="content_desc_add_new_shop">Add new shop</string>
+    <string name="cd_show_shops_image">Show shops image</string>
 </resources>

@@ -3,7 +3,6 @@ package hu.hm.icguide.ui.list
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
-import android.widget.Toast
 import androidx.core.view.GravityCompat
 import co.zsmb.rainbowcake.base.RainbowCakeFragment
 import co.zsmb.rainbowcake.hilt.getViewModelFromFactory
@@ -13,21 +12,16 @@ import com.example.icguide.databinding.FragmentListBinding
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.DocumentChange
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
+import com.google.firebase.firestore.QueryDocumentSnapshot
 import dagger.hilt.android.AndroidEntryPoint
-import hu.hm.icguide.network.NetworkModule
+import hu.hm.icguide.interactors.FirebaseInteractor
 import hu.hm.icguide.ui.add.AddFragment
-import hu.hm.icguide.ui.list.ListPresenter.Companion.EDIT_SHOP
-import hu.hm.icguide.ui.list.ListPresenter.Companion.NEW_SHOP
-import hu.hm.icguide.ui.list.ListPresenter.Companion.REMOVE_SHOP
 import hu.hm.icguide.ui.login.LoginFragment
 import hu.hm.icguide.ui.maps.MapFragment
 
 @AndroidEntryPoint
 class ListFragment : RainbowCakeFragment<ListViewState, ListViewModel>(),
-    NavigationView.OnNavigationItemSelectedListener {
+    NavigationView.OnNavigationItemSelectedListener, FirebaseInteractor.DataChangedListener {
 
     override fun provideViewModel() = getViewModelFromFactory()
     override fun getViewResource() = R.layout.fragment_list
@@ -47,11 +41,10 @@ class ListFragment : RainbowCakeFragment<ListViewState, ListViewModel>(),
     override fun onStart() {
         super.onStart()
         viewModel.load()
-        initShopsListener()
+        viewModel.initShopListeners(this)
     }
 
     override fun render(viewState: ListViewState) {
-        println("render: ${viewState.shops.size}")
         adapter.submitList(viewState.shops)
         binding.swipeRefreshLayout.isRefreshing = viewState.isRefreshing
         // TODO Render state
@@ -96,33 +89,8 @@ class ListFragment : RainbowCakeFragment<ListViewState, ListViewModel>(),
         return true
     }
 
-
-    private fun initShopsListener() {
-
-        val db = Firebase.firestore
-        db.collection("shops")
-            .addSnapshotListener { snapshots, e ->
-                if (e != null) {
-                    Toast.makeText(context, "FireStore hiba", Toast.LENGTH_SHORT).show()
-                    return@addSnapshotListener
-                }
-
-                for (dc in snapshots!!.documentChanges) {
-                    when (dc.type) {
-                        DocumentChange.Type.ADDED -> viewModel.dataChanged(
-                            dc.document,
-                            NEW_SHOP
-                        )
-                        DocumentChange.Type.MODIFIED -> viewModel.dataChanged(
-                            dc.document,
-                            EDIT_SHOP
-                        )
-                        DocumentChange.Type.REMOVED -> viewModel.dataChanged(
-                            dc.document, REMOVE_SHOP
-                        )
-                    }
-                }
-            }
+    override fun dataChanged(dc: QueryDocumentSnapshot, type: String) {
+        viewModel.dataChanged(dc, type)
     }
 
 }

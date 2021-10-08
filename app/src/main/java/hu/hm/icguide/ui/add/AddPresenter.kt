@@ -5,19 +5,11 @@ import co.zsmb.rainbowcake.withIOContext
 import com.google.android.gms.tasks.OnFailureListener
 import com.google.android.gms.tasks.OnSuccessListener
 import com.google.firebase.firestore.GeoPoint
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
-import com.google.firebase.storage.FirebaseStorage
+import hu.hm.icguide.interactors.FirebaseInteractor
 import java.io.ByteArrayOutputStream
-import java.net.URLEncoder
-import java.util.*
 import javax.inject.Inject
 
-class AddPresenter @Inject constructor() {
-
-    suspend fun getData(): String = withIOContext {
-        ""
-    }
+class AddPresenter @Inject constructor(private val firebaseInteractor: FirebaseInteractor) {
 
     data class UploadShop(
         val name: String,
@@ -29,12 +21,7 @@ class AddPresenter @Inject constructor() {
     )
 
     fun uploadShop(newShop: UploadShop, onSuccessListener: OnSuccessListener<Any>, onFailureListener: OnFailureListener) {
-        val db = Firebase.firestore
-
-        db.collection("shops")
-            .add(newShop)
-            .addOnSuccessListener(onSuccessListener)
-            .addOnFailureListener(onFailureListener)
+        firebaseInteractor.uploadShop(newShop, onSuccessListener, onFailureListener)
     }
 
     fun uploadShopWithImage(newShop: UploadShop, bitmap: Bitmap, onSuccessListener: OnSuccessListener<Any>, onFailureListener: OnFailureListener) {
@@ -42,23 +29,7 @@ class AddPresenter @Inject constructor() {
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos)
         val imageInBytes = baos.toByteArray()
 
-        val storageReference = FirebaseStorage.getInstance().reference
-        val newImageName = URLEncoder.encode(UUID.randomUUID().toString(), "UTF-8") + ".jpg"
-        val newImageRef = storageReference.child("images/$newImageName")
-
-        newImageRef.putBytes(imageInBytes)
-            .addOnFailureListener(onFailureListener)
-            .continueWithTask { task ->
-                if (!task.isSuccessful) {
-                    task.exception?.let { throw it }
-                }
-
-                newImageRef.downloadUrl
-            }
-            .addOnSuccessListener { downloadUri ->
-                newShop.photo = downloadUri.toString()
-                uploadShop(newShop, onSuccessListener, onFailureListener)
-            }
+        firebaseInteractor.uploadShopWithImage(imageInBytes, newShop, onFailureListener,onSuccessListener)
     }
 
 }

@@ -8,6 +8,9 @@ import android.os.Bundle
 import android.provider.MediaStore
 import android.view.View
 import android.widget.Toast
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import co.zsmb.rainbowcake.base.RainbowCakeFragment
 import co.zsmb.rainbowcake.hilt.getViewModelFromFactory
 import co.zsmb.rainbowcake.navigation.navigator
@@ -29,7 +32,7 @@ class AddFragment(private val position: LatLng) : RainbowCakeFragment<AddViewSta
     override fun getViewResource() = R.layout.fragment_add
 
     private lateinit var binding: FragmentAddBinding
-
+    private lateinit var startForResult: ActivityResultLauncher<Intent>
     private var imageSet = false
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -41,31 +44,26 @@ class AddFragment(private val position: LatLng) : RainbowCakeFragment<AddViewSta
         binding.imgAttach.setOnClickListener {
             attachImage()
         }
-        binding.imgAttach.setImageDrawable(resources.getDrawable(R.drawable.placeholder, resources.newTheme()))
 
-        // TODO Setup views
     }
 
     private fun attachImage() {
-
         val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-        startActivityForResult(takePictureIntent, 101)
-
+        startForResult.launch(Intent(takePictureIntent))
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (resultCode != Activity.RESULT_OK) {
-            return
-        }
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        startForResult =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
+                if (result.resultCode == Activity.RESULT_OK) {
+                    val imageBitmap = result.data?.extras?.get("data") as Bitmap
+                    imageSet = true
+                    binding.imgAttach.setImageBitmap(imageBitmap)
+                }
 
-        if (requestCode == 101) {
-            val imageBitmap = data?.extras?.get("data") as? Bitmap ?: return
-            imageSet = true
-            binding.imgAttach.setImageBitmap(imageBitmap)
-        }
+            }
     }
-
 
     override fun onStart() {
         super.onStart()
@@ -91,15 +89,15 @@ class AddFragment(private val position: LatLng) : RainbowCakeFragment<AddViewSta
             photo = ""
         )
 
+        binding.fabAddShop.isClickable = false
         if (!imageSet) {
             viewModel.uploadShop(newShop, this, this)
-        }
-        else
-        {
+        } else {
             try {
                 val bitmap: Bitmap = (binding.imgAttach.drawable as BitmapDrawable).bitmap
                 viewModel.uploadShopWithImage(newShop, bitmap, this, this)
             } catch (e: Exception) {
+                binding.fabAddShop.isClickable = true
                 e.printStackTrace()
                 toast(e.message)
             }
@@ -114,18 +112,18 @@ class AddFragment(private val position: LatLng) : RainbowCakeFragment<AddViewSta
         return if (binding.addNameTextField.validateNonEmpty() && binding.addAddressTextField.validateNonEmpty()) {
             true
         } else {
-            toast("Név vagy cím üres")
+            toast(getString(R.string.name_address_empty))
             false
         }
     }
 
     override fun onSuccess(p0: Any?) {
-        toast("Új fagylaltozó felvéve")
+        toast(getString(R.string.shop_added))
         navigator?.pop()
     }
 
     override fun onFailure(p0: java.lang.Exception) {
-        toast("Felvétel sikertelen")
+        toast(getString(R.string.add_unsuccessful))
         navigator?.pop()
     }
 

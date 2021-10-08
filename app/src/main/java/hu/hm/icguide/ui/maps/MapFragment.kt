@@ -5,6 +5,7 @@ import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
@@ -12,22 +13,28 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.StringRes
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.view.GravityCompat
 import co.zsmb.rainbowcake.base.RainbowCakeFragment
 import co.zsmb.rainbowcake.hilt.getViewModelFromFactory
 import co.zsmb.rainbowcake.navigation.navigator
 import com.example.icguide.R
+import com.example.icguide.databinding.FragmentMapsBinding
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.material.navigation.NavigationView
+import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.AndroidEntryPoint
 import hu.hm.icguide.ui.add.AddFragment
+import hu.hm.icguide.ui.login.LoginFragment
 
 @AndroidEntryPoint
 class MapFragment : RainbowCakeFragment<MapViewState, MapViewModel>(),
-    ActivityCompat.OnRequestPermissionsResultCallback {
+    ActivityCompat.OnRequestPermissionsResultCallback,
+    NavigationView.OnNavigationItemSelectedListener {
 
     override fun provideViewModel() = getViewModelFromFactory()
     override fun getViewResource() = R.layout.fragment_maps
@@ -35,10 +42,12 @@ class MapFragment : RainbowCakeFragment<MapViewState, MapViewModel>(),
     private lateinit var map: GoogleMap
     private var isPermissionGranted = false
     private lateinit var permReqLauncher: ActivityResultLauncher<String>
+    private lateinit var binding: FragmentMapsBinding
 
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        binding = FragmentMapsBinding.bind(view)
         val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
         mapFragment?.getMapAsync(callback)
 
@@ -50,12 +59,14 @@ class MapFragment : RainbowCakeFragment<MapViewState, MapViewModel>(),
 
         permReqLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) {
             if (it) {
-                Toast.makeText(context, "Engedély megadva", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, getString(R.string.permission_granted), Toast.LENGTH_SHORT)
+                    .show()
                 isPermissionGranted = true
                 enableMyLocation()
 
             } else {
-                Toast.makeText(context, "Engedély megtagadva", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, getString(R.string.permission_denied), Toast.LENGTH_SHORT)
+                    .show()
             }
         }
         handleLocationPermission()
@@ -82,23 +93,7 @@ class MapFragment : RainbowCakeFragment<MapViewState, MapViewModel>(),
     private val callback = OnMapReadyCallback { googleMap ->
 
         map = googleMap
-
-        googleMap.uiSettings.isZoomControlsEnabled = true
-        googleMap.uiSettings.isCompassEnabled = true
-        googleMap.uiSettings.isTiltGesturesEnabled = true
-        googleMap.uiSettings.isRotateGesturesEnabled = true
-        googleMap.uiSettings.isScrollGesturesEnabled = true
-
-
-        googleMap.setOnMyLocationButtonClickListener {
-            Toast.makeText(context, "buttonClick", Toast.LENGTH_SHORT).show()
-            false
-        }
-
-        /**
-         * If you want to do sth when user clicks on his exact location (blue dot)*
-         * googleMap.setOnMyLocationClickListener {}
-         **/
+        googleMap.uiSettings.setAllGesturesEnabled(true)
 
         googleMap.isMyLocationEnabled = isPermissionGranted
 
@@ -106,11 +101,16 @@ class MapFragment : RainbowCakeFragment<MapViewState, MapViewModel>(),
             navigator?.replace(AddFragment(it.position))
         }
 
-        val sydney = LatLng(-34.0, 151.0)
-        googleMap.addMarker(MarkerOptions().position(sydney).title("Marker in Sydney"))
-        googleMap.moveCamera(CameraUpdateFactory.newLatLng(sydney))
-        googleMap.setOnMapClickListener {
-            googleMap.addMarker(MarkerOptions().position(it).title("Fagylaltozó felvétele ide"))
+        val budapest = LatLng(47.4979, 19.0402)
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(budapest, 10F))
+        googleMap.setOnMapLongClickListener {
+            googleMap.addMarker(
+                MarkerOptions().position(it).title(getString(R.string.add_new_shop_here))
+            )
+            googleMap.moveCamera(CameraUpdateFactory.newLatLng(it))
+        }
+        googleMap.setOnPoiClickListener {
+            Toast.makeText(context, " ${it.name}", Toast.LENGTH_SHORT).show()
         }
 
         //TODO every shop a marker
@@ -142,24 +142,16 @@ class MapFragment : RainbowCakeFragment<MapViewState, MapViewModel>(),
                 Manifest.permission.ACCESS_FINE_LOCATION
             ) != PackageManager.PERMISSION_GRANTED
         ) {
-            // Should we show an explanation?
             if (ActivityCompat.shouldShowRequestPermissionRationale(
                     requireActivity(),
                     Manifest.permission.ACCESS_FINE_LOCATION
                 )
             ) {
-
-                // Show an explanation to the user *asynchronously* -- don't block
-                // this thread waiting for the user's response! After the user
-                // sees the explanation, try again to request the permission.
-
                 showRationaleDialog(
                     explanation = R.string.location_permission_explanation,
                     onPositiveButton = this::requestLocationPermission
                 )
-
             } else {
-                // No explanation needed, we can request the permission.
                 requestLocationPermission()
             }
         } else {
@@ -169,6 +161,27 @@ class MapFragment : RainbowCakeFragment<MapViewState, MapViewModel>(),
 
     private fun requestLocationPermission() {
         permReqLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+    }
+
+
+    override fun onNavigationItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+
+            R.id.action_drawer_one -> {
+                navigator?.add(AddFragment(LatLng(12.1, 12.1)))
+            }
+            R.id.action_drawer_two -> {
+            }
+            R.id.action_drawer_three -> {
+                //TODO navigator?.add(SettingsFragment())
+            }
+            R.id.action_drawer_four -> {
+                FirebaseAuth.getInstance().signOut()
+                navigator?.replace(LoginFragment())
+            }
+        }
+        binding.drawerLayout.closeDrawer(GravityCompat.START)
+        return true
     }
 
 
