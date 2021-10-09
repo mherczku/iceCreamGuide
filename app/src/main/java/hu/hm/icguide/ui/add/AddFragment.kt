@@ -122,8 +122,9 @@ class AddFragment(private val position: LatLng) : RainbowCakeFragment<AddViewSta
         navigator?.pop()
     }
 
-    override fun onFailure(p0: java.lang.Exception) {
+    override fun onFailure(p0: Exception) {
         toast(getString(R.string.add_unsuccessful))
+        toast(p0.localizedMessage)
         navigator?.pop()
     }
 

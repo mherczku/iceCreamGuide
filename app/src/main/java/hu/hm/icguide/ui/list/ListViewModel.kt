@@ -25,8 +25,8 @@ class ListViewModel @Inject constructor(
         viewState = ListViewState(shops = newList)
     }
 
-    fun initShopListeners(listener: FirebaseInteractor.DataChangedListener) {
-        listPresenter.initShopListeners(listener)
+    fun initShopListeners(listener: FirebaseInteractor.DataChangedListener, toastListener: FirebaseInteractor.OnToastListener) {
+        listPresenter.initShopListeners(listener, toastListener)
     }
 
 }

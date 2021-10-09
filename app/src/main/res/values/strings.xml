@@ -45,4 +45,14 @@
     <string name="shops_address">Fagylaltozó címe</string>
     <string name="content_desc_add_new_shop">Add new shop</string>
     <string name="cd_show_shops_image">Show shops image</string>
+    <string name="registration_successful">Sikeres regisztáció, mostmár beléphetsz</string>
+    <string name="registration_unsuccessful">Sikertelen regisztráció</string>
+    <string name="login_successful">Belépés sikeres</string>
+    <string name="login_unsuccessful">Belépés sikertelen</string>
+    <string name="email_password_empty">Email vagy jelszó üres</string>
+    <string name="cd_login_image">Login Image</string>
+    <string name="email">Email</string>
+    <string name="password">Jelszó</string>
+    <string name="login">Bejelentkezés</string>
+    <string name="register">Regisztrálás</string>
 </resources>

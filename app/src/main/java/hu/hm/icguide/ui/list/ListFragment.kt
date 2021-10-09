@@ -3,6 +3,7 @@ package hu.hm.icguide.ui.list
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
+import android.widget.Toast
 import androidx.core.view.GravityCompat
 import co.zsmb.rainbowcake.base.RainbowCakeFragment
 import co.zsmb.rainbowcake.hilt.getViewModelFromFactory
@@ -10,6 +11,7 @@ import co.zsmb.rainbowcake.navigation.navigator
 import com.example.icguide.R
 import com.example.icguide.databinding.FragmentListBinding
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.tasks.OnFailureListener
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.QueryDocumentSnapshot
@@ -21,7 +23,7 @@ import hu.hm.icguide.ui.maps.MapFragment
 
 @AndroidEntryPoint
 class ListFragment : RainbowCakeFragment<ListViewState, ListViewModel>(),
-    NavigationView.OnNavigationItemSelectedListener, FirebaseInteractor.DataChangedListener {
+    NavigationView.OnNavigationItemSelectedListener, FirebaseInteractor.DataChangedListener, FirebaseInteractor.OnToastListener {
 
     override fun provideViewModel() = getViewModelFromFactory()
     override fun getViewResource() = R.layout.fragment_list
@@ -41,7 +43,7 @@ class ListFragment : RainbowCakeFragment<ListViewState, ListViewModel>(),
     override fun onStart() {
         super.onStart()
         viewModel.load()
-        viewModel.initShopListeners(this)
+        viewModel.initShopListeners(this, this)
     }
 
     override fun render(viewState: ListViewState) {
@@ -91,6 +93,11 @@ class ListFragment : RainbowCakeFragment<ListViewState, ListViewModel>(),
 
     override fun dataChanged(dc: QueryDocumentSnapshot, type: String) {
         viewModel.dataChanged(dc, type)
+    }
+
+    override fun toast(message: String?) {
+        message ?: return
+        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
     }
 
 }
