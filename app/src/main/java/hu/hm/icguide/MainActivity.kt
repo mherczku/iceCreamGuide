@@ -19,9 +19,13 @@ class MainActivity : SimpleNavActivity() {
 
         if (savedInstanceState == null) {
 
-            if(FirebaseAuth.getInstance().currentUser != null)
+            val user = FirebaseAuth.getInstance().currentUser?.displayName
+            if(user != null)
                 navigator.add(ListFragment())
-            else navigator.add(LoginFragment())
+            else {
+                Toast.makeText(applicationContext, "${user} bejelentkezve", Toast.LENGTH_SHORT).show()
+                navigator.add(LoginFragment())
+            }
         }
     }
 
