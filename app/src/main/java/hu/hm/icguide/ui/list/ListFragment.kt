@@ -11,19 +11,20 @@ import co.zsmb.rainbowcake.navigation.navigator
 import com.example.icguide.R
 import com.example.icguide.databinding.FragmentListBinding
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.tasks.OnFailureListener
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.QueryDocumentSnapshot
 import dagger.hilt.android.AndroidEntryPoint
 import hu.hm.icguide.interactors.FirebaseInteractor
 import hu.hm.icguide.ui.add.AddFragment
+import hu.hm.icguide.ui.detail.DetailFragment
 import hu.hm.icguide.ui.login.LoginFragment
 import hu.hm.icguide.ui.maps.MapFragment
 
 @AndroidEntryPoint
 class ListFragment : RainbowCakeFragment<ListViewState, ListViewModel>(),
-    NavigationView.OnNavigationItemSelectedListener, FirebaseInteractor.DataChangedListener, FirebaseInteractor.OnToastListener {
+    NavigationView.OnNavigationItemSelectedListener, FirebaseInteractor.DataChangedListener,
+    FirebaseInteractor.OnToastListener, ShopAdapter.ShopAdapterListener {
 
     override fun provideViewModel() = getViewModelFromFactory()
     override fun getViewResource() = R.layout.fragment_list
@@ -37,7 +38,14 @@ class ListFragment : RainbowCakeFragment<ListViewState, ListViewModel>(),
         setupToolbar()
         binding.navigationView.setNavigationItemSelectedListener(this)
         setupRecyclerView()
-        // TODO Setup views
+        val user = FirebaseAuth.getInstance().currentUser
+        if (user == null) {
+            navigator?.replace(LoginFragment())
+        } else Toast.makeText(
+            context,
+            user.displayName!! + getString(R.string.logged_in),
+            Toast.LENGTH_LONG
+        ).show()
     }
 
     override fun onStart() {
@@ -54,7 +62,7 @@ class ListFragment : RainbowCakeFragment<ListViewState, ListViewModel>(),
     }
 
     private fun setupRecyclerView() {
-        adapter = ShopAdapter()
+        adapter = ShopAdapter(this)
         binding.shopList.adapter = adapter
     }
 
@@ -98,6 +106,10 @@ class ListFragment : RainbowCakeFragment<ListViewState, ListViewModel>(),
     override fun toast(message: String?) {
         message ?: return
         Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+    }
+
+    override fun onItemSelected(id: String) {
+        navigator?.add(DetailFragment(id))
     }
 
 }

@@ -55,4 +55,6 @@
     <string name="password">Jelszó</string>
     <string name="login">Bejelentkezés</string>
     <string name="register">Regisztrálás</string>
+    <string name="logged_in">bejelentkezve</string>
+    <string name="write_comment">Hozzászolás írása...</string>
 </resources>

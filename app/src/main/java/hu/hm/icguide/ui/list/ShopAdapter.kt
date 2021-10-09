@@ -11,7 +11,7 @@ import com.example.icguide.R
 import com.example.icguide.databinding.RowShopBinding
 import hu.hm.icguide.network.NetworkShop
 
-class ShopAdapter : ListAdapter<NetworkShop, ShopAdapter.ViewHolder>(ShopComparator){
+class ShopAdapter(private val listener : ShopAdapterListener) : ListAdapter<NetworkShop, ShopAdapter.ViewHolder>(ShopComparator){
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
         ViewHolder(RowShopBinding.inflate(LayoutInflater.from(parent.context), parent, false))
@@ -21,13 +21,15 @@ class ShopAdapter : ListAdapter<NetworkShop, ShopAdapter.ViewHolder>(ShopCompara
         holder.nameText.text = shop.name
         holder.addressText.text = shop.address
         holder.rateText.text = shop.rate.toString()
-        if(!shop.photo.isNullOrBlank()) {
+        if(shop.photo.isNotBlank()) {
             Glide.with(holder.shopImage)
                 .load(shop.photo)
                 .placeholder(R.drawable.placeholder)
                 .into(holder.shopImage)
         }
     }
+
+    interface ShopAdapterListener{fun onItemSelected(id: String)}
 
     inner class ViewHolder(binding: RowShopBinding) : RecyclerView.ViewHolder(binding.root) {
         val nameText: TextView = binding.nameText
@@ -38,15 +40,11 @@ class ShopAdapter : ListAdapter<NetworkShop, ShopAdapter.ViewHolder>(ShopCompara
         var item: NetworkShop? = null
 
         init {
-            binding.root.setOnClickListener {
-                item?.let {
-                    //TODO navigate to deatilF item -> listener?.onItemSelected(item.id)
-                 }
+
+            itemView.setOnClickListener {
+                item?.id?.let { it1 -> listener.onItemSelected(it1) }
             }
         }
     }
-
-    //TODO interface Listener{fun onItemSelected(id: Long)}
-
 
 }

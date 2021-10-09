@@ -8,7 +8,7 @@ import com.example.icguide.R
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class DetailFragment : RainbowCakeFragment<DetailViewState, DetailViewModel>() {
+class DetailFragment(shopId: String) : RainbowCakeFragment<DetailViewState, DetailViewModel>() {
 
     override fun provideViewModel() = getViewModelFromFactory()
     override fun getViewResource() = R.layout.fragment_detail
