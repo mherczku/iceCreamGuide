@@ -1,4 +1,4 @@
 package hu.hm.icguide.ui.maps
 
 
-data class MapViewState(val data: String = "")
+data class MapViewState(val marks: List<MapPresenter.Mark> = emptyList())

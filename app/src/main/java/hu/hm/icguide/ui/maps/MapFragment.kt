@@ -88,6 +88,18 @@ class MapFragment : RainbowCakeFragment<MapViewState, MapViewModel>(),
     }
 
     override fun render(viewState: MapViewState) {
+        if (!::map.isInitialized) return
+        println("render Map ${viewState.marks.size}")
+        var a: LatLng? = null
+        viewState.marks.forEach {
+            println(it.geoPoint)
+            map.addMarker(
+                MarkerOptions().position(LatLng(it.geoPoint.latitude, it.geoPoint.longitude)).title(it.name)
+            )
+            a = LatLng(it.geoPoint.latitude, it.geoPoint.longitude)
+        }
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(a, 10F))
+
         // TODO Render state
     }
 
@@ -99,24 +111,14 @@ class MapFragment : RainbowCakeFragment<MapViewState, MapViewModel>(),
 
         googleMap.isMyLocationEnabled = isPermissionGranted
 
-        googleMap.setOnInfoWindowLongClickListener {
-            navigator?.replace(AddDialog(it.position))
-        }
-
         val budapest = LatLng(47.4979, 19.0402)
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(budapest, 10F))
         googleMap.setOnMapLongClickListener {
-            googleMap.addMarker(
-                MarkerOptions().position(it).title(getString(R.string.add_new_shop_here))
-            )
-            googleMap.moveCamera(CameraUpdateFactory.newLatLng(it))
+            AddDialog(it).show(childFragmentManager, null)
         }
         googleMap.setOnPoiClickListener {
             Toast.makeText(context, " ${it.name}", Toast.LENGTH_SHORT).show()
         }
-
-        //TODO every shop a marker
-        //TODO current position, click --> new marker --> Add new shop
     }
 
     private fun showRationaleDialog(
