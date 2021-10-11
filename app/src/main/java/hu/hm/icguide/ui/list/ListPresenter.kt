@@ -8,14 +8,18 @@ import javax.inject.Inject
 
 class ListPresenter @Inject constructor(private val firebaseInteractor: FirebaseInteractor) {
 
-    companion object{
+    companion object {
         const val NEW_SHOP = "NEW_DATA"
         const val EDIT_SHOP = "EDIT_DATA"
         const val REMOVE_SHOP = "REMOVE_SHOP"
     }
 
-    fun dataChanged(dc: QueryDocumentSnapshot, function: String, list: MutableList<NetworkShop>): MutableList<NetworkShop> {
-        val objectShop : NetworkShop = dc.toObject()
+    fun dataChanged(
+        dc: QueryDocumentSnapshot,
+        function: String,
+        list: MutableList<NetworkShop>
+    ): MutableList<NetworkShop> {
+        val objectShop: NetworkShop = dc.toObject()
         val shop = NetworkShop(
             id = dc.id,
             name = objectShop.name,
@@ -37,7 +41,10 @@ class ListPresenter @Inject constructor(private val firebaseInteractor: Firebase
         return list
     }
 
-    fun initShopListeners(listener: FirebaseInteractor.DataChangedListener, toastListener: FirebaseInteractor.OnToastListener) {
+    fun initShopListeners(
+        listener: FirebaseInteractor.DataChangedListener,
+        toastListener: FirebaseInteractor.OnToastListener
+    ) {
         firebaseInteractor.initShopsListener(listener, toastListener)
     }
 

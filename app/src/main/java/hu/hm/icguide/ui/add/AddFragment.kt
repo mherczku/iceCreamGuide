@@ -1,5 +1,5 @@
 package hu.hm.icguide.ui.add
-
+/*
 import android.app.Activity
 import android.content.Intent
 import android.graphics.Bitmap
@@ -72,7 +72,7 @@ class AddFragment(private val position: LatLng) : RainbowCakeFragment<AddViewSta
     }
 
     override fun render(viewState: AddViewState) {
-        // TODO Render state
+        //TODO Render state
     }
 
     private fun addClick() {
@@ -129,3 +129,4 @@ class AddFragment(private val position: LatLng) : RainbowCakeFragment<AddViewSta
     }
 
 }
+*/

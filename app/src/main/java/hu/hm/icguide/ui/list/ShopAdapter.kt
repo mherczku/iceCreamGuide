@@ -11,7 +11,8 @@ import com.example.icguide.R
 import com.example.icguide.databinding.RowShopBinding
 import hu.hm.icguide.network.NetworkShop
 
-class ShopAdapter(private val listener : ShopAdapterListener) : ListAdapter<NetworkShop, ShopAdapter.ViewHolder>(ShopComparator){
+class ShopAdapter(private val listener: ShopAdapterListener) :
+    ListAdapter<NetworkShop, ShopAdapter.ViewHolder>(ShopComparator) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
         ViewHolder(RowShopBinding.inflate(LayoutInflater.from(parent.context), parent, false))
@@ -22,7 +23,7 @@ class ShopAdapter(private val listener : ShopAdapterListener) : ListAdapter<Netw
         holder.nameText.text = shop.name
         holder.addressText.text = shop.address
         holder.rateText.text = shop.rate.toString()
-        if(shop.photo.isNotBlank()) {
+        if (shop.photo.isNotBlank()) {
             Glide.with(holder.shopImage)
                 .load(shop.photo)
                 .placeholder(R.drawable.placeholder)
@@ -30,7 +31,9 @@ class ShopAdapter(private val listener : ShopAdapterListener) : ListAdapter<Netw
         }
     }
 
-    interface ShopAdapterListener{fun onItemSelected(shop: NetworkShop)}
+    interface ShopAdapterListener {
+        fun onItemSelected(shop: NetworkShop)
+    }
 
     inner class ViewHolder(binding: RowShopBinding) : RecyclerView.ViewHolder(binding.root) {
         val nameText: TextView = binding.nameText
@@ -43,7 +46,7 @@ class ShopAdapter(private val listener : ShopAdapterListener) : ListAdapter<Netw
         init {
             itemView.setOnClickListener {
                 item ?: return@setOnClickListener
-                item.let { item -> listener.onItemSelected(item!!)}
+                item.let { item -> listener.onItemSelected(item!!) }
             }
         }
     }

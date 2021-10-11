@@ -1,5 +1,6 @@
 package hu.hm.icguide.ui.add
 
+/*
 import android.graphics.Bitmap
 import co.zsmb.rainbowcake.withIOContext
 import com.google.android.gms.tasks.OnFailureListener
@@ -33,3 +34,4 @@ class AddPresenter @Inject constructor(private val firebaseInteractor: FirebaseI
     }
 
 }
+*/

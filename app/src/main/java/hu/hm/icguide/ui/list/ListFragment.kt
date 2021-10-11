@@ -17,7 +17,7 @@ import com.google.firebase.firestore.QueryDocumentSnapshot
 import dagger.hilt.android.AndroidEntryPoint
 import hu.hm.icguide.interactors.FirebaseInteractor
 import hu.hm.icguide.network.NetworkShop
-import hu.hm.icguide.ui.add.AddFragment
+import hu.hm.icguide.ui.add.AddDialog
 import hu.hm.icguide.ui.detail.DetailFragment
 import hu.hm.icguide.ui.login.LoginFragment
 import hu.hm.icguide.ui.maps.MapFragment
@@ -83,7 +83,8 @@ class ListFragment : RainbowCakeFragment<ListViewState, ListViewModel>(),
         when (item.itemId) {
 
             R.id.action_drawer_one -> {
-                navigator?.add(AddFragment(LatLng(12.1, 12.1)))
+                AddDialog(LatLng(12.1, 12.1)).show(childFragmentManager, null)
+
             }
             R.id.action_drawer_two -> {
                 navigator?.add(MapFragment())

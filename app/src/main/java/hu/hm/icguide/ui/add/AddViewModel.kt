@@ -1,5 +1,6 @@
 package hu.hm.icguide.ui.add
 
+/*
 import android.graphics.Bitmap
 import co.zsmb.rainbowcake.base.RainbowCakeViewModel
 import com.google.android.gms.tasks.OnFailureListener
@@ -25,3 +26,4 @@ class AddViewModel @Inject constructor(
     }
 
 }
+*/

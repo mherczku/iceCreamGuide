@@ -5,7 +5,6 @@ import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
@@ -13,7 +12,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.StringRes
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.core.view.GravityCompat
 import co.zsmb.rainbowcake.base.RainbowCakeFragment
 import co.zsmb.rainbowcake.hilt.getViewModelFromFactory
 import co.zsmb.rainbowcake.navigation.navigator
@@ -25,11 +23,8 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
-import com.google.android.material.navigation.NavigationView
-import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.AndroidEntryPoint
-import hu.hm.icguide.ui.add.AddFragment
-import hu.hm.icguide.ui.login.LoginFragment
+import hu.hm.icguide.ui.add.AddDialog
 
 @AndroidEntryPoint
 class MapFragment : RainbowCakeFragment<MapViewState, MapViewModel>(),
@@ -105,7 +100,7 @@ class MapFragment : RainbowCakeFragment<MapViewState, MapViewModel>(),
         googleMap.isMyLocationEnabled = isPermissionGranted
 
         googleMap.setOnInfoWindowLongClickListener {
-            navigator?.replace(AddFragment(it.position))
+            navigator?.replace(AddDialog(it.position))
         }
 
         val budapest = LatLng(47.4979, 19.0402)

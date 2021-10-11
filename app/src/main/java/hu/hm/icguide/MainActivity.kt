@@ -1,11 +1,9 @@
 package hu.hm.icguide
 
 import android.os.Bundle
-import android.widget.Toast
 import co.zsmb.rainbowcake.navigation.SimpleNavActivity
 import com.example.icguide.R
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.ktx.Firebase
 import dagger.hilt.android.AndroidEntryPoint
 import hu.hm.icguide.ui.list.ListFragment
 import hu.hm.icguide.ui.login.LoginFragment
@@ -20,7 +18,7 @@ class MainActivity : SimpleNavActivity() {
         if (savedInstanceState == null) {
 
             val user = FirebaseAuth.getInstance().currentUser
-            if(user != null) navigator.add(ListFragment())
+            if (user != null) navigator.add(ListFragment())
             else navigator.add(LoginFragment())
         }
     }

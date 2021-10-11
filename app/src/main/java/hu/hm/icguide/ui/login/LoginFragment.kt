@@ -1,6 +1,5 @@
 package hu.hm.icguide.ui.login
 
-import android.app.ProgressDialog
 import android.os.Bundle
 import android.view.View
 import android.widget.ProgressBar
@@ -12,11 +11,6 @@ import com.example.icguide.R
 import com.example.icguide.databinding.FragmentLoginBinding
 import com.google.android.gms.tasks.OnFailureListener
 import com.google.android.gms.tasks.OnSuccessListener
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.UserProfileChangeRequest
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ktx.database
-import com.google.firebase.ktx.Firebase
 import dagger.hilt.android.AndroidEntryPoint
 import hu.hm.icguide.extensions.validateNonEmpty
 import hu.hm.icguide.interactors.FirebaseInteractor

@@ -14,7 +14,7 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
-import hu.hm.icguide.ui.add.AddPresenter
+import hu.hm.icguide.ui.add.AddDialog
 import hu.hm.icguide.ui.list.ListPresenter
 import java.net.URLEncoder
 import java.util.*
@@ -34,26 +34,37 @@ class FirebaseInteractor @Inject constructor() {
         fun dataChanged(dc: QueryDocumentSnapshot, type: String)
     }
 
-    interface OnToastListener{
+    interface OnToastListener {
         fun toast(message: String?)
     }
-    interface OnRegisterSuccessListener{
+
+    interface OnRegisterSuccessListener {
         fun onRegisterSuccess()
     }
 
 
-    fun loginFirebase(email: String, password: String, onSuccessListener: OnSuccessListener<Any>, onFailureListener: OnFailureListener) {
+    fun loginFirebase(
+        email: String,
+        password: String,
+        onSuccessListener: OnSuccessListener<Any>,
+        onFailureListener: OnFailureListener
+    ) {
         firebaseAuth
             .signInWithEmailAndPassword(email, password)
             .addOnSuccessListener(onSuccessListener)
             .addOnFailureListener(onFailureListener)
     }
 
-    fun registerFirebase(email: String, password: String, onRegisterSuccessListener: OnRegisterSuccessListener, onFailureListener: OnFailureListener) {
+    fun registerFirebase(
+        email: String,
+        password: String,
+        onRegisterSuccessListener: OnRegisterSuccessListener,
+        onFailureListener: OnFailureListener
+    ) {
 
         firebaseAuth
             .createUserWithEmailAndPassword(email, password)
-            .addOnSuccessListener{
+            .addOnSuccessListener {
                 val firebaseUser = it.user
                 val profileChangeRequest = UserProfileChangeRequest.Builder()
                     .setDisplayName(firebaseUser?.email?.substringBefore('@'))
@@ -95,7 +106,7 @@ class FirebaseInteractor @Inject constructor() {
     }
 
     fun uploadShop(
-        newShop: AddPresenter.UploadShop,
+        newShop: AddDialog.UploadShop,
         onSuccessListener: OnSuccessListener<Any>,
         onFailureListener: OnFailureListener
     ) {
@@ -109,7 +120,7 @@ class FirebaseInteractor @Inject constructor() {
 
     fun uploadShopWithImage(
         imageInBytes: ByteArray,
-        newShop: AddPresenter.UploadShop,
+        newShop: AddDialog.UploadShop,
         onFailureListener: OnFailureListener,
         onSuccessListener: OnSuccessListener<Any>
     ) {
