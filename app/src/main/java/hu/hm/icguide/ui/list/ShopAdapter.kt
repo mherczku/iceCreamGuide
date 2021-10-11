@@ -18,6 +18,7 @@ class ShopAdapter(private val listener : ShopAdapterListener) : ListAdapter<Netw
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val shop = getItem(position)
+        holder.item = shop
         holder.nameText.text = shop.name
         holder.addressText.text = shop.address
         holder.rateText.text = shop.rate.toString()
@@ -29,7 +30,7 @@ class ShopAdapter(private val listener : ShopAdapterListener) : ListAdapter<Netw
         }
     }
 
-    interface ShopAdapterListener{fun onItemSelected(id: String)}
+    interface ShopAdapterListener{fun onItemSelected(shop: NetworkShop)}
 
     inner class ViewHolder(binding: RowShopBinding) : RecyclerView.ViewHolder(binding.root) {
         val nameText: TextView = binding.nameText
@@ -40,9 +41,9 @@ class ShopAdapter(private val listener : ShopAdapterListener) : ListAdapter<Netw
         var item: NetworkShop? = null
 
         init {
-
             itemView.setOnClickListener {
-                item?.id?.let { it1 -> listener.onItemSelected(it1) }
+                item ?: return@setOnClickListener
+                item.let { item -> listener.onItemSelected(item!!)}
             }
         }
     }

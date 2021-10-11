@@ -13,4 +13,6 @@ class DetailViewModel @Inject constructor(
         viewState = DetailViewState(detailPresenter.getData())
     }
 
+    fun isNetAvailable(): Boolean = detailPresenter.isNetAvailable()
+
 }

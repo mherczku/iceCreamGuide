@@ -33,8 +33,7 @@ import hu.hm.icguide.ui.login.LoginFragment
 
 @AndroidEntryPoint
 class MapFragment : RainbowCakeFragment<MapViewState, MapViewModel>(),
-    ActivityCompat.OnRequestPermissionsResultCallback,
-    NavigationView.OnNavigationItemSelectedListener {
+    ActivityCompat.OnRequestPermissionsResultCallback {
 
     override fun provideViewModel() = getViewModelFromFactory()
     override fun getViewResource() = R.layout.fragment_maps
@@ -48,10 +47,18 @@ class MapFragment : RainbowCakeFragment<MapViewState, MapViewModel>(),
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding = FragmentMapsBinding.bind(view)
+        setupToolbar()
         val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
         mapFragment?.getMapAsync(callback)
 
         // TODO Setup views
+    }
+
+    private fun setupToolbar() {
+        binding.toolbar.setNavigationOnClickListener {
+            navigator?.pop()
+        }
+        binding.toolbar.inflateMenu(R.menu.menu_list)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -162,27 +169,5 @@ class MapFragment : RainbowCakeFragment<MapViewState, MapViewModel>(),
     private fun requestLocationPermission() {
         permReqLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
     }
-
-
-    override fun onNavigationItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-
-            R.id.action_drawer_one -> {
-                navigator?.add(AddFragment(LatLng(12.1, 12.1)))
-            }
-            R.id.action_drawer_two -> {
-            }
-            R.id.action_drawer_three -> {
-                //TODO navigator?.add(SettingsFragment())
-            }
-            R.id.action_drawer_four -> {
-                FirebaseAuth.getInstance().signOut()
-                navigator?.replace(LoginFragment())
-            }
-        }
-        binding.drawerLayout.closeDrawer(GravityCompat.START)
-        return true
-    }
-
 
 }
