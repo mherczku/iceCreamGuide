@@ -82,7 +82,7 @@ class AddDialog(private val position: LatLng) : DialogFragment(),
         }
 
         val newShop = UploadShop(
-            name = binding.addNameTextField.editText?.text.toString(),
+            name = binding.addNameTextField.editText?.text.toString().replaceFirstChar { it.uppercase() },
             address = binding.addAddressTextField.editText?.text.toString(),
             geoPoint = GeoPoint(position.latitude, position.longitude),
             rate = binding.ratingBar.rating,

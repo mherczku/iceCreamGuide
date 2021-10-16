@@ -45,6 +45,7 @@ class AddReviewDialog(private val shopId: String) : DialogFragment(),
             userId = firebaseInteractor.firebaseUser!!.uid,
             rate = binding.ratingBar.rating
         )
+        //TODO update shop's rate and ratings with new rate, maybe in interactor
         firebaseInteractor.postReview(shopId, review, this, this)
 
     }
