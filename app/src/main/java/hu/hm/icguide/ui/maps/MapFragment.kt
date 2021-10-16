@@ -89,17 +89,12 @@ class MapFragment : RainbowCakeFragment<MapViewState, MapViewModel>(),
 
     override fun render(viewState: MapViewState) {
         if (!::map.isInitialized) return
-        println("render Map ${viewState.marks.size}")
-        var a: LatLng? = null
         viewState.marks.forEach {
-            println(it.geoPoint)
             map.addMarker(
-                MarkerOptions().position(LatLng(it.geoPoint.latitude, it.geoPoint.longitude)).title(it.name)
+                MarkerOptions().position(LatLng(it.geoPoint.latitude, it.geoPoint.longitude))
+                    .title(it.name)
             )
-            a = LatLng(it.geoPoint.latitude, it.geoPoint.longitude)
         }
-        map.moveCamera(CameraUpdateFactory.newLatLngZoom(a, 10F))
-
         // TODO Render state
     }
 
