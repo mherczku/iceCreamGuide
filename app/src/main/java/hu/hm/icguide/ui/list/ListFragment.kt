@@ -8,15 +8,15 @@ import androidx.core.view.GravityCompat
 import co.zsmb.rainbowcake.base.RainbowCakeFragment
 import co.zsmb.rainbowcake.hilt.getViewModelFromFactory
 import co.zsmb.rainbowcake.navigation.navigator
-import com.example.icguide.R
-import com.example.icguide.databinding.FragmentListBinding
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.QueryDocumentSnapshot
 import dagger.hilt.android.AndroidEntryPoint
+import hu.hm.icguide.R
+import hu.hm.icguide.databinding.FragmentListBinding
 import hu.hm.icguide.interactors.FirebaseInteractor
-import hu.hm.icguide.network.NetworkShop
+import hu.hm.icguide.models.Shop
 import hu.hm.icguide.ui.add.AddDialog
 import hu.hm.icguide.ui.detail.DetailFragment
 import hu.hm.icguide.ui.login.LoginFragment
@@ -110,7 +110,7 @@ class ListFragment : RainbowCakeFragment<ListViewState, ListViewModel>(),
         Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
     }
 
-    override fun onItemSelected(shop: NetworkShop) {
+    override fun onItemSelected(shop: Shop) {
         navigator?.add(DetailFragment(shop))
     }
 

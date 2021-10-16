@@ -7,12 +7,12 @@ import android.widget.TextView
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.example.icguide.R
-import com.example.icguide.databinding.RowShopBinding
-import hu.hm.icguide.network.NetworkShop
+import hu.hm.icguide.R
+import hu.hm.icguide.databinding.RowShopBinding
+import hu.hm.icguide.models.Shop
 
 class ShopAdapter(private val listener: ShopAdapterListener) :
-    ListAdapter<NetworkShop, ShopAdapter.ViewHolder>(ShopComparator) {
+    ListAdapter<Shop, ShopAdapter.ViewHolder>(ShopComparator) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
         ViewHolder(RowShopBinding.inflate(LayoutInflater.from(parent.context), parent, false))
@@ -32,16 +32,16 @@ class ShopAdapter(private val listener: ShopAdapterListener) :
     }
 
     interface ShopAdapterListener {
-        fun onItemSelected(shop: NetworkShop)
+        fun onItemSelected(shop: Shop)
     }
 
     inner class ViewHolder(binding: RowShopBinding) : RecyclerView.ViewHolder(binding.root) {
         val nameText: TextView = binding.nameText
         val addressText: TextView = binding.addressText
         val rateText: TextView = binding.rateText
-        val shopImage: ImageView = binding.shopImage
+        val shopImage: ImageView = binding.rivShop
 
-        var item: NetworkShop? = null
+        var item: Shop? = null
 
         init {
             itemView.setOnClickListener {

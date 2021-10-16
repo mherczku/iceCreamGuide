@@ -57,9 +57,15 @@
     <string name="register">Regisztrálás</string>
     <string name="logged_in">bejelentkezve</string>
     <string name="write_comment">Hozzászolás írása...</string>
-    <string name="cd_send_imagebtn">Send image button</string>
+    <string name="cd_send_image_btn">Send image button</string>
     <string name="detail_title">Fagylaltozó</string>
     <string name="internet_unavailable">Internet nem elérhető</string>
     <string name="map_title">Térkép</string>
     <string name="add_new_shop">Új Fagylaltozó felvétele</string>
+    <string name="successful_comment">Sikeres komment</string>
+    <string name="empty_comment">Üres komment</string>
+    <string name="add_review">Értékelés</string>
+    <string name="review">Értékelés</string>
+    <string name="review_success">Értékelés sikeres</string>
+    <string name="already_reviewed">Már értékelve</string>
 </resources>

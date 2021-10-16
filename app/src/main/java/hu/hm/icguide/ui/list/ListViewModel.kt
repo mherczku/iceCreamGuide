@@ -21,6 +21,7 @@ class ListViewModel @Inject constructor(
     }
 
     fun dataChanged(dc: QueryDocumentSnapshot, type: String) {
+        //TODO lehet toMutableList felesleges
         val newList = listPresenter.dataChanged(dc, type, viewState.shops.toMutableList())
         viewState = ListViewState(shops = newList)
     }

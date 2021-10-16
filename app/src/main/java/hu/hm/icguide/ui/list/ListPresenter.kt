@@ -3,7 +3,7 @@ package hu.hm.icguide.ui.list
 import com.google.firebase.firestore.QueryDocumentSnapshot
 import com.google.firebase.firestore.ktx.toObject
 import hu.hm.icguide.interactors.FirebaseInteractor
-import hu.hm.icguide.network.NetworkShop
+import hu.hm.icguide.models.Shop
 import javax.inject.Inject
 
 class ListPresenter @Inject constructor(private val firebaseInteractor: FirebaseInteractor) {
@@ -11,16 +11,16 @@ class ListPresenter @Inject constructor(private val firebaseInteractor: Firebase
     companion object {
         const val NEW_SHOP = "NEW_DATA"
         const val EDIT_SHOP = "EDIT_DATA"
-        const val REMOVE_SHOP = "REMOVE_SHOP"
+        const val REMOVE_SHOP = "REMOVE_DATA"
     }
 
     fun dataChanged(
         dc: QueryDocumentSnapshot,
         function: String,
-        list: MutableList<NetworkShop>
-    ): MutableList<NetworkShop> {
-        val objectShop: NetworkShop = dc.toObject()
-        val shop = NetworkShop(
+        list: MutableList<Shop>
+    ): MutableList<Shop> {
+        val objectShop: Shop = dc.toObject()
+        val shop = Shop(
             id = dc.id,
             name = objectShop.name,
             address = objectShop.address,

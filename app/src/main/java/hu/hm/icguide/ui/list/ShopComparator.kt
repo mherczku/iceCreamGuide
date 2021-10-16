@@ -1,15 +1,15 @@
 package hu.hm.icguide.ui.list
 
 import androidx.recyclerview.widget.DiffUtil
-import hu.hm.icguide.network.NetworkShop
+import hu.hm.icguide.models.Shop
 
-object ShopComparator : DiffUtil.ItemCallback<NetworkShop>() {
+object ShopComparator : DiffUtil.ItemCallback<Shop>() {
 
-    override fun areItemsTheSame(oldItem: NetworkShop, newItem: NetworkShop): Boolean {
+    override fun areItemsTheSame(oldItem: Shop, newItem: Shop): Boolean {
         return oldItem.id == newItem.id
     }
 
-    override fun areContentsTheSame(oldItem: NetworkShop, newItem: NetworkShop): Boolean {
+    override fun areContentsTheSame(oldItem: Shop, newItem: Shop): Boolean {
         return oldItem == newItem
     }
 }

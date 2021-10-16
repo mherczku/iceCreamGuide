@@ -2,12 +2,13 @@ package hu.hm.icguide.models
 
 import com.google.firebase.firestore.GeoPoint
 
+
 data class Shop(
-    val id: Long,
-    var name: String,
-    var address: String,
-    var geoPoint: GeoPoint,
-    var rate: Float,
-    var ratings: Int,
-    var photo: String?
+    var id: String = "",
+    var name: String = "",
+    var address: String = "",
+    var geoPoint: GeoPoint = GeoPoint(0.0, 0.0),
+    var rate: Float = 5F,
+    var ratings: Int = 1,
+    var photo: String = ""
 )

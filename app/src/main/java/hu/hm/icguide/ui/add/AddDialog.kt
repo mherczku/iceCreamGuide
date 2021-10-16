@@ -14,13 +14,13 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.DialogFragment
-import com.example.icguide.R
-import com.example.icguide.databinding.DialogAddBinding
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.tasks.OnFailureListener
 import com.google.android.gms.tasks.OnSuccessListener
 import com.google.firebase.firestore.GeoPoint
 import dagger.hilt.android.AndroidEntryPoint
+import hu.hm.icguide.R
+import hu.hm.icguide.databinding.DialogAddBinding
 import hu.hm.icguide.extensions.validateNonEmpty
 import hu.hm.icguide.interactors.FirebaseInteractor
 import java.io.ByteArrayOutputStream

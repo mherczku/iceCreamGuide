@@ -7,15 +7,14 @@ import android.widget.Toast
 import co.zsmb.rainbowcake.base.RainbowCakeFragment
 import co.zsmb.rainbowcake.hilt.getViewModelFromFactory
 import co.zsmb.rainbowcake.navigation.navigator
-import com.example.icguide.R
-import com.example.icguide.databinding.FragmentLoginBinding
 import com.google.android.gms.tasks.OnFailureListener
 import com.google.android.gms.tasks.OnSuccessListener
 import dagger.hilt.android.AndroidEntryPoint
+import hu.hm.icguide.R
+import hu.hm.icguide.databinding.FragmentLoginBinding
 import hu.hm.icguide.extensions.validateNonEmpty
 import hu.hm.icguide.interactors.FirebaseInteractor
 import hu.hm.icguide.ui.list.ListFragment
-import java.lang.Exception
 
 @AndroidEntryPoint
 class LoginFragment : RainbowCakeFragment<LoginViewState, LoginViewModel>(),

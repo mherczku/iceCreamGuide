@@ -1,7 +1,7 @@
 package hu.hm.icguide.interactors
 
 import android.os.Build
-import com.example.icguide.BuildConfig
+import hu.hm.icguide.BuildConfig
 import javax.inject.Inject
 import javax.inject.Singleton
 

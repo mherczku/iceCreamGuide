@@ -14,7 +14,10 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
+import hu.hm.icguide.models.Review
 import hu.hm.icguide.ui.add.AddDialog
+import hu.hm.icguide.ui.add.AddReviewDialog
+import hu.hm.icguide.ui.detail.DetailPresenter
 import hu.hm.icguide.ui.list.ListPresenter
 import java.net.URLEncoder
 import java.util.*
@@ -27,7 +30,7 @@ class FirebaseInteractor @Inject constructor() {
     private val firebaseDb: DatabaseReference = Firebase.database.reference
     private val firestoreDb: FirebaseFirestore = Firebase.firestore
     private val storageReference: StorageReference = FirebaseStorage.getInstance().reference
-    private var firebaseUser: FirebaseUser? = null
+    val firebaseUser: FirebaseUser?
         get() = firebaseAuth.currentUser
 
     interface DataChangedListener {
@@ -110,9 +113,7 @@ class FirebaseInteractor @Inject constructor() {
         onSuccessListener: OnSuccessListener<Any>,
         onFailureListener: OnFailureListener
     ) {
-        val db = Firebase.firestore
-
-        db.collection("shops")
+        firestoreDb.collection("shops")
             .add(newShop)
             .addOnSuccessListener(onSuccessListener)
             .addOnFailureListener(onFailureListener)
@@ -143,5 +144,61 @@ class FirebaseInteractor @Inject constructor() {
             }
     }
 
+    fun postComment(
+        comment: DetailPresenter.PostComment, shopId: String,
+        onSuccessListener: OnSuccessListener<Any>,
+        onFailureListener: OnFailureListener
+    ) {
+        firestoreDb.collection("shops/${shopId}/comments")
+            .add(comment)
+            .addOnSuccessListener(onSuccessListener)
+            .addOnFailureListener(onFailureListener)
+    }
+
+    fun initCommentsListeners(
+        shopId: String,
+        listener: DataChangedListener,
+        onToastListener: OnToastListener
+    ) {
+        firestoreDb.collection("shops/${shopId}/comments")
+            .addSnapshotListener { snapshots, e ->
+                if (e != null) {
+                    onToastListener.toast(e.localizedMessage)
+                    return@addSnapshotListener
+                }
+
+                for (dc in snapshots!!.documentChanges) {
+                    when (dc.type) {
+                        DocumentChange.Type.ADDED -> listener.dataChanged(
+                            dc.document,
+                            DetailPresenter.NEW_COMMENT
+                        )
+                        DocumentChange.Type.MODIFIED -> listener.dataChanged(
+                            dc.document,
+                            DetailPresenter.EDIT_COMMENT
+                        )
+                        DocumentChange.Type.REMOVED -> listener.dataChanged(
+                            dc.document, DetailPresenter.REMOVE_COMMENT
+                        )
+                    }
+                }
+            }
+    }
+
+    fun getReviews(shopId: String, onSuccessListener: AddReviewDialog){
+        firestoreDb.collection("shops/${shopId}/reviews").get().addOnSuccessListener(onSuccessListener)
+    }
+
+    fun postReview(
+        shopId: String,
+        review: Review,
+        onSuccessListener: OnSuccessListener<Any>,
+        onFailureListener: OnFailureListener
+    ) {
+        firestoreDb.collection("shops/${shopId}/reviews")
+            .add(review)
+            .addOnSuccessListener(onSuccessListener)
+            .addOnFailureListener(onFailureListener)
+    }
 
 }

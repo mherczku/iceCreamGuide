@@ -2,7 +2,6 @@ package hu.hm.icguide
 
 import android.os.Bundle
 import co.zsmb.rainbowcake.navigation.SimpleNavActivity
-import com.example.icguide.R
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.AndroidEntryPoint
 import hu.hm.icguide.ui.list.ListFragment

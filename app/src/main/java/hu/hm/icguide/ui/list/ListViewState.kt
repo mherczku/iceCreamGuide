@@ -1,9 +1,9 @@
 package hu.hm.icguide.ui.list
 
-import hu.hm.icguide.network.NetworkShop
+import hu.hm.icguide.models.Shop
 
 
 data class ListViewState(
-    val shops: MutableList<NetworkShop> = mutableListOf(),
+    val shops: MutableList<Shop> = mutableListOf(),
     val isRefreshing: Boolean = false
 )
