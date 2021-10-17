@@ -11,7 +11,7 @@ import co.zsmb.rainbowcake.navigation.navigator
 import com.bumptech.glide.Glide
 import com.google.android.gms.tasks.OnFailureListener
 import com.google.android.gms.tasks.OnSuccessListener
-import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.Timestamp
 import com.google.firebase.firestore.QueryDocumentSnapshot
 import dagger.hilt.android.AndroidEntryPoint
 import hu.hm.icguide.R
@@ -21,6 +21,7 @@ import hu.hm.icguide.interactors.FirebaseInteractor
 import hu.hm.icguide.models.Comment
 import hu.hm.icguide.models.Shop
 import hu.hm.icguide.ui.add.AddReviewDialog
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class DetailFragment(
@@ -32,9 +33,10 @@ class DetailFragment(
     override fun provideViewModel() = getViewModelFromFactory()
     override fun getViewResource() = R.layout.fragment_detail
 
+    @Inject
+    lateinit var firebaseInteractor: FirebaseInteractor
     private lateinit var binding: FragmentDetailBinding
     private lateinit var adapter: CommentAdapter
-
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -95,13 +97,13 @@ class DetailFragment(
         } else {
             setupRecyclerView()
             binding.btnSend.setOnClickListener {
-                if(!binding.etComment.validateNonEmpty()) return@setOnClickListener
+                if (!binding.etComment.validateNonEmpty()) return@setOnClickListener
 
-                val pic = FirebaseAuth.getInstance().currentUser.photoUrl ?: ""
                 val c = DetailPresenter.PostComment(
-                    author = FirebaseAuth.getInstance().currentUser.displayName,
+                    author = firebaseInteractor.firebaseUser?.displayName.toString(),
                     content = binding.etComment.text.toString(),
-                    photo = pic.toString()
+                    photo = (firebaseInteractor.firebaseUser?.photoUrl ?: "") as String,
+                    date = Timestamp.now()
                 )
                 viewModel.postComment(shop.id, c, this, this)
                 binding.etComment.text?.clear()

@@ -27,7 +27,7 @@ class CommentAdapter(private val listener: CommentAdapterListener) :
         holder.item = comment
         holder.authorText.text = comment.author
         holder.contentText.text = comment.content
-        if(comment.photo.isNotBlank()){
+        if (comment.photo.isNotBlank()) {
             Glide.with(holder.authorImage)
                 .load(comment.photo)
                 .placeholder(R.drawable.outline_account_circle_24)

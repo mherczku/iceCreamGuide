@@ -10,13 +10,13 @@ import com.google.firebase.database.ktx.database
 import com.google.firebase.firestore.DocumentChange
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QueryDocumentSnapshot
+import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 import hu.hm.icguide.models.Review
 import hu.hm.icguide.ui.add.AddDialog
-import hu.hm.icguide.ui.add.AddReviewDialog
 import hu.hm.icguide.ui.detail.DetailPresenter
 import hu.hm.icguide.ui.list.ListPresenter
 import java.net.URLEncoder
@@ -185,8 +185,12 @@ class FirebaseInteractor @Inject constructor() {
             }
     }
 
-    fun getReviews(shopId: String, onSuccessListener: AddReviewDialog){
+    fun getReviews(shopId: String, onSuccessListener: OnSuccessListener<Any>){
         firestoreDb.collection("shops/${shopId}/reviews").get().addOnSuccessListener(onSuccessListener)
+    }
+
+    fun getShops(onSuccessListener: OnSuccessListener<QuerySnapshot>){
+        firestoreDb.collection("shops").get().addOnSuccessListener(onSuccessListener)
     }
 
     fun postReview(

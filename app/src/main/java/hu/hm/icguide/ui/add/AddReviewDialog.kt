@@ -75,7 +75,7 @@ class AddReviewDialog(private val shopId: String) : DialogFragment(),
         val review = reviews.find { it.userId == firebaseInteractor.firebaseUser?.uid }
         if( review != null) {
             binding.ratingBar.rating = review.rate
-            toast(getString(R.string.already_reviewed)) //TODO lehet módosítás is
+            toast(getString(R.string.already_reviewed)) //TODO lehetne módosítás is
             binding.btnAdd.isEnabled = false
         }
         binding.btnAdd.setOnClickListener { addClick() }

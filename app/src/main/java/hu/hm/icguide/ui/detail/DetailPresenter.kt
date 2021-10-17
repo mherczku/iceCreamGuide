@@ -2,6 +2,7 @@ package hu.hm.icguide.ui.detail
 
 import com.google.android.gms.tasks.OnFailureListener
 import com.google.android.gms.tasks.OnSuccessListener
+import com.google.firebase.Timestamp
 import com.google.firebase.firestore.QueryDocumentSnapshot
 import com.google.firebase.firestore.ktx.toObject
 import hu.hm.icguide.interactors.FirebaseInteractor
@@ -9,12 +10,16 @@ import hu.hm.icguide.interactors.SystemInteractor
 import hu.hm.icguide.models.Comment
 import javax.inject.Inject
 
-class DetailPresenter @Inject constructor(private val systemInteractor: SystemInteractor, private val firebaseInteractor: FirebaseInteractor) {
+class DetailPresenter @Inject constructor(
+    private val systemInteractor: SystemInteractor,
+    private val firebaseInteractor: FirebaseInteractor
+) {
 
     data class PostComment(
         val author: String,
         val content: String,
-        val photo: String
+        val photo: String,
+        val date: Timestamp
     )
 
     companion object {
@@ -52,7 +57,8 @@ class DetailPresenter @Inject constructor(private val systemInteractor: SystemIn
             id = dc.id,
             author = objectComment.author,
             content = objectComment.content,
-            photo = objectComment.photo
+            photo = objectComment.photo,
+            date = objectComment.date
         )
         when (type) {
             NEW_COMMENT -> list.add(comment)

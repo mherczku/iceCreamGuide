@@ -21,6 +21,7 @@ import hu.hm.icguide.ui.add.AddDialog
 import hu.hm.icguide.ui.detail.DetailFragment
 import hu.hm.icguide.ui.login.LoginFragment
 import hu.hm.icguide.ui.maps.MapFragment
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class ListFragment : RainbowCakeFragment<ListViewState, ListViewModel>(),
@@ -30,6 +31,8 @@ class ListFragment : RainbowCakeFragment<ListViewState, ListViewModel>(),
     override fun provideViewModel() = getViewModelFromFactory()
     override fun getViewResource() = R.layout.fragment_list
 
+    @Inject
+    lateinit var firebaseInteractor: FirebaseInteractor
     private lateinit var binding: FragmentListBinding
     private lateinit var adapter: ShopAdapter
 
@@ -39,7 +42,7 @@ class ListFragment : RainbowCakeFragment<ListViewState, ListViewModel>(),
         setupToolbar()
         binding.navigationView.setNavigationItemSelectedListener(this)
         setupRecyclerView()
-        val user = FirebaseAuth.getInstance().currentUser
+        val user = firebaseInteractor.firebaseUser
         if (user == null) {
             navigator?.replace(LoginFragment())
         } else Toast.makeText(
@@ -59,7 +62,6 @@ class ListFragment : RainbowCakeFragment<ListViewState, ListViewModel>(),
         adapter.submitList(viewState.shops)
         binding.swipeRefreshLayout.isRefreshing = viewState.isRefreshing
         // TODO Render state
-
     }
 
     private fun setupRecyclerView() {

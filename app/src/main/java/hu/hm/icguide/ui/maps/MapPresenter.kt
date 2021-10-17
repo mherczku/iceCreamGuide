@@ -1,32 +1,33 @@
 package hu.hm.icguide.ui.maps
 
-import co.zsmb.rainbowcake.withIOContext
+import com.google.android.gms.tasks.OnSuccessListener
 import com.google.firebase.firestore.GeoPoint
-import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.ktx.toObject
-import com.google.firebase.ktx.Firebase
+import hu.hm.icguide.interactors.FirebaseInteractor
 import hu.hm.icguide.models.Shop
 import javax.inject.Inject
 
-class MapPresenter @Inject constructor() {
+class MapPresenter @Inject constructor(private val firebaseInteractor: FirebaseInteractor) {
 
-    suspend fun getData(): MutableList<Mark> = withIOContext {
-        val shops : MutableList<Mark> = mutableListOf()
-        Firebase.firestore.collection("shops").get().addOnSuccessListener {
-            for (d in it.documents){
-                val s = d.toObject<Shop>()
-                if(s == null || s.name.isEmpty()) continue
-                shops.add(Mark(
-                    name = s.name,
-                    geoPoint = s.geoPoint
-                ))
-            }
-
-        }
-        shops
+    fun getData(onSuccessListener: OnSuccessListener<QuerySnapshot>) {
+        firebaseInteractor.getShops(onSuccessListener)
     }
 
-    data class Mark(
+    fun getMarkers(qs: QuerySnapshot): MutableList<Marker> {
+        val shops: MutableList<Marker> = mutableListOf()
+        for (d in qs.documents){
+            val s = d.toObject<Shop>()
+            if(s == null || s.name.isEmpty()) continue
+            shops.add(Marker(
+                name = s.name,
+                geoPoint = s.geoPoint
+            ))
+        }
+        return shops
+    }
+
+    data class Marker(
         val name: String,
         val geoPoint: GeoPoint
     )

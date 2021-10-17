@@ -9,7 +9,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ListViewModel @Inject constructor(
     private val listPresenter: ListPresenter
-) : RainbowCakeViewModel<ListViewState>(ListViewState()){
+) : RainbowCakeViewModel<ListViewState>(ListViewState()) {
 
 
     fun load() = execute {
@@ -21,13 +21,15 @@ class ListViewModel @Inject constructor(
     }
 
     fun dataChanged(dc: QueryDocumentSnapshot, type: String) {
-        //TODO lehet toMutableList felesleges
-        val newList = listPresenter.dataChanged(dc, type, viewState.shops.toMutableList())
+        val newList = listPresenter.dataChanged(dc, type, viewState.shops)
         newList.sortBy { it.name }
         viewState = ListViewState(shops = newList)
     }
 
-    fun initShopListeners(listener: FirebaseInteractor.DataChangedListener, toastListener: FirebaseInteractor.OnToastListener) {
+    fun initShopListeners(
+        listener: FirebaseInteractor.DataChangedListener,
+        toastListener: FirebaseInteractor.OnToastListener
+    ) {
         listPresenter.initShopListeners(listener, toastListener)
     }
 

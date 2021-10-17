@@ -13,7 +13,7 @@ class LoginViewModel @Inject constructor(
 ) : RainbowCakeViewModel<LoginViewState>(LoginViewState()) {
 
     fun load() = execute {
-        viewState = LoginViewState(loginPresenter.getData())
+        viewState = LoginViewState()
     }
 
     fun register(

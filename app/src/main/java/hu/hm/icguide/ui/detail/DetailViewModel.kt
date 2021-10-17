@@ -36,8 +36,8 @@ class DetailViewModel @Inject constructor(
     }
 
     fun dataChanged(dc: QueryDocumentSnapshot, type: String) {
-        //TODO lehet toMutableList felesleges
-        val newList = detailPresenter.dataChanged(dc, type, viewState.comments.toMutableList())
+        val newList = detailPresenter.dataChanged(dc, type, viewState.comments)
+        newList.sortByDescending { it.date }
         viewState = DetailViewState(comments = newList)
     }
 

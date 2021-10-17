@@ -20,6 +20,7 @@ import hu.hm.icguide.ui.list.ListFragment
 class LoginFragment : RainbowCakeFragment<LoginViewState, LoginViewModel>(),
     FirebaseInteractor.OnToastListener, OnSuccessListener<Any>, OnFailureListener,
     FirebaseInteractor.OnRegisterSuccessListener {
+
     override fun provideViewModel() = getViewModelFromFactory()
     override fun getViewResource() = R.layout.fragment_login
 
@@ -81,7 +82,6 @@ class LoginFragment : RainbowCakeFragment<LoginViewState, LoginViewModel>(),
     }
 
     override fun onRegisterSuccess() {
-
         toast(getString(R.string.registration_successful))
         hideProgressDialog()
     }
@@ -107,7 +107,7 @@ class LoginFragment : RainbowCakeFragment<LoginViewState, LoginViewModel>(),
 
     override fun onSuccess(p0: Any?) {
         hideProgressDialog()
-        Toast.makeText(context, getString(R.string.login_successful), Toast.LENGTH_SHORT).show()
+        toast(getString(R.string.login_successful))
         navigator?.replace(ListFragment())
     }
 

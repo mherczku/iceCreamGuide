@@ -4,11 +4,11 @@ import com.google.firebase.firestore.GeoPoint
 
 
 data class Shop(
-    var id: String = "",
-    var name: String = "",
-    var address: String = "",
-    var geoPoint: GeoPoint = GeoPoint(0.0, 0.0),
-    var rate: Float = 5F,
-    var ratings: Int = 1,
-    var photo: String = ""
+    val id: String = "",
+    val name: String = "",
+    val address: String = "",
+    val geoPoint: GeoPoint = GeoPoint(0.0, 0.0),
+    val rate: Float = 5F,
+    val ratings: Int = 1,
+    val photo: String = ""
 )

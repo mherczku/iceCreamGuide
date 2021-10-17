@@ -21,6 +21,8 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.tasks.OnSuccessListener
+import com.google.firebase.firestore.QuerySnapshot
 import dagger.hilt.android.AndroidEntryPoint
 import hu.hm.icguide.R
 import hu.hm.icguide.databinding.FragmentMapsBinding
@@ -28,7 +30,7 @@ import hu.hm.icguide.ui.add.AddDialog
 
 @AndroidEntryPoint
 class MapFragment : RainbowCakeFragment<MapViewState, MapViewModel>(),
-    ActivityCompat.OnRequestPermissionsResultCallback {
+    ActivityCompat.OnRequestPermissionsResultCallback, OnSuccessListener<QuerySnapshot> {
 
     override fun provideViewModel() = getViewModelFromFactory()
     override fun getViewResource() = R.layout.fragment_maps
@@ -45,7 +47,6 @@ class MapFragment : RainbowCakeFragment<MapViewState, MapViewModel>(),
         setupToolbar()
         val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
         mapFragment?.getMapAsync(callback)
-
         // TODO Setup views
     }
 
@@ -83,13 +84,12 @@ class MapFragment : RainbowCakeFragment<MapViewState, MapViewModel>(),
 
     override fun onStart() {
         super.onStart()
-
         viewModel.load()
     }
 
     override fun render(viewState: MapViewState) {
         if (!::map.isInitialized) return
-        viewState.marks.forEach {
+        viewState.markers.forEach {
             map.addMarker(
                 MarkerOptions().position(LatLng(it.geoPoint.latitude, it.geoPoint.longitude))
                     .title(it.name)
@@ -114,6 +114,7 @@ class MapFragment : RainbowCakeFragment<MapViewState, MapViewModel>(),
         googleMap.setOnPoiClickListener {
             Toast.makeText(context, " ${it.name}", Toast.LENGTH_SHORT).show()
         }
+        viewModel.getData(this)
     }
 
     private fun showRationaleDialog(
@@ -160,6 +161,11 @@ class MapFragment : RainbowCakeFragment<MapViewState, MapViewModel>(),
 
     private fun requestLocationPermission() {
         permReqLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+    }
+
+    override fun onSuccess(p0: QuerySnapshot?) {
+        p0 ?: return
+        viewModel.getMarkers(p0)
     }
 
 }
