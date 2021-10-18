@@ -6,6 +6,7 @@ import com.google.android.gms.tasks.OnSuccessListener
 import com.google.firebase.firestore.QueryDocumentSnapshot
 import dagger.hilt.android.lifecycle.HiltViewModel
 import hu.hm.icguide.interactors.FirebaseInteractor
+import hu.hm.icguide.models.Shop
 import javax.inject.Inject
 
 @HiltViewModel
@@ -39,6 +40,14 @@ class DetailViewModel @Inject constructor(
         val newList = detailPresenter.dataChanged(dc, type, viewState.comments)
         newList.sortByDescending { it.date }
         viewState = DetailViewState(comments = newList)
+    }
+
+    fun getShop(id: String) {
+        detailPresenter.getShop(id, ::updateShop)
+    }
+
+    fun updateShop(shop : Shop){
+        viewState = DetailViewState(comments = viewState.comments, shop = shop)
     }
 
 }

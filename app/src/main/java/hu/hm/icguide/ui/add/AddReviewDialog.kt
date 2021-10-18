@@ -15,11 +15,13 @@ import hu.hm.icguide.R
 import hu.hm.icguide.databinding.DialogReviewBinding
 import hu.hm.icguide.interactors.FirebaseInteractor
 import hu.hm.icguide.models.Review
+import hu.hm.icguide.models.Shop
 import javax.inject.Inject
+import kotlin.reflect.KFunction1
 
 
 @AndroidEntryPoint
-class AddReviewDialog(private val shopId: String) : DialogFragment(),
+class AddReviewDialog(private val shop: Shop, private val myCallback: KFunction1<String, Unit>) : DialogFragment(),
     OnSuccessListener<Any>, OnFailureListener {
 
     @Inject
@@ -36,7 +38,7 @@ class AddReviewDialog(private val shopId: String) : DialogFragment(),
     }
 
     private fun setup() {
-        firebaseInteractor.getReviews(shopId, this)
+        firebaseInteractor.getReviews(shop.id, this)
     }
 
     private fun addClick() {
@@ -45,9 +47,7 @@ class AddReviewDialog(private val shopId: String) : DialogFragment(),
             userId = firebaseInteractor.firebaseUser!!.uid,
             rate = binding.ratingBar.rating
         )
-        //TODO update shop's rate and ratings with new rate, maybe in interactor
-        firebaseInteractor.postReview(shopId, review, this, this)
-
+        firebaseInteractor.postReview(shop, review, this, this)
     }
 
     private fun toast(message: String?) {
@@ -55,34 +55,48 @@ class AddReviewDialog(private val shopId: String) : DialogFragment(),
     }
 
     override fun onSuccess(p0: Any?) {
-        if(p0 is QuerySnapshot){
+        if (p0 is QuerySnapshot) {
             val reviews = mutableListOf<Review>()
             for (d in p0.documents) {
-                val s = d.toObject<Review>()
-                if (s != null) {
-                    reviews.add(s)
+                val o = d.toObject<Review>()
+                if (o != null) {
+                    val r = Review(
+                        id = d.id,
+                        userId = o.userId,
+                        rate = o.rate
+                    )
+                    reviews.add(r)
                 }
             }
             setupReviewButton(reviews)
-        }
-        else {
+        } else {
             toast(getString(R.string.review_success))
+            myCallback(shop.id)
             this.dismiss()
         }
     }
 
     private fun setupReviewButton(reviews: MutableList<Review>) {
         val review = reviews.find { it.userId == firebaseInteractor.firebaseUser?.uid }
-        if( review != null) {
+        if (review != null) {
             binding.ratingBar.rating = review.rate
-            toast(getString(R.string.already_reviewed)) //TODO lehetne módosítás is
-            binding.btnAdd.isEnabled = false
+            toast(getString(R.string.already_reviewed))
+            binding.btnAdd.text = getString(R.string.edit)
+            binding.btnAdd.setOnClickListener {
+                if(binding.ratingBar.rating != review.rate){
+                    firebaseInteractor.updateReview(shop, review, binding.ratingBar.rating)
+                    //TODO átírni hogy shopot updatelje mint régen
+                    myCallback(shop.id)
+                    this.dismiss()
+                }
+            }
         }
-        binding.btnAdd.setOnClickListener { addClick() }
+        else binding.btnAdd.setOnClickListener { addClick() }
     }
 
     override fun onFailure(p0: Exception) {
         toast(p0.localizedMessage)
+        myCallback(shop.id)
         this.dismiss()
     }
 

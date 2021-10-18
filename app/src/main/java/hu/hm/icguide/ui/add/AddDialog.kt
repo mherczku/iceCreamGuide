@@ -85,8 +85,8 @@ class AddDialog(private val position: LatLng) : DialogFragment(),
             name = binding.addNameTextField.editText?.text.toString().replaceFirstChar { it.uppercase() },
             address = binding.addAddressTextField.editText?.text.toString(),
             geoPoint = GeoPoint(position.latitude, position.longitude),
-            rate = binding.ratingBar.rating,
-            ratings = 1,
+            rate = 0F,
+            ratings = 0,
             photo = ""
         )
 

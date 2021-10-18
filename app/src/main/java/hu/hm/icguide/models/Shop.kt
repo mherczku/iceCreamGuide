@@ -8,7 +8,7 @@ data class Shop(
     val name: String = "",
     val address: String = "",
     val geoPoint: GeoPoint = GeoPoint(0.0, 0.0),
-    val rate: Float = 5F,
-    val ratings: Int = 1,
+    val rate: Float = 0F,
+    val ratings: Int = 0,
     val photo: String = ""
 )

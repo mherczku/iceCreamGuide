@@ -12,10 +12,12 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QueryDocumentSnapshot
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 import hu.hm.icguide.models.Review
+import hu.hm.icguide.models.Shop
 import hu.hm.icguide.ui.add.AddDialog
 import hu.hm.icguide.ui.detail.DetailPresenter
 import hu.hm.icguide.ui.list.ListPresenter
@@ -74,7 +76,7 @@ class FirebaseInteractor @Inject constructor() {
                     .build()
                 firebaseUser?.updateProfile(profileChangeRequest)
 
-                val uid = firebaseUser.uid
+                val uid = firebaseUser!!.uid
 
                 firebaseDb.child("users").child(uid).setValue("USER")
                 onRegisterSuccessListener.onRegisterSuccess()
@@ -185,24 +187,55 @@ class FirebaseInteractor @Inject constructor() {
             }
     }
 
-    fun getReviews(shopId: String, onSuccessListener: OnSuccessListener<Any>){
-        firestoreDb.collection("shops/${shopId}/reviews").get().addOnSuccessListener(onSuccessListener)
+    fun getReviews(shopId: String, onSuccessListener: OnSuccessListener<Any>) {
+        firestoreDb.collection("shops/${shopId}/reviews").get()
+            .addOnSuccessListener(onSuccessListener)
     }
 
-    fun getShops(onSuccessListener: OnSuccessListener<QuerySnapshot>){
+    fun getShops(onSuccessListener: OnSuccessListener<QuerySnapshot>) {
         firestoreDb.collection("shops").get().addOnSuccessListener(onSuccessListener)
     }
 
+    fun getShop(shopId: String, myCallback: (Shop) -> Unit){
+        firestoreDb.document("shops/${shopId}").get().addOnSuccessListener {
+            it ?: return@addOnSuccessListener
+            val o : Shop? = it.toObject()
+            o ?: return@addOnSuccessListener
+            val shop = Shop(
+                id = it.id,
+                name = o.name,
+                address = o.address,
+                geoPoint = o.geoPoint,
+                rate = o.rate,
+                ratings = o.ratings,
+                photo = o.photo
+            )
+            myCallback(shop)
+        }
+    }
+
     fun postReview(
-        shopId: String,
+        shop: Shop,
         review: Review,
         onSuccessListener: OnSuccessListener<Any>,
         onFailureListener: OnFailureListener
     ) {
-        firestoreDb.collection("shops/${shopId}/reviews")
+        firestoreDb.collection("shops/${shop.id}/reviews")
             .add(review)
             .addOnSuccessListener(onSuccessListener)
             .addOnFailureListener(onFailureListener)
+
+        // Update shop's rate and ratings
+        val newRate = ((shop.rate * shop.ratings) / (shop.ratings + 1)) + (review.rate / (shop.ratings + 1))
+        firestoreDb.document("shops/${shop.id}").update("rate", newRate)
+        firestoreDb.document("shops/${shop.id}").update("ratings", shop.ratings + 1)
+    }
+
+    fun updateReview(shop: Shop, review: Review, newRate: Float) {
+        firestoreDb.document("shops/${shop.id}/reviews/${review.id}").update("rate", newRate)
+        // Update the shop's rate
+        val newShopRate = (shop.rate * shop.ratings - review.rate + newRate) / (shop.ratings)
+        firestoreDb.document("shops/${shop.id}").update("rate", newShopRate)
     }
 
 }

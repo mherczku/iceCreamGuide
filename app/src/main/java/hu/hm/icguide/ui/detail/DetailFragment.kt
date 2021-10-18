@@ -25,7 +25,7 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class DetailFragment(
-    private val shop: Shop
+    private val shopId: String
 ) : RainbowCakeFragment<DetailViewState, DetailViewModel>(), OnSuccessListener<Any>,
     OnFailureListener, CommentAdapter.CommentAdapterListener,
     FirebaseInteractor.DataChangedListener, FirebaseInteractor.OnToastListener {
@@ -37,10 +37,12 @@ class DetailFragment(
     lateinit var firebaseInteractor: FirebaseInteractor
     private lateinit var binding: FragmentDetailBinding
     private lateinit var adapter: CommentAdapter
+    private var shop: Shop = Shop()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding = FragmentDetailBinding.bind(view)
+        viewModel.getShop(shopId)
         setupToolbar()
         setupView()
 
@@ -50,11 +52,20 @@ class DetailFragment(
     override fun onStart() {
         super.onStart()
         viewModel.load()
-        viewModel.initCommentsListeners(shop.id, this, this)
+        viewModel.initCommentsListeners(shopId, this, this)
     }
 
     override fun render(viewState: DetailViewState) {
         adapter.submitList(viewState.comments)
+        shop = viewState.shop
+
+        binding.tvName.text = shop.name
+        binding.tvAddress.text = shop.address
+        binding.ratingBar.rating = shop.rate
+        Glide.with(binding.imgShop)
+            .load(shop.photo)
+            .placeholder(R.drawable.placeholder)
+            .into(binding.imgShop)
         // TODO Render state
     }
 
@@ -72,22 +83,13 @@ class DetailFragment(
 
     @SuppressLint("ClickableViewAccessibility")
     private fun setupView() {
-        binding.tvName.text = shop.name
-        binding.tvAddress.text = shop.address
-        binding.ratingBar.rating = shop.rate
 
-        binding.ratingBar.setOnTouchListener(View.OnTouchListener { v, event ->
+        binding.ratingBar.setOnTouchListener(View.OnTouchListener { _, event ->
             if (event.action == MotionEvent.ACTION_UP) {
-                AddReviewDialog(shop.id).show(childFragmentManager, null)
+                AddReviewDialog(shop, viewModel::getShop).show(childFragmentManager, null)
             }
             return@OnTouchListener true
         })
-
-
-        Glide.with(binding.imgShop)
-            .load(shop.photo)
-            .placeholder(R.drawable.placeholder)
-            .into(binding.imgShop)
 
         if (!viewModel.isNetAvailable()) {
             binding.etComment.isEnabled = false
@@ -105,7 +107,7 @@ class DetailFragment(
                     photo = (firebaseInteractor.firebaseUser?.photoUrl ?: "") as String,
                     date = Timestamp.now()
                 )
-                viewModel.postComment(shop.id, c, this, this)
+                viewModel.postComment(shopId, c, this, this)
                 binding.etComment.text?.clear()
             }
         }

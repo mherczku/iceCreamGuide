@@ -8,7 +8,9 @@ import com.google.firebase.firestore.ktx.toObject
 import hu.hm.icguide.interactors.FirebaseInteractor
 import hu.hm.icguide.interactors.SystemInteractor
 import hu.hm.icguide.models.Comment
+import hu.hm.icguide.models.Shop
 import javax.inject.Inject
+import kotlin.reflect.KFunction1
 
 class DetailPresenter @Inject constructor(
     private val systemInteractor: SystemInteractor,
@@ -70,6 +72,10 @@ class DetailPresenter @Inject constructor(
             REMOVE_COMMENT -> list.remove(comment)
         }
         return list
+    }
+
+    fun getShop(id: String, callback: KFunction1<Shop, Unit>) {
+        firebaseInteractor.getShop(id, callback)
     }
 
 }
