@@ -113,7 +113,7 @@ class ListFragment : RainbowCakeFragment<ListViewState, ListViewModel>(),
     }
 
     override fun onItemSelected(shop: Shop) {
-        navigator?.add(DetailFragment(shop))
+        navigator?.add(DetailFragment(shop.id))
     }
 
 }
