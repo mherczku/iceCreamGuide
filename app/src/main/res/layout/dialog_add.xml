@@ -28,6 +28,8 @@
             android:id="@+id/imgAttach"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:maxHeight="30dp"
+            android:maxWidth="30dp"
             android:layout_gravity="center_horizontal"
             android:layout_marginBottom="10dp"
             android:contentDescription="@string/cd_show_shops_image"
