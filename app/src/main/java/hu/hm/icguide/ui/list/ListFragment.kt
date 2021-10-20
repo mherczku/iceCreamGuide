@@ -21,6 +21,7 @@ import hu.hm.icguide.ui.add.AddDialog
 import hu.hm.icguide.ui.detail.DetailFragment
 import hu.hm.icguide.ui.login.LoginFragment
 import hu.hm.icguide.ui.maps.MapFragment
+import hu.hm.icguide.ui.settings.SettingsFragment
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -86,13 +87,12 @@ class ListFragment : RainbowCakeFragment<ListViewState, ListViewModel>(),
 
             R.id.action_drawer_one -> {
                 AddDialog(LatLng(12.1, 12.1)).show(childFragmentManager, null)
-
             }
             R.id.action_drawer_two -> {
                 navigator?.add(MapFragment())
             }
             R.id.action_drawer_three -> {
-                //TODO navigator?.add(SettingsFragment())
+                navigator?.add(SettingsFragment())
             }
             R.id.action_drawer_four -> {
                 FirebaseAuth.getInstance().signOut()

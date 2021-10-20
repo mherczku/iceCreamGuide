@@ -16,6 +16,7 @@ import com.google.firebase.firestore.QueryDocumentSnapshot
 import dagger.hilt.android.AndroidEntryPoint
 import hu.hm.icguide.R
 import hu.hm.icguide.databinding.FragmentDetailBinding
+import hu.hm.icguide.extensions.hideKeyboard
 import hu.hm.icguide.extensions.validateNonEmpty
 import hu.hm.icguide.interactors.FirebaseInteractor
 import hu.hm.icguide.models.Comment
@@ -42,7 +43,7 @@ class DetailFragment(
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding = FragmentDetailBinding.bind(view)
-        viewModel.getShop(shopId)
+        //TODO REMOVE? viewModel.getShop(shopId)
         setupToolbar()
         setupView()
 
@@ -52,6 +53,7 @@ class DetailFragment(
     override fun onStart() {
         super.onStart()
         viewModel.load()
+        viewModel.getShop(shopId)
         viewModel.initCommentsListeners(shopId, this, this)
     }
 
@@ -99,6 +101,7 @@ class DetailFragment(
         } else {
             setupRecyclerView()
             binding.btnSend.setOnClickListener {
+                hideKeyboard()
                 if (!binding.etComment.validateNonEmpty()) return@setOnClickListener
 
                 val c = DetailPresenter.PostComment(

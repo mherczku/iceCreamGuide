@@ -24,7 +24,6 @@
             app:title="@string/add_new_shop"
             tools:targetApi="lollipop" />
 
-
         <ImageView
             android:id="@+id/imgAttach"
             android:layout_width="wrap_content"

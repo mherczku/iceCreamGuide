@@ -39,7 +39,7 @@ class DetailViewModel @Inject constructor(
     fun dataChanged(dc: QueryDocumentSnapshot, type: String) {
         val newList = detailPresenter.dataChanged(dc, type, viewState.comments)
         newList.sortByDescending { it.date }
-        viewState = DetailViewState(comments = newList)
+        viewState = DetailViewState(comments = newList, shop = viewState.shop)
     }
 
     fun getShop(id: String) {
