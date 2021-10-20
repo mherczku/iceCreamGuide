@@ -9,6 +9,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
+import android.widget.Toast
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.preference.PreferenceFragmentCompat
@@ -32,6 +33,11 @@ fun TextInputLayout.validateNonEmpty(): Boolean {
         return false
     }
     return true
+}
+
+fun Fragment.toast(message: String?, length : Int = Toast.LENGTH_SHORT){
+    message ?: return
+    Toast.makeText(context, message, length).show()
 }
 
 fun Fragment.hideKeyboard() {

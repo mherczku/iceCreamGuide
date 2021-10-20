@@ -30,6 +30,8 @@
         android:textStyle="bold"
         android:textSize="14sp" />
 
+
+
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -43,7 +45,7 @@
             android:layout_width="60dp"
             android:layout_height="60dp"
             android:src="@drawable/placeholder"
-            app:riv_corner_radius="100dp" />
+            app:riv_corner_radius="60dp" />
 
         <TextView
             android:id="@+id/tvName"

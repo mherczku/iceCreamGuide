@@ -1,5 +1,7 @@
 package hu.hm.icguide.interactors
 
+import android.graphics.Bitmap
+import android.net.Uri
 import com.google.android.gms.tasks.OnFailureListener
 import com.google.android.gms.tasks.OnSuccessListener
 import com.google.firebase.auth.FirebaseAuth
@@ -21,9 +23,11 @@ import hu.hm.icguide.models.Shop
 import hu.hm.icguide.ui.add.AddDialog
 import hu.hm.icguide.ui.detail.DetailPresenter
 import hu.hm.icguide.ui.list.ListPresenter
+import java.io.ByteArrayOutputStream
 import java.net.URLEncoder
 import java.util.*
 import javax.inject.Inject
+import kotlin.reflect.KFunction1
 
 
 class FirebaseInteractor @Inject constructor() {
@@ -46,7 +50,6 @@ class FirebaseInteractor @Inject constructor() {
     interface OnRegisterSuccessListener {
         fun onRegisterSuccess()
     }
-
 
     fun loginFirebase(
         email: String,
@@ -196,10 +199,10 @@ class FirebaseInteractor @Inject constructor() {
         firestoreDb.collection("shops").get().addOnSuccessListener(onSuccessListener)
     }
 
-    fun getShop(shopId: String, myCallback: (Shop) -> Unit){
+    fun getShop(shopId: String, myCallback: (Shop) -> Unit) {
         firestoreDb.document("shops/${shopId}").get().addOnSuccessListener {
             it ?: return@addOnSuccessListener
-            val o : Shop? = it.toObject()
+            val o: Shop? = it.toObject()
             o ?: return@addOnSuccessListener
             val shop = Shop(
                 id = it.id,
@@ -226,7 +229,8 @@ class FirebaseInteractor @Inject constructor() {
             .addOnFailureListener(onFailureListener)
 
         // Update shop's rate and ratings
-        val newRate = ((shop.rate * shop.ratings) / (shop.ratings + 1)) + (review.rate / (shop.ratings + 1))
+        val newRate =
+            ((shop.rate * shop.ratings) / (shop.ratings + 1)) + (review.rate / (shop.ratings + 1))
         firestoreDb.document("shops/${shop.id}").update("rate", newRate)
         firestoreDb.document("shops/${shop.id}").update("ratings", shop.ratings + 1)
     }
@@ -238,4 +242,38 @@ class FirebaseInteractor @Inject constructor() {
         firestoreDb.document("shops/${shop.id}").update("rate", newShopRate)
     }
 
+    fun updateProfile(name: String? = null, photo: Uri? = null, myCallback: (String?) -> Unit) {
+
+        val profileUpdate = UserProfileChangeRequest.Builder()
+        if (name != null) profileUpdate.displayName = name
+        if (photo != null) profileUpdate.photoUri = photo
+
+        firebaseUser?.updateProfile(profileUpdate.build())?.addOnSuccessListener {
+            myCallback(null)
+        }
+    }
+
+    fun uploadImage(imageBitmap: Bitmap, myCallback: (String?, Uri?) -> Unit) {
+
+        val newImageName = URLEncoder.encode(UUID.randomUUID().toString(), "UTF-8") + ".jpg"
+        val newImageRef = storageReference.child("userImages/$newImageName")
+
+        val baos = ByteArrayOutputStream()
+        imageBitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos)
+        val imageInBytes = baos.toByteArray()
+
+        newImageRef.putBytes(imageInBytes)
+            .addOnFailureListener {
+                myCallback(it.localizedMessage, null)
+            }
+            .continueWithTask { task ->
+                if (!task.isSuccessful) {
+                    task.exception?.let { throw it }
+                }
+                newImageRef.downloadUrl
+            }
+            .addOnSuccessListener { downloadUri ->
+                myCallback(null, downloadUri)
+            }
+    }
 }
