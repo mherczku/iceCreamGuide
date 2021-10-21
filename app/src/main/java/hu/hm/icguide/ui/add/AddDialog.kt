@@ -6,13 +6,13 @@ import android.app.AlertDialog
 import android.app.Dialog
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.Bitmap
-import android.graphics.ImageDecoder
+import android.graphics.*
 import android.graphics.drawable.BitmapDrawable
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
 import android.view.LayoutInflater
+import android.widget.Toast
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -62,6 +62,18 @@ class AddDialog(private val position: LatLng) : DialogFragment(),
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
 
         binding = DialogAddBinding.inflate(LayoutInflater.from(context))
+        permReqLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) {
+            if (it) {
+                Toast.makeText(context, getString(R.string.permission_granted), Toast.LENGTH_SHORT)
+                    .show()
+                isPermissionGranted = true
+                pickImage()
+
+            } else {
+                Toast.makeText(context, getString(R.string.permission_denied), Toast.LENGTH_SHORT)
+                    .show()
+            }
+        }
         startForResult =
             registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
                 if (result.resultCode == Activity.RESULT_OK) {
@@ -75,10 +87,26 @@ class AddDialog(private val position: LatLng) : DialogFragment(),
                 if (result.resultCode == Activity.RESULT_OK) {
                     val uri = result.data?.data
                     uri ?: return@registerForActivityResult
-                    val source = ImageDecoder.createSource(requireActivity().contentResolver, uri)
-                    val imageBitmap = ImageDecoder.decodeBitmap(source)
-                    //TODO hogy beleférjen mert most tul nagy
-                    binding.imgAttach.setImageBitmap(imageBitmap)
+                    val imageBitmap: Bitmap? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                        val source =
+                            ImageDecoder.createSource(requireActivity().contentResolver, uri)
+                        ImageDecoder.decodeBitmap(source)
+                    } else {
+                        MediaStore.Images.Media.getBitmap(
+                            requireActivity().contentResolver,
+                            uri
+                        )
+                    }
+                    imageBitmap ?: return@registerForActivityResult
+                    binding.imgAttach.setImageBitmap(
+                        Bitmap.createScaledBitmap(
+                            imageBitmap,
+                            binding.imgAttach.width,
+                            binding.imgAttach.height,
+                            false
+                        )
+                    )
+                    imageSet = true
                 }
             }
 

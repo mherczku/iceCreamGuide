@@ -14,6 +14,7 @@ import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -58,6 +59,18 @@ class SettingsFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         childFragmentManager.beginTransaction().add(R.id.container, SettingsPreference()).commit()
+        permReqLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) {
+            if (it) {
+                Toast.makeText(context, getString(R.string.permission_granted), Toast.LENGTH_SHORT)
+                    .show()
+                isPermissionGranted = true
+                pickImage()
+
+            } else {
+                Toast.makeText(context, getString(R.string.permission_denied), Toast.LENGTH_SHORT)
+                    .show()
+            }
+        }
         startForResultCamera =
             registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
                 if (result.resultCode == Activity.RESULT_OK) {
@@ -70,9 +83,24 @@ class SettingsFragment : Fragment() {
                 if (result.resultCode == Activity.RESULT_OK) {
                     val uri = result.data?.data
                     uri ?: return@registerForActivityResult
-                    val source = ImageDecoder.createSource(requireActivity().contentResolver, uri)
-                    val imageBitmap = ImageDecoder.decodeBitmap(source)
-                    firebaseInteractor.uploadImage(imageBitmap, ::updatePic)
+                    val imageBitmap: Bitmap? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                        val source =
+                            ImageDecoder.createSource(requireActivity().contentResolver, uri)
+                        ImageDecoder.decodeBitmap(source)
+                    } else {
+                        MediaStore.Images.Media.getBitmap(
+                            requireActivity().contentResolver,
+                            uri
+                        )
+                    }
+                    imageBitmap ?: return@registerForActivityResult
+                    val scaledBitmap = Bitmap.createScaledBitmap(
+                        imageBitmap,
+                        binding.ivUser.width,
+                        binding.ivUser.height,
+                        false
+                    )
+                    firebaseInteractor.uploadImage(scaledBitmap, ::updatePic)
                 }
             }
     }
@@ -138,7 +166,7 @@ class SettingsFragment : Fragment() {
             .into(binding.ivUser)
     }
 
-    private fun uploadImage() {
+    private fun pickImage() {
         val getPicIntent = Intent(Intent.ACTION_PICK)
         getPicIntent.type = "image/*"
         startForResultGalery.launch(Intent(getPicIntent))
@@ -183,7 +211,7 @@ class SettingsFragment : Fragment() {
             }
         } else {
             isPermissionGranted = true
-            uploadImage()
+            pickImage()
         }
     }
 
