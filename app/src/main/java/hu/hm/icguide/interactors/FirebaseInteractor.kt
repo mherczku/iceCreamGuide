@@ -6,7 +6,9 @@ import com.google.android.gms.tasks.OnFailureListener
 import com.google.android.gms.tasks.OnSuccessListener
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.auth.PhoneAuthCredential
 import com.google.firebase.auth.UserProfileChangeRequest
+import com.google.firebase.auth.ktx.auth
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ktx.database
 import com.google.firebase.firestore.DocumentChange
@@ -242,15 +244,28 @@ class FirebaseInteractor @Inject constructor() {
         firestoreDb.document("shops/${shop.id}").update("rate", newShopRate)
     }
 
-    fun updateProfile(name: String? = null, photo: Uri? = null, myCallback: (String?) -> Unit) {
-
+    fun updateProfile(name: String? = null, email: String? = null, phone: String? = null, photo: Uri? = null, myCallback: (String?) -> Unit) {
         val profileUpdate = UserProfileChangeRequest.Builder()
         if (name != null) profileUpdate.displayName = name
         if (photo != null) profileUpdate.photoUri = photo
 
-        firebaseUser?.updateProfile(profileUpdate.build())?.addOnSuccessListener {
-            myCallback(null)
+        if(name != null || photo != null) {
+            firebaseUser?.updateProfile(profileUpdate.build())?.addOnSuccessListener {
+                myCallback(null)
+            }
         }
+        if (email != null) {
+            firebaseUser?.updateEmail(email)
+                ?.addOnSuccessListener {
+                    myCallback(null)
+                }
+                ?.addOnFailureListener {
+                    myCallback(it.localizedMessage)
+                }
+        }
+        /*if(phone != null) {
+            firebaseUser?.updatePhoneNumber(PhoneAuthCredential.zzb(phone))
+        }*/
     }
 
     fun uploadImage(imageBitmap: Bitmap, myCallback: (String?, Uri?) -> Unit) {
@@ -275,5 +290,18 @@ class FirebaseInteractor @Inject constructor() {
             .addOnSuccessListener { downloadUri ->
                 myCallback(null, downloadUri)
             }
+    }
+
+    fun logout() {
+        firebaseAuth.signOut()
+    }
+
+    fun authenticate(password: String) {
+        firebaseUser ?: return
+        firebaseAuth.signInWithEmailAndPassword(firebaseUser!!.email!!, password)
+    }
+
+    fun verifyEmail() {
+        firebaseUser?.sendEmailVerification()
     }
 }

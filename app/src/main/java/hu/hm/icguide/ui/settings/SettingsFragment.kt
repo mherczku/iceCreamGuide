@@ -1,6 +1,7 @@
 package hu.hm.icguide.ui.settings
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.AlertDialog
 import android.content.Intent
@@ -11,6 +12,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
+import android.text.InputType
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -26,6 +28,7 @@ import androidx.fragment.app.Fragment
 import co.zsmb.rainbowcake.navigation.navigator
 import com.bumptech.glide.Glide
 import com.google.firebase.auth.FirebaseUser
+import com.google.type.DateTime
 import dagger.hilt.android.AndroidEntryPoint
 import hu.hm.icguide.R
 import hu.hm.icguide.databinding.FragmentSettingsBinding
@@ -33,6 +36,8 @@ import hu.hm.icguide.extensions.EditTextDialog
 import hu.hm.icguide.extensions.SettingsPreference
 import hu.hm.icguide.extensions.toast
 import hu.hm.icguide.interactors.FirebaseInteractor
+import java.text.SimpleDateFormat
+import java.util.*
 import javax.inject.Inject
 
 
@@ -74,8 +79,15 @@ class SettingsFragment : Fragment() {
         startForResultCamera =
             registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
                 if (result.resultCode == Activity.RESULT_OK) {
-                    val imageBitmap = result.data?.extras?.get("data") as Bitmap
-                    firebaseInteractor.uploadImage(imageBitmap, ::updatePic)
+                    val imageBitmap = result.data?.extras?.get("data") as Bitmap?
+                    imageBitmap ?: return@registerForActivityResult
+                    val scaledBitmap = Bitmap.createScaledBitmap(
+                        imageBitmap,
+                        binding.ivUser.width,
+                        binding.ivUser.height,
+                        false
+                    )
+                    firebaseInteractor.uploadImage(scaledBitmap, ::updatePic)
                 }
             }
         startForResultGalery =
@@ -117,6 +129,11 @@ class SettingsFragment : Fragment() {
     private fun setupView() {
         binding.toolbar.setNavigationOnClickListener { navigator?.pop() }
         binding.tvName.text = user.displayName
+        binding.tvEmail.text = user.email
+        binding.tvPhone.text = user.phoneNumber
+        binding.checkBoxEmailVerified.isChecked = user.isEmailVerified
+        val date = SimpleDateFormat("yyyy/MM/dd", Locale.ENGLISH).format(Date(user.metadata.creationTimestamp))
+        binding.tvRegistered.text = date
 
         Glide.with(binding.ivUser)
             .load(user.photoUrl)
@@ -139,20 +156,81 @@ class SettingsFragment : Fragment() {
                 .create().show()
         }
 
-        binding.tvName.setOnClickListener {
-            EditTextDialog(binding.tvName.text.toString(), ::editName).show(
+        binding.btnEditName.setOnClickListener {
+            EditTextDialog(
+                binding.tvName.text.toString(),
+                ::editProfile,
+                type = EditTextDialog.EDIT_NAME
+            ).show(
                 childFragmentManager,
                 null
             )
         }
+        binding.btnEditEmail.setOnClickListener {
+            EditTextDialog(
+                binding.tvEmail.text.toString(),
+                ::editProfile,
+                inputType = InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS,
+                type = EditTextDialog.EDIT_EMAIL
+            ).show(
+                childFragmentManager,
+                null
+            )
+        }
+
+        binding.btnEditPhone.setOnClickListener {
+            EditTextDialog(
+                binding.tvPhone.text.toString(),
+                ::editProfile,
+                inputType = InputType.TYPE_CLASS_PHONE,
+                type = EditTextDialog.EDIT_EMAIL
+            ).show(
+                childFragmentManager,
+                null
+            )
+        }
+        binding.btnLogout.setOnClickListener {
+            firebaseInteractor.logout()
+        }
+        binding.btnAuthenticate.setOnClickListener {
+            reAuthenticate()
+        }
+        binding.checkBoxEmailVerified.setOnClickListener {
+            firebaseInteractor.verifyEmail()
+            toast(getString(R.string.verification_email_sent))
+        }
     }
 
-    private fun editName(name: String) {
-        firebaseInteractor.updateProfile(name, myCallback =  ::updateView)
+    private fun reAuthenticate(){
+        EditTextDialog(
+            myCallback = ::authenticate,
+            inputType = InputType.TYPE_TEXT_VARIATION_PASSWORD,
+            type = EditTextDialog.AUTHENTICATE
+        ).show(
+            childFragmentManager,
+            null
+        )
     }
-    private fun updatePic(message : String? = getString(R.string.pic_upload_successful), photo: Uri? = null){
+
+    private fun authenticate(password: String?, s1: String?, s2: String?) {
+        password ?: return
+        firebaseInteractor.authenticate(password)
+        toast(getString(R.string.authenticateSuccess))
+    }
+
+    private fun editProfile(name: String? = null, email: String? = null, phone: String? = null) {
+        firebaseInteractor.updateProfile(name, email, phone, myCallback = ::updateView)
+    }
+
+    private fun updatePic(
+        message: String? = getString(R.string.pic_upload_successful),
+        photo: Uri? = null
+    ) {
         toast(message)
-        if(photo != null) firebaseInteractor.updateProfile(photo = photo, myCallback = ::updateView)
+        if (photo != null) firebaseInteractor.updateProfile(
+            photo = photo,
+            myCallback = ::updateView
+        )
     }
 
     private fun updateView(message: String? = null) {
@@ -160,6 +238,9 @@ class SettingsFragment : Fragment() {
         else toast(message)
         user = firebaseInteractor.firebaseUser!!
         binding.tvName.text = user.displayName
+        binding.tvEmail.text = user.email
+        binding.tvPhone.text = user.phoneNumber
+        binding.checkBoxEmailVerified.isChecked = user.isEmailVerified
         Glide.with(binding.ivUser)
             .load(user.photoUrl)
             .placeholder(R.drawable.placeholder)

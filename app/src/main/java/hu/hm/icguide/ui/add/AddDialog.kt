@@ -53,7 +53,7 @@ class AddDialog(private val position: LatLng) : DialogFragment(),
     private lateinit var binding: DialogAddBinding
     private lateinit var startForResult: ActivityResultLauncher<Intent>
     private var imageSet = false
-    private lateinit var startForResultGalery: ActivityResultLauncher<Intent>
+    private lateinit var startForResultGallery: ActivityResultLauncher<Intent>
     private var isPermissionGranted = false
     private lateinit var permReqLauncher: ActivityResultLauncher<String>
 
@@ -82,7 +82,7 @@ class AddDialog(private val position: LatLng) : DialogFragment(),
                     binding.imgAttach.setImageBitmap(imageBitmap)
                 }
             }
-        startForResultGalery =
+        startForResultGallery =
             registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
                 if (result.resultCode == Activity.RESULT_OK) {
                     val uri = result.data?.data
@@ -217,7 +217,7 @@ class AddDialog(private val position: LatLng) : DialogFragment(),
     private fun pickImage() {
         val getPicIntent = Intent(Intent.ACTION_PICK)
         getPicIntent.type = "image/*"
-        startForResultGalery.launch(Intent(getPicIntent))
+        startForResultGallery.launch(Intent(getPicIntent))
     }
 
     private fun showRationaleDialog(

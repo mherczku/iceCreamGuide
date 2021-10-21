@@ -63,4 +63,16 @@
     <string name="take_photo">Kép készítése</string>
     <string name="upload_photo">Kép feltöltése</string>
     <string name="pic_upload_successful">Sikeres képfeltöltés</string>
+    <string name="phone_number">Telefonszám:</string>
+    <string name="email2">Email:</string>
+    <string name="example_email">pelda@mail.hu</string>
+    <string name="emailVerified">Email hitelesítve:</string>
+    <string name="verified">Hitelesítve:</string>
+    <string name="last_login">Utoljára bejelentkezett:</string>
+    <string name="registered">Regisztrált:</string>
+    <string name="logout">Kijelentkezés</string>
+    <string name="reauthenticate">azonosítás</string>
+    <string name="authenticate">Azonositás</string>
+    <string name="authenticateSuccess">Sikeres azonosítás, mostmár módosíthatja!</string>
+    <string name="verification_email_sent">A megadott email címre elküldtük a visszaigazoló üzenetet</string>
 </resources>
