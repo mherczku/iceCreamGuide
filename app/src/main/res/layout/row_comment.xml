@@ -9,6 +9,7 @@
         android:id="@+id/rivAuthor"
         android:layout_width="50dp"
         android:layout_height="50dp"
+        app:riv_corner_radius="50dp"
         android:layout_margin="10dp"
         android:src="@drawable/outline_account_circle_24"
         app:layout_constraintStart_toStartOf="parent"

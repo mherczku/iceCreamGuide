@@ -6,6 +6,7 @@ import com.google.android.gms.tasks.OnSuccessListener
 import com.google.firebase.firestore.QueryDocumentSnapshot
 import dagger.hilt.android.lifecycle.HiltViewModel
 import hu.hm.icguide.interactors.FirebaseInteractor
+import hu.hm.icguide.models.Comment
 import hu.hm.icguide.models.Shop
 import javax.inject.Inject
 
@@ -46,8 +47,17 @@ class DetailViewModel @Inject constructor(
         detailPresenter.getShop(id, ::updateShop)
     }
 
-    fun updateShop(shop : Shop){
+    private fun updateShop(shop : Shop){
         viewState = DetailViewState(comments = viewState.comments, shop = shop)
+    }
+
+    fun updateComments(shopId: String) {
+        detailPresenter.updateComments(shopId, ::updateComments2)
+    }
+
+    private fun updateComments2(comments: MutableList<Comment>){
+        comments.sortByDescending { it.date }
+        viewState = DetailViewState(comments = comments, shop = viewState.shop)
     }
 
 }

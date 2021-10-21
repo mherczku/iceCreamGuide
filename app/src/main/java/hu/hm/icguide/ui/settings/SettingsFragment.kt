@@ -212,14 +212,14 @@ class SettingsFragment : Fragment() {
         )
     }
 
-    private fun authenticate(password: String?, s1: String?, s2: String?) {
+    private fun authenticate(password: String?, s1: String?) {
         password ?: return
         firebaseInteractor.authenticate(password)
         toast(getString(R.string.authenticateSuccess))
     }
 
-    private fun editProfile(name: String? = null, email: String? = null, phone: String? = null) {
-        firebaseInteractor.updateProfile(name, email, phone, myCallback = ::updateView)
+    private fun editProfile(name: String? = null, email: String? = null) {
+        firebaseInteractor.updateProfile(name, email, myCallback = ::updateView)
     }
 
     private fun updatePic(

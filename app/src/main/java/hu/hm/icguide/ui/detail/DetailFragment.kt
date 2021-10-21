@@ -43,7 +43,6 @@ class DetailFragment(
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding = FragmentDetailBinding.bind(view)
-        //TODO REMOVE? viewModel.getShop(shopId)
         setupToolbar()
         setupView()
 
@@ -54,7 +53,7 @@ class DetailFragment(
         super.onStart()
         viewModel.load()
         viewModel.getShop(shopId)
-        viewModel.initCommentsListeners(shopId, this, this)
+        //viewModel.initCommentsListeners(shopId, this, this)
     }
 
     override fun render(viewState: DetailViewState) {
@@ -74,6 +73,7 @@ class DetailFragment(
     private fun setupRecyclerView() {
         adapter = CommentAdapter(this)
         binding.rvComments.adapter = adapter
+        viewModel.updateComments(shopId)
     }
 
     private fun setupToolbar() {
@@ -105,9 +105,8 @@ class DetailFragment(
                 if (!binding.etComment.validateNonEmpty()) return@setOnClickListener
 
                 val c = DetailPresenter.PostComment(
-                    author = firebaseInteractor.firebaseUser?.displayName.toString(),
+                    authorId = firebaseInteractor.firebaseUser?.uid.toString(),
                     content = binding.etComment.text.toString(),
-                    photo = (firebaseInteractor.firebaseUser?.photoUrl ?: "") as String,
                     date = Timestamp.now()
                 )
                 viewModel.postComment(shopId, c, this, this)
@@ -118,6 +117,7 @@ class DetailFragment(
 
     override fun onSuccess(p0: Any?) {
         toast(getString(R.string.successful_comment))
+        viewModel.updateComments(shopId)
     }
 
     override fun onFailure(p0: Exception) {

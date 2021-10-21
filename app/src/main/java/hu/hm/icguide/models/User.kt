@@ -2,6 +2,8 @@ package hu.hm.icguide.models
 
 
 data class User(
-    private val uid: String,
-    private val role: String
+    val uid: String = "",
+    val role: String = "user",
+    val name: String = "",
+    val photo: String = ""
 )

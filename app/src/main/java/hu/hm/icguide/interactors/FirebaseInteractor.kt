@@ -6,11 +6,7 @@ import com.google.android.gms.tasks.OnFailureListener
 import com.google.android.gms.tasks.OnSuccessListener
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.auth.PhoneAuthCredential
 import com.google.firebase.auth.UserProfileChangeRequest
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.ktx.database
 import com.google.firebase.firestore.DocumentChange
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QueryDocumentSnapshot
@@ -20,8 +16,10 @@ import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
+import hu.hm.icguide.models.Comment
 import hu.hm.icguide.models.Review
 import hu.hm.icguide.models.Shop
+import hu.hm.icguide.models.User
 import hu.hm.icguide.ui.add.AddDialog
 import hu.hm.icguide.ui.detail.DetailPresenter
 import hu.hm.icguide.ui.list.ListPresenter
@@ -29,15 +27,15 @@ import java.io.ByteArrayOutputStream
 import java.net.URLEncoder
 import java.util.*
 import javax.inject.Inject
-import kotlin.reflect.KFunction1
 
 
 class FirebaseInteractor @Inject constructor() {
 
     private val firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance()
-    private val firebaseDb: DatabaseReference = Firebase.database.reference
     private val firestoreDb: FirebaseFirestore = Firebase.firestore
     private val storageReference: StorageReference = FirebaseStorage.getInstance().reference
+    private var users = mutableListOf<User>()
+    var user: User? = null
     val firebaseUser: FirebaseUser?
         get() = firebaseAuth.currentUser
 
@@ -53,6 +51,19 @@ class FirebaseInteractor @Inject constructor() {
         fun onRegisterSuccess()
     }
 
+    init {
+        if (firebaseAuth.currentUser != null) {
+            getUsers()
+            firestoreDb.document("users/${firebaseUser?.uid}").get()
+                .addOnSuccessListener { it2 ->
+                    val getUser: User? = it2.toObject()
+                    if (getUser != null) {
+                        user = getUser
+                    }
+                }
+        }
+    }
+
     fun loginFirebase(
         email: String,
         password: String,
@@ -63,6 +74,26 @@ class FirebaseInteractor @Inject constructor() {
             .signInWithEmailAndPassword(email, password)
             .addOnSuccessListener(onSuccessListener)
             .addOnFailureListener(onFailureListener)
+            .addOnCompleteListener { it ->
+                if (it.isSuccessful) {
+                    getUsers()
+                    firestoreDb.document("users/${firebaseUser?.uid}").get()
+                        .addOnSuccessListener { it2 ->
+                            val getUser: User? = it2.toObject()
+                            if (getUser == null) {
+                                val newUser = User(
+                                    uid = firebaseUser?.uid!!,
+                                    role = "user",
+                                    name = firebaseUser?.displayName.toString(),
+                                    photo = firebaseUser?.photoUrl.toString()
+                                )
+                                firestoreDb.collection("users").document(newUser.uid).set(newUser)
+                            } else {
+                                user = getUser
+                            }
+                        }
+                }
+            }
     }
 
     fun registerFirebase(
@@ -75,15 +106,11 @@ class FirebaseInteractor @Inject constructor() {
         firebaseAuth
             .createUserWithEmailAndPassword(email, password)
             .addOnSuccessListener {
-                val firebaseUser = it.user
+                val newFirebaseUser = it.user
                 val profileChangeRequest = UserProfileChangeRequest.Builder()
-                    .setDisplayName(firebaseUser?.email?.substringBefore('@'))
+                    .setDisplayName(newFirebaseUser?.email?.substringBefore('@'))
                     .build()
-                firebaseUser?.updateProfile(profileChangeRequest)
-
-                val uid = firebaseUser!!.uid
-
-                firebaseDb.child("users").child(uid).setValue("USER")
+                newFirebaseUser?.updateProfile(profileChangeRequest)
                 onRegisterSuccessListener.onRegisterSuccess()
             }
             .addOnFailureListener(onFailureListener)
@@ -160,6 +187,44 @@ class FirebaseInteractor @Inject constructor() {
             .add(comment)
             .addOnSuccessListener(onSuccessListener)
             .addOnFailureListener(onFailureListener)
+    }
+
+    private fun getUsers() {
+        firestoreDb.collection("users").get().addOnSuccessListener {
+            val list = mutableListOf<User>()
+            for (dc in it.documents) {
+                val o = dc.toObject<User>()
+                o ?: continue
+                val user = User(
+                    uid = o.uid,
+                    role = o.role,
+                    name = o.name,
+                    photo = o.photo
+                )
+                list.add(user)
+            }
+            users = list
+        }
+    }
+
+    fun getComments(shopId: String, callBack: (MutableList<Comment>) -> Unit) {
+        firestoreDb.collection("shops/${shopId}/comments").get().addOnSuccessListener {
+            val list = mutableListOf<Comment>()
+            for (dc in it.documents) {
+                val o = dc.toObject<Comment>()
+                o ?: continue
+                val comment = Comment(
+                    id = dc.id,
+                    authorId = o.authorId,
+                    authorName = users.find { it.uid == o.authorId }?.name ?: o.authorName,
+                    content = o.content,
+                    photo = users.find { it.uid == o.authorId }?.photo ?: o.photo,
+                    date = o.date
+                )
+                list.add(comment)
+            }
+            callBack(list)
+        }
     }
 
     fun initCommentsListeners(
@@ -244,15 +309,34 @@ class FirebaseInteractor @Inject constructor() {
         firestoreDb.document("shops/${shop.id}").update("rate", newShopRate)
     }
 
-    fun updateProfile(name: String? = null, email: String? = null, phone: String? = null, photo: Uri? = null, myCallback: (String?) -> Unit) {
+    fun updateUserRole(role: Int = 0) {
+        when (role) {
+            0 -> firestoreDb.document("users/${firebaseUser?.uid}").update("role", "user")
+            1 -> firestoreDb.document("users/${firebaseUser?.uid}").update("role", "admin")
+        }
+    }
+
+    fun updateProfile(
+        name: String? = null,
+        email: String? = null,
+        photo: Uri? = null,
+        myCallback: (String?) -> Unit
+    ) {
         val profileUpdate = UserProfileChangeRequest.Builder()
         if (name != null) profileUpdate.displayName = name
         if (photo != null) profileUpdate.photoUri = photo
 
-        if(name != null || photo != null) {
+        if (name != null || photo != null) {
             firebaseUser?.updateProfile(profileUpdate.build())?.addOnSuccessListener {
                 myCallback(null)
             }
+            if (name != null) {
+                firestoreDb.document("users/${firebaseUser?.uid}").update("name", name)
+            }
+            if (photo != null) {
+                firestoreDb.document("users/${firebaseUser?.uid}").update("photo", photo.toString())
+            }
+
         }
         if (email != null) {
             firebaseUser?.updateEmail(email)
@@ -263,9 +347,6 @@ class FirebaseInteractor @Inject constructor() {
                     myCallback(it.localizedMessage)
                 }
         }
-        /*if(phone != null) {
-            firebaseUser?.updatePhoneNumber(PhoneAuthCredential.zzb(phone))
-        }*/
     }
 
     fun uploadImage(imageBitmap: Bitmap, myCallback: (String?, Uri?) -> Unit) {

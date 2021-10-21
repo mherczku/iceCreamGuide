@@ -18,9 +18,8 @@ class DetailPresenter @Inject constructor(
 ) {
 
     data class PostComment(
-        val author: String,
+        val authorId: String,
         val content: String,
-        val photo: String,
         val date: Timestamp
     )
 
@@ -57,7 +56,8 @@ class DetailPresenter @Inject constructor(
         val objectComment: Comment = dc.toObject()
         val comment = Comment(
             id = dc.id,
-            author = objectComment.author,
+            authorId = objectComment.authorId,
+            authorName = objectComment.authorName,
             content = objectComment.content,
             photo = objectComment.photo,
             date = objectComment.date
@@ -76,6 +76,10 @@ class DetailPresenter @Inject constructor(
 
     fun getShop(id: String, callback: KFunction1<Shop, Unit>) {
         firebaseInteractor.getShop(id, callback)
+    }
+
+    fun updateComments(shopId: String, callBack: (MutableList<Comment>) -> Unit) {
+        firebaseInteractor.getComments(shopId, callBack)
     }
 
 }

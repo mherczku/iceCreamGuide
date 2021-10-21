@@ -25,7 +25,7 @@ class CommentAdapter(private val listener: CommentAdapterListener) :
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val comment = getItem(position)
         holder.item = comment
-        holder.authorText.text = comment.author
+        holder.authorText.text = comment.authorName
         holder.contentText.text = comment.content
         if (comment.photo.isNotBlank()) {
             Glide.with(holder.authorImage)

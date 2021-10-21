@@ -60,7 +60,7 @@ class SettingsPreference : PreferenceFragmentCompat() {
 
 class EditTextDialog(
     private val text: String? = null,
-    private val myCallback: (String?, String?, String?) -> (Unit),
+    private val myCallback: (String?, String?) -> (Unit),
     private val inputType: Int = InputType.TYPE_TEXT_FLAG_CAP_SENTENCES,
     private val type: Int
 ) : DialogFragment() {
@@ -68,7 +68,6 @@ class EditTextDialog(
     companion object {
         const val EDIT_NAME = 1
         const val EDIT_EMAIL = 2
-        const val EDIT_PHONE = 3
         const val AUTHENTICATE = 0
     }
 
@@ -88,9 +87,9 @@ class EditTextDialog(
                 if (binding.addNameTextField.validateNonEmpty()) {
                     myCallback(
                         binding.addNameTextField.editText?.text.toString(),
-                        null,
                         null
                     )
+                    this.dismiss()
                 }
             }
         } else {
@@ -102,7 +101,6 @@ class EditTextDialog(
                         if (binding.addNameTextField.validateNonEmpty()) {
                             myCallback(
                                 binding.addNameTextField.editText?.text.toString(),
-                                null,
                                 null
                             )
                             this.dismiss()
@@ -111,17 +109,6 @@ class EditTextDialog(
                     EDIT_EMAIL -> {
                         if (binding.addNameTextField.validateNonEmpty()) {
                             myCallback(
-                                null,
-                                binding.addNameTextField.editText?.text.toString(),
-                                null
-                            )
-                            this.dismiss()
-                        }
-                    }
-                    EDIT_PHONE -> {
-                        if (binding.addNameTextField.validateNonEmpty()) {
-                            myCallback(
-                                null,
                                 null,
                                 binding.addNameTextField.editText?.text.toString()
                             )
