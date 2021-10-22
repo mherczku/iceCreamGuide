@@ -305,5 +305,4 @@ class SettingsFragment : Fragment() {
     private fun requestStoragePermission() {
         permReqLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
     }
-
 }

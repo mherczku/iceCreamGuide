@@ -17,12 +17,13 @@
             android:layout_height="?attr/actionBarSize"
             android:background="@color/colorPrimary"
             android:elevation="4dp"
-            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+            android:theme="@style/Theme.MaterialComponents.DayNight.DarkActionBar"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:navigationIcon="@drawable/ic_navigate_menu"
             app:title="@string/list_title"
+            app:titleTextColor="@color/colorToolbarTitle"
             tools:targetApi="lollipop" />
 
         <androidx.swiperefreshlayout.widget.SwipeRefreshLayout

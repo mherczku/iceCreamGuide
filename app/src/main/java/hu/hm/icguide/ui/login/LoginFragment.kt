@@ -12,6 +12,7 @@ import com.google.android.gms.tasks.OnSuccessListener
 import dagger.hilt.android.AndroidEntryPoint
 import hu.hm.icguide.R
 import hu.hm.icguide.databinding.FragmentLoginBinding
+import hu.hm.icguide.extensions.hideKeyboard
 import hu.hm.icguide.extensions.validateNonEmpty
 import hu.hm.icguide.interactors.FirebaseInteractor
 import hu.hm.icguide.ui.list.ListFragment
@@ -97,6 +98,7 @@ class LoginFragment : RainbowCakeFragment<LoginViewState, LoginViewModel>(),
             hideProgressDialog()
             return
         }
+        hideKeyboard()
         viewModel.login(
             binding.etEmail.text.toString(),
             binding.etPassword.text.toString(),
