@@ -43,15 +43,7 @@ class ListFragment : RainbowCakeFragment<ListViewState, ListViewModel>(),
         setupToolbar()
         binding.navigationView.setNavigationItemSelectedListener(this)
         setupRecyclerView()
-        val user = firebaseInteractor.firebaseUser
-        if (user == null) {
-            navigator?.replace(LoginFragment())
-        } else Toast.makeText(
-            context,
-            user.displayName!! + getString(R.string.logged_in),
-            Toast.LENGTH_LONG
-        ).show()
-    }
+        }
 
     override fun onStart() {
         super.onStart()
@@ -95,7 +87,7 @@ class ListFragment : RainbowCakeFragment<ListViewState, ListViewModel>(),
                 navigator?.add(SettingsFragment())
             }
             R.id.action_drawer_four -> {
-                FirebaseAuth.getInstance().signOut()
+                firebaseInteractor.logout()
                 navigator?.replace(LoginFragment())
             }
         }

@@ -4,6 +4,7 @@ import android.app.Activity
 import android.app.AlertDialog
 import android.app.Dialog
 import android.content.Context
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.text.InputType
 import android.view.LayoutInflater
@@ -15,11 +16,9 @@ import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.preference.PreferenceFragmentCompat
-import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import hu.hm.icguide.R
 import hu.hm.icguide.databinding.DialogEditTextBinding
-import kotlin.reflect.KFunction1
 
 
 fun EditText.validateNonEmpty(): Boolean {
@@ -58,66 +57,39 @@ class SettingsPreference : PreferenceFragmentCompat() {
     }
 }
 
-class EditTextDialog(
-    private val text: String? = null,
-    private val myCallback: (String?, String?) -> (Unit),
-    private val inputType: Int = InputType.TYPE_TEXT_FLAG_CAP_SENTENCES,
-    private val type: Int
-) : DialogFragment() {
+class EditTextDialog: DialogFragment() {
 
-    companion object {
-        const val EDIT_NAME = 1
-        const val EDIT_EMAIL = 2
-        const val AUTHENTICATE = 0
+    private lateinit var listener: (String) -> Unit
+    var text: String? = null
+    var editTextInputType: Int = InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
+    var hint: String = ""
+    var toolbarTitle: String = ""
+    var btnText: String = ""
+    var toolbarNavigationIcon: Drawable? = null
+    var textFieldEndIconMode: Int = TextInputLayout.END_ICON_CLEAR_TEXT
+
+    fun setListener(listener: (String) -> Unit) {
+        this.listener = listener
     }
 
-    private lateinit var binding: DialogEditTextBinding
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
 
-        binding = DialogEditTextBinding.inflate(LayoutInflater.from(context))
-        binding.addNameTextField.editText?.inputType = inputType
+        val binding = DialogEditTextBinding.inflate(LayoutInflater.from(context))
+        binding.textField.editText?.inputType = editTextInputType
 
-        if (type == AUTHENTICATE) {
-            binding.toolbar.title = getString(R.string.authenticate)
-            binding.toolbar.navigationIcon = ResourcesCompat.getDrawable(resources, R.drawable.security_light, null)
-            binding.addNameTextField.editText?.hint = getString(R.string.password)
-            binding.btnEditTextDialog.text = getString(R.string.authenticate)
-            binding.addNameTextField.endIconMode = TextInputLayout.END_ICON_PASSWORD_TOGGLE
-            binding.btnEditTextDialog.setOnClickListener {
-                if (binding.addNameTextField.validateNonEmpty()) {
-                    myCallback(
-                        binding.addNameTextField.editText?.text.toString(),
-                        null
-                    )
-                    this.dismiss()
-                }
-            }
-        } else {
-            binding.addNameTextField.editText?.setText(text)
-            binding.btnEditTextDialog.setOnClickListener {
-
-                when (type) {
-                    EDIT_NAME -> {
-                        if (binding.addNameTextField.validateNonEmpty()) {
-                            myCallback(
-                                binding.addNameTextField.editText?.text.toString(),
-                                null
-                            )
-                            this.dismiss()
-                        }
-                    }
-                    EDIT_EMAIL -> {
-                        if (binding.addNameTextField.validateNonEmpty()) {
-                            myCallback(
-                                null,
-                                binding.addNameTextField.editText?.text.toString()
-                            )
-                            this.dismiss()
-                        }
-                    }
-                }
+        binding.toolbar.title = toolbarTitle
+        binding.textField.editText?.setText(text)
+        binding.toolbar.navigationIcon = toolbarNavigationIcon
+        binding.textField.editText?.hint = hint
+        binding.textField.endIconMode = textFieldEndIconMode
+        binding.btnConfirm.text = btnText
+        binding.btnConfirm.setOnClickListener {
+            if (binding.textField.validateNonEmpty()) {
+                listener(binding.textField.editText?.text.toString())
+                this.dismiss()
             }
         }
+
         return AlertDialog.Builder(requireContext())
             .setView(binding.root)
             .create()

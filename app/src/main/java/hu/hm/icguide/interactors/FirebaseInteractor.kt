@@ -385,4 +385,10 @@ class FirebaseInteractor @Inject constructor() {
     fun verifyEmail() {
         firebaseUser?.sendEmailVerification()
     }
+
+    fun updatePassword(password: String, callBack: () -> Unit) {
+        firebaseUser?.updatePassword(password)?.addOnSuccessListener {
+            callBack()
+        }
+    }
 }

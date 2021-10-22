@@ -1,7 +1,6 @@
 package hu.hm.icguide.ui.settings
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.AlertDialog
 import android.content.Intent
@@ -24,11 +23,13 @@ import androidx.annotation.RequiresApi
 import androidx.annotation.StringRes
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
 import co.zsmb.rainbowcake.navigation.navigator
+import co.zsmb.rainbowcake.navigation.popUntil
 import com.bumptech.glide.Glide
+import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.auth.FirebaseUser
-import com.google.type.DateTime
 import dagger.hilt.android.AndroidEntryPoint
 import hu.hm.icguide.R
 import hu.hm.icguide.databinding.FragmentSettingsBinding
@@ -36,6 +37,8 @@ import hu.hm.icguide.extensions.EditTextDialog
 import hu.hm.icguide.extensions.SettingsPreference
 import hu.hm.icguide.extensions.toast
 import hu.hm.icguide.interactors.FirebaseInteractor
+import hu.hm.icguide.ui.list.ListFragment
+import hu.hm.icguide.ui.login.LoginFragment
 import java.text.SimpleDateFormat
 import java.util.*
 import javax.inject.Inject
@@ -52,7 +55,6 @@ class SettingsFragment : Fragment() {
     private lateinit var startForResultCamera: ActivityResultLauncher<Intent>
     private var isPermissionGranted = false
     private lateinit var permReqLauncher: ActivityResultLauncher<String>
-
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -126,21 +128,24 @@ class SettingsFragment : Fragment() {
         return binding.root
     }
 
-    private fun setupView() {
-        binding.toolbar.setNavigationOnClickListener { navigator?.pop() }
-        binding.tvName.text = user.displayName
-        binding.tvEmail.text = user.email
-        binding.tvPhone.text = user.phoneNumber
-        binding.checkBoxEmailVerified.isChecked = user.isEmailVerified
-        val date = SimpleDateFormat("yyyy/MM/dd", Locale.ENGLISH).format(Date(user.metadata.creationTimestamp))
-        binding.tvRegistered.text = date
+    private fun setupView() = with(binding) {
+        toolbar.setNavigationOnClickListener { navigator?.pop() }
+        tvName.text = user.displayName
+        tvEmail.text = user.email
+        checkBoxEmailVerified.isChecked = user.isEmailVerified
+        if (user.isEmailVerified) btnVerifyEmail.visibility = View.GONE
+        val date = SimpleDateFormat(
+            getString(R.string.date_pattern_ymd),
+            Locale.ENGLISH
+        ).format(Date(user.metadata.creationTimestamp))
+        tvRegistered.text = date
 
-        Glide.with(binding.ivUser)
+        Glide.with(ivUser)
             .load(user.photoUrl)
             .placeholder(R.drawable.placeholder)
-            .into(binding.ivUser)
+            .into(ivUser)
 
-        binding.ivUser.setOnClickListener {
+        ivUser.setOnClickListener {
             AlertDialog.Builder(context)
                 .setCancelable(true)
                 .setMessage(R.string.galery_or_create)
@@ -157,69 +162,70 @@ class SettingsFragment : Fragment() {
         }
 
         binding.btnEditName.setOnClickListener {
-            EditTextDialog(
-                binding.tvName.text.toString(),
-                ::editProfile,
-                type = EditTextDialog.EDIT_NAME
-            ).show(
-                childFragmentManager,
-                null
-            )
+            summonEditText(tvName.text.toString(), InputType.TYPE_TEXT_FLAG_CAP_WORDS) {
+                firebaseInteractor.updateProfile(name = it, myCallback = ::updateView)
+            }
         }
-        binding.btnEditEmail.setOnClickListener {
-            EditTextDialog(
-                binding.tvEmail.text.toString(),
-                ::editProfile,
-                inputType = InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS,
-                type = EditTextDialog.EDIT_EMAIL
-            ).show(
-                childFragmentManager,
-                null
-            )
+        btnEditEmail.setOnClickListener {
+            summonEditText(tvEmail.text.toString(), InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS) {
+                firebaseInteractor.updateProfile(email = it, myCallback = ::updateView)
+            }
         }
-
-        binding.btnEditPhone.setOnClickListener {
-            EditTextDialog(
-                binding.tvPhone.text.toString(),
-                ::editProfile,
-                inputType = InputType.TYPE_CLASS_PHONE,
-                type = EditTextDialog.EDIT_EMAIL
-            ).show(
-                childFragmentManager,
-                null
-            )
-        }
-        binding.btnLogout.setOnClickListener {
+        btnLogout.setOnClickListener {
             firebaseInteractor.logout()
+            navigator?.popUntil<ListFragment>()
+            navigator?.replace(LoginFragment())
         }
-        binding.btnAuthenticate.setOnClickListener {
+        btnAuthenticate.setOnClickListener {
             reAuthenticate()
         }
-        binding.checkBoxEmailVerified.setOnClickListener {
+        btnVerifyEmail.setOnClickListener {
             firebaseInteractor.verifyEmail()
             toast(getString(R.string.verification_email_sent))
+            btnVerifyEmail.isEnabled = false
+        }
+        btnEditPassword.setOnClickListener {
+            summonEditText(
+                null,
+                InputType.TYPE_TEXT_VARIATION_PASSWORD,
+                TextInputLayout.END_ICON_PASSWORD_TOGGLE
+            ) {
+                firebaseInteractor.updatePassword(it) { toast(getString(R.string.password_updated)) }
+            }
         }
     }
 
-    private fun reAuthenticate(){
-        EditTextDialog(
-            myCallback = ::authenticate,
-            inputType = InputType.TYPE_TEXT_VARIATION_PASSWORD,
-            type = EditTextDialog.AUTHENTICATE
-        ).show(
-            childFragmentManager,
-            null
-        )
+    private fun summonEditText(
+        text: String? = null,
+        inputType: Int? = null,
+        endIconMode: Int? = null,
+        listener: ((String) -> Unit)? = null
+    ) {
+        val editTextDialog = EditTextDialog()
+        editTextDialog.text = text
+        editTextDialog.toolbarTitle = getString(R.string.edit)
+        editTextDialog.btnText = getString(R.string.edit)
+        editTextDialog.toolbarNavigationIcon =
+            ResourcesCompat.getDrawable(resources, R.drawable.outline_create_24, null)
+        if (inputType != null) editTextDialog.editTextInputType = inputType
+        if (listener != null) editTextDialog.setListener(listener)
+        if (endIconMode != null) editTextDialog.textFieldEndIconMode = endIconMode
+        editTextDialog.show(childFragmentManager, null)
     }
 
-    private fun authenticate(password: String?, s1: String?) {
-        password ?: return
-        firebaseInteractor.authenticate(password)
-        toast(getString(R.string.authenticateSuccess))
-    }
-
-    private fun editProfile(name: String? = null, email: String? = null) {
-        firebaseInteractor.updateProfile(name, email, myCallback = ::updateView)
+    private fun reAuthenticate() {
+        val editTextDialog = EditTextDialog()
+        editTextDialog.btnText = getString(R.string.authenticate)
+        editTextDialog.toolbarNavigationIcon =
+            ResourcesCompat.getDrawable(resources, R.drawable.security_light, null)
+        editTextDialog.hint = getString(R.string.password)
+        editTextDialog.textFieldEndIconMode = TextInputLayout.END_ICON_PASSWORD_TOGGLE
+        editTextDialog.toolbarTitle = getString(R.string.authenticate)
+        editTextDialog.setListener {
+            firebaseInteractor.authenticate(it)
+            toast(getString(R.string.authenticateSuccess))
+        }
+        editTextDialog.show(childFragmentManager, null)
     }
 
     private fun updatePic(
@@ -239,8 +245,8 @@ class SettingsFragment : Fragment() {
         user = firebaseInteractor.firebaseUser!!
         binding.tvName.text = user.displayName
         binding.tvEmail.text = user.email
-        binding.tvPhone.text = user.phoneNumber
         binding.checkBoxEmailVerified.isChecked = user.isEmailVerified
+        if (user.isEmailVerified) binding.btnVerifyEmail.visibility = View.GONE
         Glide.with(binding.ivUser)
             .load(user.photoUrl)
             .placeholder(R.drawable.placeholder)

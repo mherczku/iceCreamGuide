@@ -75,4 +75,8 @@
     <string name="authenticate">Azonositás</string>
     <string name="authenticateSuccess">Sikeres azonosítás, mostmár módosíthatja!</string>
     <string name="verification_email_sent">A megadott email címre elküldtük a visszaigazoló üzenetet</string>
+    <string name="password_updated">Jelszó sikeresen módositva</string>
+    <string name="user_settings">Felhasználói beállitások</string>
+    <string name="edit_password">Jelszó módositása</string>
+    <string name="date_pattern_ymd">yyyy/MM/dd</string>
 </resources>
