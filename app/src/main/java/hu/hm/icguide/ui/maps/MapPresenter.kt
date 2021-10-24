@@ -20,6 +20,7 @@ class MapPresenter @Inject constructor(private val firebaseInteractor: FirebaseI
             val s = d.toObject<Shop>()
             if(s == null || s.name.isEmpty()) continue
             shops.add(Marker(
+                id = d.id,
                 name = s.name,
                 geoPoint = s.geoPoint
             ))
@@ -28,6 +29,7 @@ class MapPresenter @Inject constructor(private val firebaseInteractor: FirebaseI
     }
 
     data class Marker(
+        val id: String,
         val name: String,
         val geoPoint: GeoPoint
     )

@@ -8,6 +8,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.*
 import android.graphics.drawable.BitmapDrawable
+import android.location.Geocoder
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
@@ -118,6 +119,7 @@ class AddDialog(private val position: LatLng) : DialogFragment(),
     }
 
     private fun setupViews() {
+        binding.addAddressTextField.editText?.setText(geocode(position))
         binding.imgAttach.setOnClickListener {
             AlertDialog.Builder(context)
                 .setCancelable(true)
@@ -218,6 +220,13 @@ class AddDialog(private val position: LatLng) : DialogFragment(),
         val getPicIntent = Intent(Intent.ACTION_PICK)
         getPicIntent.type = "image/*"
         startForResultGallery.launch(Intent(getPicIntent))
+    }
+
+    private fun geocode(latLng: LatLng): String {
+        val geocoder = Geocoder(context)
+        val addresses = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1)
+        val address = addresses[0]
+        return address.getAddressLine(0)
     }
 
     private fun showRationaleDialog(

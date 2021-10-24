@@ -4,6 +4,7 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.pm.PackageManager
+import android.location.Geocoder
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
@@ -26,7 +27,9 @@ import com.google.firebase.firestore.QuerySnapshot
 import dagger.hilt.android.AndroidEntryPoint
 import hu.hm.icguide.R
 import hu.hm.icguide.databinding.FragmentMapsBinding
+import hu.hm.icguide.extensions.toast
 import hu.hm.icguide.ui.add.AddDialog
+import hu.hm.icguide.ui.detail.DetailFragment
 
 @AndroidEntryPoint
 class MapFragment : RainbowCakeFragment<MapViewState, MapViewModel>(),
@@ -90,10 +93,11 @@ class MapFragment : RainbowCakeFragment<MapViewState, MapViewModel>(),
     override fun render(viewState: MapViewState) {
         if (!::map.isInitialized) return
         viewState.markers.forEach {
-            map.addMarker(
+            val marker = map.addMarker(
                 MarkerOptions().position(LatLng(it.geoPoint.latitude, it.geoPoint.longitude))
                     .title(it.name)
             )
+            marker?.tag = it.id
         }
         // TODO Render state
     }
@@ -111,8 +115,9 @@ class MapFragment : RainbowCakeFragment<MapViewState, MapViewModel>(),
         googleMap.setOnMapLongClickListener {
             AddDialog(it).show(childFragmentManager, null)
         }
-        googleMap.setOnPoiClickListener {
-            Toast.makeText(context, " ${it.name}", Toast.LENGTH_SHORT).show()
+        googleMap.setOnInfoWindowLongClickListener {
+            it.tag ?: return@setOnInfoWindowLongClickListener
+            navigator?.add(DetailFragment(it.tag!! as String))
         }
         viewModel.getData(this)
     }
