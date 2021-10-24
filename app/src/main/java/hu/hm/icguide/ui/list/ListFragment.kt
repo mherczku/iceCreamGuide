@@ -14,6 +14,7 @@ import com.google.firebase.firestore.QueryDocumentSnapshot
 import dagger.hilt.android.AndroidEntryPoint
 import hu.hm.icguide.R
 import hu.hm.icguide.databinding.FragmentListBinding
+import hu.hm.icguide.extensions.toast
 import hu.hm.icguide.interactors.FirebaseInteractor
 import hu.hm.icguide.models.Shop
 import hu.hm.icguide.ui.add.AddDialog
@@ -75,10 +76,6 @@ class ListFragment : RainbowCakeFragment<ListViewState, ListViewModel>(),
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-
-            R.id.action_drawer_one -> {
-                AddDialog(LatLng(12.1, 12.1)).show(childFragmentManager, null)
-            }
             R.id.action_drawer_two -> {
                 navigator?.add(MapFragment())
             }
@@ -98,13 +95,12 @@ class ListFragment : RainbowCakeFragment<ListViewState, ListViewModel>(),
         viewModel.dataChanged(dc, type)
     }
 
-    override fun toast(message: String?) {
-        message ?: return
-        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-    }
-
     override fun onItemSelected(shop: Shop) {
         navigator?.add(DetailFragment(shop.id))
+    }
+
+    override fun toast(message: String?) {
+        toast(message)
     }
 
 }
