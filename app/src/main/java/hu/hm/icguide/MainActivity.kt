@@ -1,6 +1,9 @@
 package hu.hm.icguide
 
+import android.content.SharedPreferences
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.preference.PreferenceManager
 import co.zsmb.rainbowcake.navigation.SimpleNavActivity
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.AndroidEntryPoint
@@ -20,6 +23,10 @@ class MainActivity : SimpleNavActivity() {
             if (user != null) navigator.add(ListFragment())
             else navigator.add(LoginFragment())
         }
+        val sp = PreferenceManager.getDefaultSharedPreferences(applicationContext)
+        val darkMode = sp.getBoolean("darkTheme", false)
+        if (darkMode) AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+        else AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
     }
 
 }
