@@ -4,10 +4,8 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.pm.PackageManager
-import android.location.Geocoder
 import android.os.Bundle
 import android.view.View
-import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.StringRes
@@ -65,14 +63,12 @@ class MapFragment : RainbowCakeFragment<MapViewState, MapViewModel>(),
 
         permReqLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) {
             if (it) {
-                Toast.makeText(context, getString(R.string.permission_granted), Toast.LENGTH_SHORT)
-                    .show()
+                toast(getString(R.string.permission_granted))
                 isPermissionGranted = true
                 enableMyLocation()
 
             } else {
-                Toast.makeText(context, getString(R.string.permission_denied), Toast.LENGTH_SHORT)
-                    .show()
+                toast(getString(R.string.permission_denied))
             }
         }
         handleLocationPermission()
