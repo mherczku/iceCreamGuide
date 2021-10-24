@@ -51,9 +51,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="20dp"
-            android:text="Móricz Claudia"
             android:textColor="@color/colorTextContra"
-            android:textSize="20sp" />
+            android:textSize="20sp"
+            tools:text="Móricz Claudia" />
 
         <ImageButton
             android:id="@+id/btnEditName"
@@ -87,10 +87,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="20dp"
-            android:text="@string/example_email"
             android:textColor="@color/colorTextContra"
             android:textSize="20sp"
-            android:textStyle="italic" />
+            android:textStyle="italic"
+            tools:text="példa@email.hu" />
 
         <ImageButton
             android:id="@+id/btnEditEmail"
@@ -126,7 +126,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="16dp"
-            android:text="Hitelesités" />
+            android:text="@string/verify" />
 
     </LinearLayout>
 
@@ -164,9 +164,9 @@
             android:id="@+id/tvRegistered"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="2010.10.10"
             android:textColor="@color/colorTextContra"
-            android:textSize="14sp" />
+            android:textSize="14sp"
+            tools:text="2010.10.10" />
 
     </LinearLayout>
 

@@ -79,4 +79,5 @@
     <string name="user_settings">Felhasználói beállitások</string>
     <string name="edit_password">Jelszó módositása</string>
     <string name="date_pattern_ymd">yyyy/MM/dd</string>
+    <string name="verify">Hitelesités</string>
 </resources>
