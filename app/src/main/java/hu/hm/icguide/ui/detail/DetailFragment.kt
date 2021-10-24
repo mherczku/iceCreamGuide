@@ -116,23 +116,23 @@ class DetailFragment(
     }
 
     override fun onSuccess(p0: Any?) {
-        toast(getString(R.string.successful_comment))
+        onToast(getString(R.string.successful_comment))
         viewModel.updateComments(shopId)
     }
 
     override fun onFailure(p0: Exception) {
-        toast(p0.localizedMessage)
+        onToast(p0.localizedMessage)
     }
 
     override fun onItemSelected(comment: Comment) {
-        toast(comment.content)
+        onToast(comment.content)
     }
 
     override fun dataChanged(dc: QueryDocumentSnapshot, type: String) {
         viewModel.dataChanged(dc, type)
     }
 
-    override fun toast(message: String?) {
+    override fun onToast(message: String?) {
         message ?: return
         Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
     }

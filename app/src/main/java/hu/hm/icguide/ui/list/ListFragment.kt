@@ -3,12 +3,10 @@ package hu.hm.icguide.ui.list
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
-import android.widget.Toast
 import androidx.core.view.GravityCompat
 import co.zsmb.rainbowcake.base.RainbowCakeFragment
 import co.zsmb.rainbowcake.hilt.getViewModelFromFactory
 import co.zsmb.rainbowcake.navigation.navigator
-import com.google.android.gms.maps.model.LatLng
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.firestore.QueryDocumentSnapshot
 import dagger.hilt.android.AndroidEntryPoint
@@ -17,7 +15,6 @@ import hu.hm.icguide.databinding.FragmentListBinding
 import hu.hm.icguide.extensions.toast
 import hu.hm.icguide.interactors.FirebaseInteractor
 import hu.hm.icguide.models.Shop
-import hu.hm.icguide.ui.add.AddDialog
 import hu.hm.icguide.ui.detail.DetailFragment
 import hu.hm.icguide.ui.login.LoginFragment
 import hu.hm.icguide.ui.maps.MapFragment
@@ -67,8 +64,17 @@ class ListFragment : RainbowCakeFragment<ListViewState, ListViewModel>(),
             binding.drawerLayout.openDrawer(GravityCompat.START)
         }
         binding.toolbar.inflateMenu(R.menu.menu_list)
+        binding.toolbar.setOnMenuItemClickListener {
+            when(it.itemId) {
+                R.id.menuItemSearch -> {
+                    //TODO keresés
+                }
+            }
+            true
+        }
 
         binding.swipeRefreshLayout.setOnRefreshListener {
+            //TODO vagy legyen értelme vagy ne legyen swipeRefresh
             viewModel.refreshList()
             binding.swipeRefreshLayout.isRefreshing = false
         }
@@ -99,7 +105,7 @@ class ListFragment : RainbowCakeFragment<ListViewState, ListViewModel>(),
         navigator?.add(DetailFragment(shop.id))
     }
 
-    override fun toast(message: String?) {
+    override fun onToast(message: String?) {
         toast(message)
     }
 

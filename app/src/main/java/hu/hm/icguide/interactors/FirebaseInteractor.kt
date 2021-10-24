@@ -44,7 +44,7 @@ class FirebaseInteractor @Inject constructor() {
     }
 
     interface OnToastListener {
-        fun toast(message: String?)
+        fun onToast(message: String?)
     }
 
     interface OnRegisterSuccessListener {
@@ -120,7 +120,7 @@ class FirebaseInteractor @Inject constructor() {
         firestoreDb.collection("shops")
             .addSnapshotListener { snapshots, e ->
                 if (e != null) {
-                    toastListenerListener.toast(e.localizedMessage)
+                    toastListenerListener.onToast(e.localizedMessage)
                     return@addSnapshotListener
                 }
 
@@ -235,7 +235,7 @@ class FirebaseInteractor @Inject constructor() {
         firestoreDb.collection("shops/${shopId}/comments")
             .addSnapshotListener { snapshots, e ->
                 if (e != null) {
-                    onToastListener.toast(e.localizedMessage)
+                    onToastListener.onToast(e.localizedMessage)
                     return@addSnapshotListener
                 }
 

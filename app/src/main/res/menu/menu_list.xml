@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/action_1"
+        android:id="@+id/menuItemSearch"
         android:title="@string/menu_item_one"
         app:showAsAction="ifRoom"
         android:icon="@drawable/ic_baseline_search_24"/>

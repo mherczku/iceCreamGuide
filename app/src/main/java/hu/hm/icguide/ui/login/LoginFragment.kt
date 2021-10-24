@@ -55,7 +55,7 @@ class LoginFragment : RainbowCakeFragment<LoginViewState, LoginViewModel>(),
         progressBar.visibility = View.GONE
     }
 
-    override fun toast(message: String?) {
+    override fun onToast(message: String?) {
         Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
     }
 
@@ -63,7 +63,7 @@ class LoginFragment : RainbowCakeFragment<LoginViewState, LoginViewModel>(),
         return if (binding.etEmail.validateNonEmpty() && binding.etPassword.validateNonEmpty()) {
             true
         } else {
-            toast(getString(R.string.email_password_empty))
+            onToast(getString(R.string.email_password_empty))
             false
         }
     }
@@ -83,12 +83,12 @@ class LoginFragment : RainbowCakeFragment<LoginViewState, LoginViewModel>(),
     }
 
     override fun onRegisterSuccess() {
-        toast(getString(R.string.registration_successful))
+        onToast(getString(R.string.registration_successful))
         hideProgressDialog()
     }
 
     override fun onFailure(p0: Exception) {
-        toast(p0.localizedMessage)
+        onToast(p0.localizedMessage)
         hideProgressDialog()
     }
 
@@ -109,7 +109,7 @@ class LoginFragment : RainbowCakeFragment<LoginViewState, LoginViewModel>(),
 
     override fun onSuccess(p0: Any?) {
         hideProgressDialog()
-        toast(getString(R.string.login_successful))
+        onToast(getString(R.string.login_successful))
         navigator?.replace(ListFragment())
     }
 

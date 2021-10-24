@@ -55,7 +55,6 @@ class MapFragment : RainbowCakeFragment<MapViewState, MapViewModel>(),
         binding.toolbar.setNavigationOnClickListener {
             navigator?.pop()
         }
-        binding.toolbar.inflateMenu(R.menu.menu_list)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
