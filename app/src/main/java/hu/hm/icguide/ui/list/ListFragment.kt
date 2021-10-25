@@ -3,6 +3,7 @@ package hu.hm.icguide.ui.list
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
+import androidx.appcompat.widget.SearchView
 import androidx.core.view.GravityCompat
 import co.zsmb.rainbowcake.base.RainbowCakeFragment
 import co.zsmb.rainbowcake.hilt.getViewModelFromFactory
@@ -40,7 +41,7 @@ class ListFragment : RainbowCakeFragment<ListViewState, ListViewModel>(),
         setupToolbar()
         binding.navigationView.setNavigationItemSelectedListener(this)
         setupRecyclerView()
-        }
+    }
 
     override fun onStart() {
         super.onStart()
@@ -65,9 +66,24 @@ class ListFragment : RainbowCakeFragment<ListViewState, ListViewModel>(),
         }
         binding.toolbar.inflateMenu(R.menu.menu_list)
         binding.toolbar.setOnMenuItemClickListener {
-            when(it.itemId) {
+            when (it.itemId) {
                 R.id.menuItemSearch -> {
-                    //TODO keresés
+                    val searchView = it.actionView as SearchView
+                    searchView.queryHint = getString(R.string.search)
+                    it.expandActionView()
+                    searchView.setOnQueryTextListener(
+                        object : SearchView.OnQueryTextListener {
+                            override fun onQueryTextSubmit(query: String?): Boolean {
+                                return true
+                            }
+
+                            override fun onQueryTextChange(newText: String?): Boolean {
+                                adapter.filter.filter(newText)
+                                return true
+                            }
+
+                        }
+                    )
                 }
             }
             true
