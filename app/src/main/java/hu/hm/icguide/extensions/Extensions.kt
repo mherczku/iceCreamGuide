@@ -22,6 +22,7 @@ import androidx.preference.PreferenceFragmentCompat
 import com.google.android.material.textfield.TextInputLayout
 import hu.hm.icguide.R
 import hu.hm.icguide.databinding.DialogEditTextBinding
+import java.util.*
 
 
 fun EditText.validateNonEmpty(): Boolean {
@@ -65,6 +66,12 @@ class SettingsPreference : PreferenceFragmentCompat(), SharedPreferences.OnShare
             val darkMode = sharedPreferences?.getBoolean(key, false)
             if(darkMode == true) AppCompatDelegate.setDefaultNightMode(MODE_NIGHT_YES)
             else AppCompatDelegate.setDefaultNightMode(MODE_NIGHT_NO)
+        }
+        else if(key == "language"){
+            val lang = sharedPreferences?.getString(key, "English")
+            if(lang == "English") resources.configuration.setLocale(Locale.ENGLISH)
+            else if(lang == "Magyar") resources.configuration.setLocale(Locale("hu", "Hungary"))
+            //TODO nem vált nyelvet resources.updateConfiguration(resources.configuration, resources.displayMetrics)
         }
     }
 }
