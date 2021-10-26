@@ -33,8 +33,6 @@ import com.google.firebase.auth.FirebaseUser
 import dagger.hilt.android.AndroidEntryPoint
 import hu.hm.icguide.R
 import hu.hm.icguide.databinding.FragmentSettingsBinding
-import hu.hm.icguide.extensions.EditTextDialog
-import hu.hm.icguide.extensions.SettingsPreference
 import hu.hm.icguide.extensions.toast
 import hu.hm.icguide.interactors.FirebaseInteractor
 import hu.hm.icguide.ui.list.ListFragment
@@ -51,7 +49,7 @@ class SettingsFragment : Fragment() {
     lateinit var firebaseInteractor: FirebaseInteractor
     private lateinit var binding: FragmentSettingsBinding
     private lateinit var user: FirebaseUser
-    private lateinit var startForResultGalery: ActivityResultLauncher<Intent>
+    private lateinit var startForResultGallery: ActivityResultLauncher<Intent>
     private lateinit var startForResultCamera: ActivityResultLauncher<Intent>
     private var isPermissionGranted = false
     private lateinit var permReqLauncher: ActivityResultLauncher<String>
@@ -92,7 +90,7 @@ class SettingsFragment : Fragment() {
                     firebaseInteractor.uploadImage(scaledBitmap, ::updatePic)
                 }
             }
-        startForResultGalery =
+        startForResultGallery =
             registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
                 if (result.resultCode == Activity.RESULT_OK) {
                     val uri = result.data?.data
@@ -256,7 +254,7 @@ class SettingsFragment : Fragment() {
     private fun pickImage() {
         val getPicIntent = Intent(Intent.ACTION_PICK)
         getPicIntent.type = "image/*"
-        startForResultGalery.launch(Intent(getPicIntent))
+        startForResultGallery.launch(Intent(getPicIntent))
     }
 
     private fun showRationaleDialog(

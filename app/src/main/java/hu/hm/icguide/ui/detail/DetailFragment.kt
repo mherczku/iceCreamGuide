@@ -80,7 +80,6 @@ class DetailFragment(
         binding.toolbar.setNavigationOnClickListener {
             navigator?.pop()
         }
-        binding.toolbar.inflateMenu(R.menu.menu_list)
     }
 
     @SuppressLint("ClickableViewAccessibility")

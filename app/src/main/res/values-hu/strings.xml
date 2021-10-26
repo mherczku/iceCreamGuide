@@ -37,7 +37,7 @@
     <string name="login">Bejelentkezés</string>
     <string name="register">Regisztrálás</string>
     <string name="logged_in">bejelentkezve</string>
-    <string name="write_comment">Hozzászolás írása...</string>
+    <string name="write_comment">Hozzászolás írása…</string>
     <string name="cd_send_image_btn">Send image button</string>
     <string name="detail_title">Fagylaltozó</string>
     <string name="internet_unavailable">Internet nem elérhető</string>
