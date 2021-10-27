@@ -81,4 +81,6 @@
     <string name="date_pattern_ymd">dd/MM/yyyy</string>
     <string name="verify">Verify</string>
     <string name="search">Search</string>
+    <string name="waiting_for_approval">Waiting for Approval</string>
+    <string name="have_no_permission">You have no permission to enter</string>
 </resources>

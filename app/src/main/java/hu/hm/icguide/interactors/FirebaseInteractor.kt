@@ -266,6 +266,12 @@ class FirebaseInteractor @Inject constructor() {
         firestoreDb.collection("shops").get().addOnSuccessListener(onSuccessListener)
     }
 
+    fun getNewShops(callBack: (QuerySnapshot) -> Unit){
+        firestoreDb.collection("newShops").get().addOnSuccessListener {
+            callBack(it)
+        }
+    }
+
     fun getShop(shopId: String, myCallback: (Shop) -> Unit) {
         firestoreDb.document("shops/${shopId}").get().addOnSuccessListener {
             it ?: return@addOnSuccessListener

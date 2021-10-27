@@ -1,11 +1,8 @@
-package hu.hm.icguide.ui.list
+package hu.hm.icguide.ui.adminList
 
 import android.os.Bundle
-import android.view.KeyEvent
 import android.view.MenuItem
 import android.view.View
-import androidx.activity.OnBackPressedCallback
-import androidx.activity.addCallback
 import androidx.appcompat.widget.SearchView
 import androidx.core.view.GravityCompat
 import co.zsmb.rainbowcake.base.RainbowCakeFragment
@@ -19,16 +16,15 @@ import hu.hm.icguide.databinding.FragmentListBinding
 import hu.hm.icguide.extensions.toast
 import hu.hm.icguide.interactors.FirebaseInteractor
 import hu.hm.icguide.models.Shop
-import hu.hm.icguide.ui.adminList.AdminListFragment
 import hu.hm.icguide.ui.detail.DetailFragment
+import hu.hm.icguide.ui.list.ShopAdapter
 import hu.hm.icguide.ui.login.LoginFragment
 import hu.hm.icguide.ui.maps.MapFragment
 import hu.hm.icguide.ui.settings.SettingsFragment
-import java.security.Key
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class ListFragment : RainbowCakeFragment<ListViewState, ListViewModel>(),
+class AdminListFragment : RainbowCakeFragment<AdminListViewState, AdminListViewModel>(),
     NavigationView.OnNavigationItemSelectedListener, FirebaseInteractor.DataChangedListener,
     FirebaseInteractor.OnToastListener, ShopAdapter.ShopAdapterListener {
 
@@ -39,38 +35,23 @@ class ListFragment : RainbowCakeFragment<ListViewState, ListViewModel>(),
     lateinit var firebaseInteractor: FirebaseInteractor
     private lateinit var binding: FragmentListBinding
     private lateinit var adapter: ShopAdapter
-    private var actionview = true
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding = FragmentListBinding.bind(view)
-        setupToolbar(view)
+        setupToolbar()
         binding.navigationView.setNavigationItemSelectedListener(this)
         setupRecyclerView()
-
     }
-
-    /*override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        // This callback will only be called when MyFragment is at least Started.
-        val callback = requireActivity().onBackPressedDispatcher.addCallback(this) {
-            // Handle the back button event
-            toast("beckpressed CALLBACK")
-        }
-        callback.isEnabled = true
-
-        // The callback can be enabled or disabled here or in the lambda
-    }*/
-
 
     override fun onStart() {
         super.onStart()
         viewModel.load()
-        viewModel.initShopListeners(this, this)
+        //viewModel.initShopListeners(this, this)
+        viewModel.getNewShop()
     }
 
-    override fun render(viewState: ListViewState) {
+    override fun render(viewState: AdminListViewState) {
         adapter.submitList(viewState.shops)
         binding.swipeRefreshLayout.isRefreshing = viewState.isRefreshing
         // TODO Render state
@@ -81,7 +62,8 @@ class ListFragment : RainbowCakeFragment<ListViewState, ListViewModel>(),
         binding.shopList.adapter = adapter
     }
 
-    private fun setupToolbar(view: View) {
+    private fun setupToolbar() {
+        binding.toolbar.title = getString(R.string.waiting_for_approval)
         binding.toolbar.setNavigationOnClickListener {
             binding.drawerLayout.openDrawer(GravityCompat.START)
         }
@@ -92,10 +74,6 @@ class ListFragment : RainbowCakeFragment<ListViewState, ListViewModel>(),
                     val searchView = it.actionView as SearchView
                     searchView.queryHint = getString(R.string.search)
                     it.expandActionView()
-                    /*searchView.setOnQueryTextFocusChangeListener { v, hasFocus ->
-                        if (!hasFocus)
-                            it.collapseActionView()
-                    }*/
                     searchView.setOnQueryTextListener(
                         object : SearchView.OnQueryTextListener {
                             override fun onQueryTextSubmit(query: String?): Boolean {
@@ -123,13 +101,6 @@ class ListFragment : RainbowCakeFragment<ListViewState, ListViewModel>(),
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.action_drawer_one -> {
-                if(firebaseInteractor.user?.role == "admin"){
-                    toast(getString(R.string.permission_granted))
-                    navigator?.add(AdminListFragment())
-                }
-                else toast(getString(R.string.have_no_permission))
-            }
             R.id.action_drawer_two -> {
                 navigator?.add(MapFragment())
             }
