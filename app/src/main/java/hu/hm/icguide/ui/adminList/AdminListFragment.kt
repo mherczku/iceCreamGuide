@@ -26,7 +26,8 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class AdminListFragment : RainbowCakeFragment<AdminListViewState, AdminListViewModel>(),
     NavigationView.OnNavigationItemSelectedListener, FirebaseInteractor.DataChangedListener,
-    FirebaseInteractor.OnToastListener, ShopAdapter.ShopAdapterListener {
+    FirebaseInteractor.OnToastListener, ShopAdapter.ShopAdapterListener,
+    ShopAdapter.AdminOptionsListener {
 
     override fun provideViewModel() = getViewModelFromFactory()
     override fun getViewResource() = R.layout.fragment_list
@@ -58,7 +59,8 @@ class AdminListFragment : RainbowCakeFragment<AdminListViewState, AdminListViewM
     }
 
     private fun setupRecyclerView() {
-        adapter = ShopAdapter(this)
+        adapter = ShopAdapter(this, true)
+        adapter.setAdminOptionsListener(this)
         binding.shopList.adapter = adapter
     }
 
@@ -126,6 +128,14 @@ class AdminListFragment : RainbowCakeFragment<AdminListViewState, AdminListViewM
 
     override fun onToast(message: String?) {
         toast(message)
+    }
+
+    override fun deleteSelected(id: String) {
+
+    }
+
+    override fun addSelected(shop: Shop) {
+
     }
 
 }

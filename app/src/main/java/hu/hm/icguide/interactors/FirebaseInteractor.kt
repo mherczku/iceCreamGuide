@@ -147,10 +147,22 @@ class FirebaseInteractor @Inject constructor() {
         onSuccessListener: OnSuccessListener<Any>,
         onFailureListener: OnFailureListener
     ) {
-        firestoreDb.collection("shops")
+        firestoreDb.collection("newShops")
             .add(newShop)
             .addOnSuccessListener(onSuccessListener)
             .addOnFailureListener(onFailureListener)
+    }
+
+    private fun deleteNewShop(shopId: String){
+        firestoreDb.document("newShops/$shopId").delete()
+    }
+
+    fun addNewShopToShops(newShop: AddDialog.UploadShop, shopId: String){
+        firestoreDb.collection("shops")
+            .add(newShop)
+            .addOnSuccessListener {
+                deleteNewShop(shopId)
+            }
     }
 
     fun uploadShopWithImage(
