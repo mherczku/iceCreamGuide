@@ -4,7 +4,6 @@ import android.app.AlertDialog
 import android.app.Dialog
 import android.os.Bundle
 import android.view.LayoutInflater
-import android.widget.Toast
 import androidx.fragment.app.DialogFragment
 import com.google.android.gms.tasks.OnFailureListener
 import com.google.android.gms.tasks.OnSuccessListener
@@ -17,20 +16,17 @@ import hu.hm.icguide.interactors.FirebaseInteractor
 import hu.hm.icguide.models.Review
 import hu.hm.icguide.models.Shop
 import javax.inject.Inject
-import kotlin.reflect.KFunction1
 
 
 @AndroidEntryPoint
-class AddReviewDialog(private val shop: Shop, private val myCallback: KFunction1<String, Unit>) :
-    DialogFragment(),
-    OnSuccessListener<Any>, OnFailureListener {
+class AddReviewDialog(private val shop: Shop, private val refreshDetailFragment: (String) -> Unit) :
+    DialogFragment(), OnSuccessListener<Any>, OnFailureListener {
 
     @Inject
     lateinit var firebaseInteractor: FirebaseInteractor
     private lateinit var binding: DialogReviewBinding
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-
         binding = DialogReviewBinding.inflate(LayoutInflater.from(context))
         setup()
         return AlertDialog.Builder(requireContext())
@@ -52,7 +48,7 @@ class AddReviewDialog(private val shop: Shop, private val myCallback: KFunction1
     }
 
     private fun toast(message: String?) {
-        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+        toast(message)
     }
 
     override fun onSuccess(p0: Any?) {
@@ -72,7 +68,7 @@ class AddReviewDialog(private val shop: Shop, private val myCallback: KFunction1
             setupReviewButton(reviews)
         } else {
             toast(getString(R.string.review_success))
-            myCallback(shop.id)
+            refreshDetailFragment(shop.id)
             this.dismiss()
         }
     }
@@ -86,8 +82,7 @@ class AddReviewDialog(private val shop: Shop, private val myCallback: KFunction1
             binding.btnAdd.setOnClickListener {
                 if (binding.ratingBar.rating != review.rate) {
                     firebaseInteractor.updateReview(shop, review, binding.ratingBar.rating)
-                    //TODO átírni hogy shopot updatelje mint régen
-                    myCallback(shop.id)
+                    refreshDetailFragment(shop.id)
                     this.dismiss()
                 }
             }
@@ -96,7 +91,7 @@ class AddReviewDialog(private val shop: Shop, private val myCallback: KFunction1
 
     override fun onFailure(p0: Exception) {
         toast(p0.localizedMessage)
-        myCallback(shop.id)
+        refreshDetailFragment(shop.id)
         this.dismiss()
     }
 
