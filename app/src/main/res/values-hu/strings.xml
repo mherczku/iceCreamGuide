@@ -82,6 +82,8 @@
     <string name="verify">Hitelesités</string>
     <string name="search">Keresés</string>
     <string name="waiting_for_approval">Jóváhagyásra vár</string>
-    <string name="have_no_permission">You have no permission to enter</string>
-    <string name="delete">Delete</string>
+    <string name="have_no_permission">Nincs engedélyed a belépéshez</string>
+    <string name="delete">Törlés</string>
+    <string name="approve">Jóváhagyás</string>
+
 </resources>

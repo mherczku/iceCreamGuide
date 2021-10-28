@@ -23,6 +23,8 @@ import hu.hm.icguide.models.User
 import hu.hm.icguide.ui.add.AddDialog
 import hu.hm.icguide.ui.detail.DetailPresenter
 import hu.hm.icguide.ui.list.ListPresenter
+import kotlinx.coroutines.tasks.await
+import timber.log.Timber
 import java.io.ByteArrayOutputStream
 import java.net.URLEncoder
 import java.util.*
@@ -153,16 +155,13 @@ class FirebaseInteractor @Inject constructor() {
             .addOnFailureListener(onFailureListener)
     }
 
-    private fun deleteNewShop(shopId: String){
-        firestoreDb.document("newShops/$shopId").delete()
+    suspend fun deleteNewShop(shopId: String){
+        firestoreDb.document("newShops/$shopId").delete().await()
     }
 
-    fun addNewShopToShops(newShop: AddDialog.UploadShop, shopId: String){
-        firestoreDb.collection("shops")
-            .add(newShop)
-            .addOnSuccessListener {
-                deleteNewShop(shopId)
-            }
+    suspend fun addNewShopToShops(newShop: AddDialog.UploadShop, shopId: String){
+        firestoreDb.collection("shops").add(newShop).await()
+        deleteNewShop(shopId)
     }
 
     fun uploadShopWithImage(
@@ -278,10 +277,15 @@ class FirebaseInteractor @Inject constructor() {
         firestoreDb.collection("shops").get().addOnSuccessListener(onSuccessListener)
     }
 
-    fun getNewShops(callBack: (QuerySnapshot) -> Unit){
+    /*fun getNewShopsOld(callBack: (QuerySnapshot) -> Unit){
         firestoreDb.collection("newShops").get().addOnSuccessListener {
             callBack(it)
         }
+    }*/
+
+    suspend fun getNewShops(): QuerySnapshot? {
+        Timber.d("Downloading firestore new shops")
+        return firestoreDb.collection("newShops").get().await()
     }
 
     fun getShop(shopId: String, myCallback: (Shop) -> Unit) {

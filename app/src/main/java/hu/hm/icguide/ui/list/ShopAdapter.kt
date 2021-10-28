@@ -1,14 +1,11 @@
 package hu.hm.icguide.ui.list
 
 import android.view.LayoutInflater
-import android.view.MenuInflater
 import android.view.ViewGroup
 import android.widget.Filter
 import android.widget.Filterable
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.core.view.get
-import androidx.navigation.navOptions
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -16,14 +13,18 @@ import hu.hm.icguide.R
 import hu.hm.icguide.databinding.RowShopBinding
 import hu.hm.icguide.models.Shop
 
-class ShopAdapter(private val listener: ShopAdapterListener, private val admin: Boolean = false) :
+class ShopAdapter(private val admin: Boolean = false) :
     ListAdapter<Shop, ShopAdapter.ViewHolder>(ShopComparator), Filterable {
 
     private var filterMainList = mutableListOf<Shop>()
-    private var adminOptionsListener: AdminOptionsListener? = null
-    
-    fun setAdminOptionsListener(adminOptionsListener: AdminOptionsListener){
-        this.adminOptionsListener = adminOptionsListener
+    private var itemSelectedListener: ((Shop) -> Unit)? = null
+    private var adminOptionsListener: ((Shop) -> Unit)? = null
+
+    fun setItemSelectedListener(listener: (Shop) -> Unit) {
+        itemSelectedListener = listener
+    }
+    fun setAdminOptionsListener(listener: (Shop) -> Unit) {
+        adminOptionsListener = listener
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
@@ -43,16 +44,15 @@ class ShopAdapter(private val listener: ShopAdapterListener, private val admin: 
         }
     }
 
-    interface ShopAdapterListener {
-        fun onItemSelected(shop: Shop)
-    }
-    interface AdminOptionsListener{
-        fun deleteSelected(id: String)
-        fun addSelected(shop: Shop)
-    }
     override fun submitList(list: MutableList<Shop>?) {
         super.submitList(list)
         filterMainList = list?.toMutableList() ?: mutableListOf()
+    }
+
+    fun removeShop(shop: Shop) {
+        val list = currentList.toMutableList()
+        list.remove(shop)
+        submitList(list)
     }
 
     private fun submitFilterList(list: MutableList<Shop>?) {
@@ -69,25 +69,11 @@ class ShopAdapter(private val listener: ShopAdapterListener, private val admin: 
 
         init {
             itemView.setOnClickListener {
-                item ?: return@setOnClickListener
-                item.let { item -> listener.onItemSelected(item!!) }
+                item?.let { item -> itemSelectedListener?.invoke(item) }
             }
-            if(admin) {
-                itemView.setOnCreateContextMenuListener { menu, v, info ->
-                    menu.setHeaderTitle(item?.name)
-                    menu.add("Felvétel")
-                    menu.add("Törlés")
-                    menu[0].setOnMenuItemClickListener { 
-                        item?.let { it1 -> adminOptionsListener?.addSelected(it1) }
-                        true
-                    }
-                    menu[1].setOnMenuItemClickListener {
-                        item?.let { it1 -> adminOptionsListener?.deleteSelected(it1.id) }
-                        true
-                    }
-                }
+            if (admin) {
                 itemView.setOnLongClickListener {
-                    it.showContextMenu()
+                    item?.let { item -> adminOptionsListener?.invoke(item) }
                     true
                 }
             }
@@ -115,6 +101,7 @@ class ShopAdapter(private val listener: ShopAdapterListener, private val admin: 
                 return filterResults
             }
 
+            @Suppress("UNCHECKED_CAST")
             override fun publishResults(p0: CharSequence?, p1: FilterResults?) {
                 val filteredList = p1?.values as MutableList<Shop>
                 submitFilterList(filteredList)

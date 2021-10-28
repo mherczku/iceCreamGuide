@@ -1,15 +1,51 @@
 package hu.hm.icguide.ui.adminList
 
-import com.google.firebase.firestore.QueryDocumentSnapshot
-import com.google.firebase.firestore.QuerySnapshot
+import co.zsmb.rainbowcake.withIOContext
 import com.google.firebase.firestore.ktx.toObject
 import hu.hm.icguide.interactors.FirebaseInteractor
 import hu.hm.icguide.models.Shop
+import hu.hm.icguide.ui.add.AddDialog
 import javax.inject.Inject
 
 class AdminListPresenter @Inject constructor(private val firebaseInteractor: FirebaseInteractor) {
 
-    companion object {
+    suspend fun getNewShops(): MutableList<Shop> = withIOContext{
+        val qs = firebaseInteractor.getNewShops()
+        val list = mutableListOf<Shop>()
+        qs ?: return@withIOContext list
+        for( dc in qs.documents){
+            val id = dc.id
+            val o : Shop? = dc.toObject()
+            o ?: continue
+            val s = Shop(
+                id = id,
+                name = o.name,
+                address = o.address,
+                geoPoint = o.geoPoint,
+                photo = o.photo
+            )
+            list.add(s)
+        }
+        return@withIOContext list
+    }
+
+    suspend fun addShop(shop: Shop) {
+        val newShop = AddDialog.UploadShop(
+            name = shop.name,
+            address = shop.address,
+            geoPoint = shop.geoPoint,
+            rate = 0F,
+            ratings = 0,
+            photo = shop.photo
+        )
+        firebaseInteractor.addNewShopToShops(newShop, shop.id)
+    }
+
+    suspend fun deleteNewShop(id: String) {
+        firebaseInteractor.deleteNewShop(id)
+    }
+
+    /*companion object {
         const val NEW_SHOP = "NEW_DATA"
         const val EDIT_SHOP = "EDIT_DATA"
         const val REMOVE_SHOP = "REMOVE_DATA"
@@ -47,9 +83,9 @@ class AdminListPresenter @Inject constructor(private val firebaseInteractor: Fir
         toastListener: FirebaseInteractor.OnToastListener
     ) {
         firebaseInteractor.initShopsListener(listener, toastListener)
-    }
+    }*/
 
-    fun getNewShops(callBack: (MutableList<Shop>) -> Unit){
+    /*fun getNewShopsOld(callBack: (MutableList<Shop>) -> Unit){
         firebaseInteractor.getNewShops{
             val list = mutableListOf<Shop>()
             for( dc in it.documents){
@@ -67,6 +103,5 @@ class AdminListPresenter @Inject constructor(private val firebaseInteractor: Fir
             }
             callBack(list)
         }
-    }
-
+    }*/
 }

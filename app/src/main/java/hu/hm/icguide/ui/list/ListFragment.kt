@@ -1,11 +1,8 @@
 package hu.hm.icguide.ui.list
 
 import android.os.Bundle
-import android.view.KeyEvent
 import android.view.MenuItem
 import android.view.View
-import androidx.activity.OnBackPressedCallback
-import androidx.activity.addCallback
 import androidx.appcompat.widget.SearchView
 import androidx.core.view.GravityCompat
 import co.zsmb.rainbowcake.base.RainbowCakeFragment
@@ -18,19 +15,17 @@ import hu.hm.icguide.R
 import hu.hm.icguide.databinding.FragmentListBinding
 import hu.hm.icguide.extensions.toast
 import hu.hm.icguide.interactors.FirebaseInteractor
-import hu.hm.icguide.models.Shop
 import hu.hm.icguide.ui.adminList.AdminListFragment
 import hu.hm.icguide.ui.detail.DetailFragment
 import hu.hm.icguide.ui.login.LoginFragment
 import hu.hm.icguide.ui.maps.MapFragment
 import hu.hm.icguide.ui.settings.SettingsFragment
-import java.security.Key
 import javax.inject.Inject
 
 @AndroidEntryPoint
 class ListFragment : RainbowCakeFragment<ListViewState, ListViewModel>(),
     NavigationView.OnNavigationItemSelectedListener, FirebaseInteractor.DataChangedListener,
-    FirebaseInteractor.OnToastListener, ShopAdapter.ShopAdapterListener {
+    FirebaseInteractor.OnToastListener {
 
     override fun provideViewModel() = getViewModelFromFactory()
     override fun getViewResource() = R.layout.fragment_list
@@ -39,12 +34,11 @@ class ListFragment : RainbowCakeFragment<ListViewState, ListViewModel>(),
     lateinit var firebaseInteractor: FirebaseInteractor
     private lateinit var binding: FragmentListBinding
     private lateinit var adapter: ShopAdapter
-    private var actionview = true
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding = FragmentListBinding.bind(view)
-        setupToolbar(view)
+        setupToolbar()
         binding.navigationView.setNavigationItemSelectedListener(this)
         setupRecyclerView()
 
@@ -77,11 +71,14 @@ class ListFragment : RainbowCakeFragment<ListViewState, ListViewModel>(),
     }
 
     private fun setupRecyclerView() {
-        adapter = ShopAdapter(this)
+        adapter = ShopAdapter()
+        adapter.setItemSelectedListener {
+            navigator?.add(DetailFragment(it.id))
+        }
         binding.shopList.adapter = adapter
     }
 
-    private fun setupToolbar(view: View) {
+    private fun setupToolbar() {
         binding.toolbar.setNavigationOnClickListener {
             binding.drawerLayout.openDrawer(GravityCompat.START)
         }
@@ -147,10 +144,6 @@ class ListFragment : RainbowCakeFragment<ListViewState, ListViewModel>(),
 
     override fun dataChanged(dc: QueryDocumentSnapshot, type: String) {
         viewModel.dataChanged(dc, type)
-    }
-
-    override fun onItemSelected(shop: Shop) {
-        navigator?.add(DetailFragment(shop.id))
     }
 
     override fun onToast(message: String?) {
