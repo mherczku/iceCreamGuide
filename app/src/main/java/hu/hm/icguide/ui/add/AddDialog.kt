@@ -14,7 +14,6 @@ import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
 import android.view.LayoutInflater
-import android.widget.Toast
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -26,7 +25,6 @@ import androidx.fragment.app.DialogFragment
 import co.zsmb.rainbowcake.navigation.navigator
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.tasks.OnFailureListener
-import com.google.android.gms.tasks.OnSuccessListener
 import com.google.firebase.firestore.GeoPoint
 import dagger.hilt.android.AndroidEntryPoint
 import hu.hm.icguide.R
@@ -34,21 +32,12 @@ import hu.hm.icguide.databinding.DialogAddBinding
 import hu.hm.icguide.extensions.toast
 import hu.hm.icguide.extensions.validateNonEmpty
 import hu.hm.icguide.interactors.FirebaseInteractor
+import hu.hm.icguide.models.UploadShop
 import java.io.ByteArrayOutputStream
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class AddDialog(private val position: LatLng) : DialogFragment(),
-    OnSuccessListener<Any>, OnFailureListener {
-
-    data class UploadShop(
-        val name: String,
-        val address: String,
-        val geoPoint: GeoPoint,
-        var photo: String,
-        val rate: Float,
-        val ratings: Int
-    )
+class AddDialog(private val position: LatLng) : DialogFragment(), OnFailureListener {
 
     @Inject
     lateinit var firebaseInteractor: FirebaseInteractor
@@ -66,15 +55,10 @@ class AddDialog(private val position: LatLng) : DialogFragment(),
         binding = DialogAddBinding.inflate(LayoutInflater.from(context))
         permReqLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) {
             if (it) {
-                Toast.makeText(context, getString(R.string.permission_granted), Toast.LENGTH_SHORT)
-                    .show()
+                toast(getString(R.string.permission_granted))
                 isPermissionGranted = true
                 pickImage()
-
-            } else {
-                Toast.makeText(context, getString(R.string.permission_denied), Toast.LENGTH_SHORT)
-                    .show()
-            }
+            } else toast(getString(R.string.permission_denied))
         }
         startForResult =
             registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
@@ -93,12 +77,7 @@ class AddDialog(private val position: LatLng) : DialogFragment(),
                         val source =
                             ImageDecoder.createSource(requireActivity().contentResolver, uri)
                         ImageDecoder.decodeBitmap(source)
-                    } else {
-                        MediaStore.Images.Media.getBitmap(
-                            requireActivity().contentResolver,
-                            uri
-                        )
-                    }
+                    } else { MediaStore.Images.Media.getBitmap(requireActivity().contentResolver, uri) }
                     imageBitmap ?: return@registerForActivityResult
                     binding.imgAttach.setImageBitmap(
                         Bitmap.createScaledBitmap(
@@ -113,7 +92,6 @@ class AddDialog(private val position: LatLng) : DialogFragment(),
             }
 
         setupViews()
-
         return AlertDialog.Builder(requireContext())
             .setView(binding.root)
             .create()
@@ -124,10 +102,8 @@ class AddDialog(private val position: LatLng) : DialogFragment(),
         binding.imgAttach.setOnClickListener {
             AlertDialog.Builder(context)
                 .setCancelable(true)
-                .setMessage(R.string.galery_or_create)
-                .setPositiveButton(
-                    getString(R.string.take_photo)
-                ) { _, _ ->
+                .setMessage(R.string.gallery_or_create)
+                .setPositiveButton(getString(R.string.take_photo)) { _, _ ->
                     attachImage()
                 }
                 .setNeutralButton(getString(R.string.upload_photo)) { _, _ ->
@@ -159,16 +135,22 @@ class AddDialog(private val position: LatLng) : DialogFragment(),
         )
 
         if (!imageSet) {
-            uploadShop(newShop, this, this)
+            uploadShop(newShop, this::successfulUpload)
+            binding.btnAdd.isEnabled = false
         } else {
             try {
                 val bitmap: Bitmap = (binding.imgAttach.drawable as BitmapDrawable).bitmap
-                uploadShopWithImage(newShop, bitmap, this, this)
+                uploadShopWithImage(newShop, bitmap, this, this::successfulUpload)
+                binding.btnAdd.isEnabled = false
             } catch (e: Exception) {
-                e.printStackTrace()
                 toast(e.message)
             }
         }
+    }
+
+    private fun successfulUpload(){
+        toast(getString(R.string.upload_successful))
+        this.dismiss()
     }
 
     private fun validateForm(): Boolean {
@@ -180,19 +162,15 @@ class AddDialog(private val position: LatLng) : DialogFragment(),
         }
     }
 
-    private fun uploadShop(
-        newShop: UploadShop,
-        onSuccessListener: OnSuccessListener<Any>,
-        onFailureListener: OnFailureListener
-    ) {
-        firebaseInteractor.uploadShop(newShop, onSuccessListener, onFailureListener)
+    private fun uploadShop(newShop: UploadShop, done: () -> Unit) {
+        firebaseInteractor.uploadShop(newShop, done)
     }
 
     private fun uploadShopWithImage(
         newShop: UploadShop,
         bitmap: Bitmap,
-        onSuccessListener: OnSuccessListener<Any>,
-        onFailureListener: OnFailureListener
+        onFailureListener: OnFailureListener,
+        done: () -> Unit
     ) {
         val baos = ByteArrayOutputStream()
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos)
@@ -202,13 +180,8 @@ class AddDialog(private val position: LatLng) : DialogFragment(),
             imageInBytes,
             newShop,
             onFailureListener,
-            onSuccessListener
+            done
         )
-    }
-
-    override fun onSuccess(p0: Any?) {
-        toast(getString(R.string.shop_added))
-        this.dismiss()
     }
 
     override fun onFailure(p0: Exception) {

@@ -58,11 +58,11 @@
     <string name="settings_title">Settings</string>
     <string name="save">Save</string>
     <string name="profile_updated">Profile updated</string>
-    <string name="galery_or_create">Upload from gallery or take picture</string>
+    <string name="gallery_or_create">Upload from gallery or take picture</string>
     <string name="external_storage_explanation">The app needs permission to read files to load photos.</string>
     <string name="take_photo">Take picture</string>
     <string name="upload_photo">Upload picture</string>
-    <string name="pic_upload_successful">Successful upload</string>
+    <string name="upload_successful">Successful upload</string>
     <string name="phone_number">Phone number:</string>
     <string name="email2">Email:</string>
     <string name="example_email">example@mail.com</string>

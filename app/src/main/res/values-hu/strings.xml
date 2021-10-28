@@ -58,11 +58,11 @@
     <string name="settings_title">Beállítások</string>
     <string name="save">Mentés</string>
     <string name="profile_updated">Profil frissítve</string>
-    <string name="galery_or_create">Feltöltés galériából vagy kép készítése</string>
+    <string name="gallery_or_create">Feltöltés galériából vagy kép készítése</string>
     <string name="external_storage_explanation">Az alkalmazásnak szüksége van a fájlok olvasásához a kép betöltéséhez</string>
     <string name="take_photo">Kép készítése</string>
     <string name="upload_photo">Kép feltöltése</string>
-    <string name="pic_upload_successful">Sikeres képfeltöltés</string>
+    <string name="upload_successful">Sikeres feltöltés</string>
     <string name="phone_number">Telefonszám:</string>
     <string name="email2">Email:</string>
     <string name="example_email">pelda@mail.hu</string>

@@ -146,7 +146,7 @@ class SettingsFragment : Fragment() {
         ivUser.setOnClickListener {
             AlertDialog.Builder(context)
                 .setCancelable(true)
-                .setMessage(R.string.galery_or_create)
+                .setMessage(R.string.gallery_or_create)
                 .setPositiveButton(
                     getString(R.string.take_photo)
                 ) { _, _ ->
@@ -227,7 +227,7 @@ class SettingsFragment : Fragment() {
     }
 
     private fun updatePic(
-        message: String? = getString(R.string.pic_upload_successful),
+        message: String? = getString(R.string.upload_successful),
         photo: Uri? = null
     ) {
         toast(message)

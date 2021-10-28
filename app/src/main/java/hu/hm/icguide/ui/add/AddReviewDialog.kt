@@ -21,7 +21,8 @@ import kotlin.reflect.KFunction1
 
 
 @AndroidEntryPoint
-class AddReviewDialog(private val shop: Shop, private val myCallback: KFunction1<String, Unit>) : DialogFragment(),
+class AddReviewDialog(private val shop: Shop, private val myCallback: KFunction1<String, Unit>) :
+    DialogFragment(),
     OnSuccessListener<Any>, OnFailureListener {
 
     @Inject
@@ -83,15 +84,14 @@ class AddReviewDialog(private val shop: Shop, private val myCallback: KFunction1
             toast(getString(R.string.already_reviewed))
             binding.btnAdd.text = getString(R.string.edit)
             binding.btnAdd.setOnClickListener {
-                if(binding.ratingBar.rating != review.rate){
+                if (binding.ratingBar.rating != review.rate) {
                     firebaseInteractor.updateReview(shop, review, binding.ratingBar.rating)
                     //TODO átírni hogy shopot updatelje mint régen
                     myCallback(shop.id)
                     this.dismiss()
                 }
             }
-        }
-        else binding.btnAdd.setOnClickListener { addClick() }
+        } else binding.btnAdd.setOnClickListener { addClick() }
     }
 
     override fun onFailure(p0: Exception) {

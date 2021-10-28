@@ -16,11 +16,7 @@ import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
-import hu.hm.icguide.models.Comment
-import hu.hm.icguide.models.Review
-import hu.hm.icguide.models.Shop
-import hu.hm.icguide.models.User
-import hu.hm.icguide.ui.add.AddDialog
+import hu.hm.icguide.models.*
 import hu.hm.icguide.ui.detail.DetailPresenter
 import hu.hm.icguide.ui.list.ListPresenter
 import kotlinx.coroutines.tasks.await
@@ -144,8 +140,14 @@ class FirebaseInteractor @Inject constructor() {
             }
     }
 
-    fun uploadShop(
-        newShop: AddDialog.UploadShop,
+    fun uploadShop(newShop: UploadShop, done: () -> Unit) {
+        firestoreDb.collection("newShops").add(newShop).addOnSuccessListener {
+            done()
+        }
+    }
+
+    fun uploadShop2(
+        newShop: UploadShop,
         onSuccessListener: OnSuccessListener<Any>,
         onFailureListener: OnFailureListener
     ) {
@@ -159,19 +161,18 @@ class FirebaseInteractor @Inject constructor() {
         firestoreDb.document("newShops/$shopId").delete().await()
     }
 
-    suspend fun addNewShopToShops(newShop: AddDialog.UploadShop, shopId: String){
+    suspend fun addNewShopToShops(newShop: UploadShop, shopId: String){
         firestoreDb.collection("shops").add(newShop).await()
         deleteNewShop(shopId)
     }
 
     fun uploadShopWithImage(
         imageInBytes: ByteArray,
-        newShop: AddDialog.UploadShop,
+        newShop: UploadShop,
         onFailureListener: OnFailureListener,
-        onSuccessListener: OnSuccessListener<Any>
+        done: () -> Unit
     ) {
         val newImageName = URLEncoder.encode(UUID.randomUUID().toString(), "UTF-8") + ".jpg"
-
         val newImageRef = storageReference.child("images/$newImageName")
 
         newImageRef.putBytes(imageInBytes)
@@ -180,12 +181,11 @@ class FirebaseInteractor @Inject constructor() {
                 if (!task.isSuccessful) {
                     task.exception?.let { throw it }
                 }
-
                 newImageRef.downloadUrl
             }
             .addOnSuccessListener { downloadUri ->
                 newShop.photo = downloadUri.toString()
-                uploadShop(newShop, onSuccessListener, onFailureListener)
+                uploadShop(newShop, done)
             }
     }
 
@@ -276,12 +276,6 @@ class FirebaseInteractor @Inject constructor() {
     fun getShops(onSuccessListener: OnSuccessListener<QuerySnapshot>) {
         firestoreDb.collection("shops").get().addOnSuccessListener(onSuccessListener)
     }
-
-    /*fun getNewShopsOld(callBack: (QuerySnapshot) -> Unit){
-        firestoreDb.collection("newShops").get().addOnSuccessListener {
-            callBack(it)
-        }
-    }*/
 
     suspend fun getNewShops(): QuerySnapshot? {
         Timber.d("Downloading firestore new shops")

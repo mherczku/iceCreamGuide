@@ -4,7 +4,7 @@ import co.zsmb.rainbowcake.withIOContext
 import com.google.firebase.firestore.ktx.toObject
 import hu.hm.icguide.interactors.FirebaseInteractor
 import hu.hm.icguide.models.Shop
-import hu.hm.icguide.ui.add.AddDialog
+import hu.hm.icguide.models.UploadShop
 import javax.inject.Inject
 
 class AdminListPresenter @Inject constructor(private val firebaseInteractor: FirebaseInteractor) {
@@ -30,7 +30,7 @@ class AdminListPresenter @Inject constructor(private val firebaseInteractor: Fir
     }
 
     suspend fun addShop(shop: Shop) {
-        val newShop = AddDialog.UploadShop(
+        val newShop = UploadShop(
             name = shop.name,
             address = shop.address,
             geoPoint = shop.geoPoint,
