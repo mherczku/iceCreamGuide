@@ -211,9 +211,9 @@ class FirebaseInteractor @Inject constructor() {
             .addOnSuccessListener(onSuccessListener)
     }
 
-    fun getShops(onSuccessListener: OnSuccessListener<QuerySnapshot>) {
+    suspend fun getShops(): QuerySnapshot? {
         Timber.d("Downloading firestore shops")
-        firestoreDb.collection("shops").get().addOnSuccessListener(onSuccessListener)
+        return firestoreDb.collection("shops").get().await()
     }
 
     suspend fun getNewShops(): QuerySnapshot? {

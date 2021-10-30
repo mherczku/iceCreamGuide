@@ -11,7 +11,6 @@ import com.google.android.material.textfield.TextInputLayout
 import hu.hm.icguide.databinding.DialogEditTextBinding
 import hu.hm.icguide.extensions.validateNonEmpty
 
-
 class EditTextDialog: DialogFragment() {
 
     private lateinit var listener: (String) -> Unit
@@ -28,10 +27,8 @@ class EditTextDialog: DialogFragment() {
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-
         val binding = DialogEditTextBinding.inflate(LayoutInflater.from(context))
         binding.textField.editText?.inputType = editTextInputType
-
         binding.toolbar.title = toolbarTitle
         binding.textField.editText?.setText(text)
         binding.toolbar.navigationIcon = toolbarNavigationIcon
@@ -44,7 +41,6 @@ class EditTextDialog: DialogFragment() {
                 this.dismiss()
             }
         }
-
         return AlertDialog.Builder(requireContext())
             .setView(binding.root)
             .create()

@@ -20,18 +20,17 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
-import com.google.android.gms.tasks.OnSuccessListener
-import com.google.firebase.firestore.QuerySnapshot
 import dagger.hilt.android.AndroidEntryPoint
 import hu.hm.icguide.R
 import hu.hm.icguide.databinding.FragmentMapsBinding
 import hu.hm.icguide.extensions.toast
 import hu.hm.icguide.ui.add.AddDialog
 import hu.hm.icguide.ui.detail.DetailFragment
+import timber.log.Timber
 
 @AndroidEntryPoint
 class MapFragment : RainbowCakeFragment<MapViewState, MapViewModel>(),
-    ActivityCompat.OnRequestPermissionsResultCallback, OnSuccessListener<QuerySnapshot> {
+    ActivityCompat.OnRequestPermissionsResultCallback {
 
     override fun provideViewModel() = getViewModelFromFactory()
     override fun getViewResource() = R.layout.fragment_maps
@@ -41,6 +40,10 @@ class MapFragment : RainbowCakeFragment<MapViewState, MapViewModel>(),
     private lateinit var permReqLauncher: ActivityResultLauncher<String>
     private lateinit var binding: FragmentMapsBinding
 
+    override fun onStart() {
+        super.onStart()
+        viewModel.load()
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -48,7 +51,6 @@ class MapFragment : RainbowCakeFragment<MapViewState, MapViewModel>(),
         setupToolbar()
         val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
         mapFragment?.getMapAsync(callback)
-        // TODO Setup views
     }
 
     private fun setupToolbar() {
@@ -59,7 +61,6 @@ class MapFragment : RainbowCakeFragment<MapViewState, MapViewModel>(),
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         permReqLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) {
             if (it) {
                 toast(getString(R.string.permission_granted))
@@ -71,7 +72,6 @@ class MapFragment : RainbowCakeFragment<MapViewState, MapViewModel>(),
             }
         }
         handleLocationPermission()
-
     }
 
     @SuppressLint("MissingPermission")
@@ -80,13 +80,9 @@ class MapFragment : RainbowCakeFragment<MapViewState, MapViewModel>(),
         map.isMyLocationEnabled = isPermissionGranted
     }
 
-    override fun onStart() {
-        super.onStart()
-        viewModel.load()
-    }
-
     override fun render(viewState: MapViewState) {
         if (!::map.isInitialized) return
+        Timber.d("Received ${viewState.markers.size} markers to display in map")
         viewState.markers.forEach {
             val marker = map.addMarker(
                 MarkerOptions().position(LatLng(it.geoPoint.latitude, it.geoPoint.longitude))
@@ -94,7 +90,6 @@ class MapFragment : RainbowCakeFragment<MapViewState, MapViewModel>(),
             )
             marker?.tag = it.id
         }
-        // TODO Render state
     }
 
     @SuppressLint("MissingPermission")
@@ -114,7 +109,6 @@ class MapFragment : RainbowCakeFragment<MapViewState, MapViewModel>(),
             it.tag ?: return@setOnInfoWindowLongClickListener
             navigator?.add(DetailFragment(it.tag!! as String))
         }
-        viewModel.getData(this)
     }
 
     private fun showRationaleDialog(
@@ -161,11 +155,6 @@ class MapFragment : RainbowCakeFragment<MapViewState, MapViewModel>(),
 
     private fun requestLocationPermission() {
         permReqLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
-    }
-
-    override fun onSuccess(p0: QuerySnapshot?) {
-        p0 ?: return
-        viewModel.getMarkers(p0)
     }
 
 }
