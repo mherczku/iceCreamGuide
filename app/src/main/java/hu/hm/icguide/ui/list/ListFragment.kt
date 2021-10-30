@@ -119,7 +119,6 @@ class ListFragment : RainbowCakeFragment<ListViewState, ListViewModel>(),
         when (item.itemId) {
 
             R.id.action_drawer_admin -> {
-                //TODO mégegy ellenőrzés?
                 navigator?.add(AdminListFragment())
             }
             R.id.action_drawer_two -> {
