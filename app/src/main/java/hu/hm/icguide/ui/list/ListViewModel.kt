@@ -4,6 +4,7 @@ import co.zsmb.rainbowcake.base.RainbowCakeViewModel
 import com.google.firebase.firestore.QueryDocumentSnapshot
 import dagger.hilt.android.lifecycle.HiltViewModel
 import hu.hm.icguide.interactors.FirebaseInteractor
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -11,26 +12,24 @@ class ListViewModel @Inject constructor(
     private val listPresenter: ListPresenter
 ) : RainbowCakeViewModel<ListViewState>(ListViewState()) {
 
-
     fun load() = execute {
+        Timber.d("Loading empty state for list fragment")
         viewState = ListViewState()
-    }
-
-    fun refreshList() {
-        viewState = viewState.copy(isRefreshing = false)
-    }
-
-    fun dataChanged(dc: QueryDocumentSnapshot, type: String) {
-        val newList = listPresenter.dataChanged(dc, type, viewState.shops)
-        newList.sortBy { it.name }
-        viewState = ListViewState(shops = newList)
     }
 
     fun initShopListeners(
         listener: FirebaseInteractor.DataChangedListener,
         toastListener: FirebaseInteractor.OnToastListener
     ) {
+        Timber.d("Initializing listeners in list fragment to listen for data change")
         listPresenter.initShopListeners(listener, toastListener)
+    }
+
+    fun dataChanged(dc: QueryDocumentSnapshot, type: String) {
+        Timber.d("Changing data in list fragment")
+        val newList = listPresenter.dataChanged(dc, type, viewState.shops)
+        newList.sortBy { it.name }
+        viewState = ListViewState(shops = newList)
     }
 
 }

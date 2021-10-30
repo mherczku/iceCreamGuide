@@ -5,6 +5,7 @@ import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.widget.SearchView
 import androidx.core.view.GravityCompat
+import androidx.lifecycle.lifecycleScope
 import co.zsmb.rainbowcake.base.RainbowCakeFragment
 import co.zsmb.rainbowcake.hilt.getViewModelFromFactory
 import co.zsmb.rainbowcake.navigation.navigator
@@ -20,6 +21,10 @@ import hu.hm.icguide.ui.detail.DetailFragment
 import hu.hm.icguide.ui.login.LoginFragment
 import hu.hm.icguide.ui.maps.MapFragment
 import hu.hm.icguide.ui.settings.SettingsFragment
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import timber.log.Timber
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -41,22 +46,7 @@ class ListFragment : RainbowCakeFragment<ListViewState, ListViewModel>(),
         setupToolbar()
         binding.navigationView.setNavigationItemSelectedListener(this)
         setupRecyclerView()
-
     }
-
-    /*override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        // This callback will only be called when MyFragment is at least Started.
-        val callback = requireActivity().onBackPressedDispatcher.addCallback(this) {
-            // Handle the back button event
-            toast("beckpressed CALLBACK")
-        }
-        callback.isEnabled = true
-
-        // The callback can be enabled or disabled here or in the lambda
-    }*/
-
 
     override fun onStart() {
         super.onStart()
@@ -65,9 +55,9 @@ class ListFragment : RainbowCakeFragment<ListViewState, ListViewModel>(),
     }
 
     override fun render(viewState: ListViewState) {
+        Timber.d("Received ${viewState.shops.size} shops to display in list")
         adapter.submitList(viewState.shops)
         binding.swipeRefreshLayout.isRefreshing = viewState.isRefreshing
-        // TODO Render state
     }
 
     private fun setupRecyclerView() {
@@ -78,11 +68,24 @@ class ListFragment : RainbowCakeFragment<ListViewState, ListViewModel>(),
         binding.shopList.adapter = adapter
     }
 
+    private fun setupDrawer(role: String?) {
+        if ( role == "admin") binding.navigationView.inflateMenu(R.menu.drawer_list_admin)
+        else binding.navigationView.inflateMenu(R.menu.drawer_list)
+    }
+
     private fun setupToolbar() {
         binding.toolbar.setNavigationOnClickListener {
             binding.drawerLayout.openDrawer(GravityCompat.START)
         }
         binding.toolbar.inflateMenu(R.menu.menu_list)
+        binding.swipeRefreshLayout.isEnabled = false
+        lifecycleScope.launch(Dispatchers.IO) {
+            val role = firebaseInteractor.getUserRole()
+            withContext(Dispatchers.Main){
+                setupDrawer(role)
+            }
+        }
+
         binding.toolbar.setOnMenuItemClickListener {
             when (it.itemId) {
                 R.id.menuItemSearch -> {
@@ -110,22 +113,14 @@ class ListFragment : RainbowCakeFragment<ListViewState, ListViewModel>(),
             }
             true
         }
-
-        binding.swipeRefreshLayout.setOnRefreshListener {
-            //TODO vagy legyen értelme vagy ne legyen swipeRefresh
-            viewModel.refreshList()
-            binding.swipeRefreshLayout.isRefreshing = false
-        }
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.action_drawer_one -> {
-                if(firebaseInteractor.user?.role == "admin"){
-                    toast(getString(R.string.permission_granted))
-                    navigator?.add(AdminListFragment())
-                }
-                else toast(getString(R.string.have_no_permission))
+
+            R.id.action_drawer_admin -> {
+                //TODO mégegy ellenőrzés?
+                navigator?.add(AdminListFragment())
             }
             R.id.action_drawer_two -> {
                 navigator?.add(MapFragment())

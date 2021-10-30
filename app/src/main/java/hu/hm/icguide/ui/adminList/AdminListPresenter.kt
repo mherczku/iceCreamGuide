@@ -29,7 +29,7 @@ class AdminListPresenter @Inject constructor(private val firebaseInteractor: Fir
         return@withIOContext list
     }
 
-    suspend fun addShop(shop: Shop) {
+    fun addShop(shop: Shop) {
         val newShop = UploadShop(
             name = shop.name,
             address = shop.address,
@@ -41,7 +41,7 @@ class AdminListPresenter @Inject constructor(private val firebaseInteractor: Fir
         firebaseInteractor.addNewShopToShops(newShop, shop.id)
     }
 
-    suspend fun deleteNewShop(id: String) {
+    fun deleteNewShop(id: String) {
         firebaseInteractor.deleteNewShop(id)
     }
 

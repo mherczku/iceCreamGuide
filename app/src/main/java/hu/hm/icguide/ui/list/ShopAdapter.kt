@@ -95,7 +95,6 @@ class ShopAdapter(private val admin: Boolean = false) :
                     }
                     tempList
                 }
-
                 val filterResults = FilterResults()
                 filterResults.values = filteredList
                 return filterResults

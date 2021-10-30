@@ -29,14 +29,13 @@ import javax.inject.Inject
 
 class FirebaseInteractor @Inject constructor() {
 
-    //fireAUTH legyen külön
+    //TODO fireAUTH legyen külön
+    //TODO az admin jogos kérésekhez még egy ellenőrzés és visszajelzés ha már nincs joga
 
     private val firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance()
     private val firestoreDb: FirebaseFirestore = Firebase.firestore
     private val storageReference: StorageReference = FirebaseStorage.getInstance().reference
-    var user: User? = null
 
-    //TODO ez a usernek legyen jobb megoldás, bevárja  abetöltést stb.. fgvel
     val firebaseUser: FirebaseUser?
         get() = firebaseAuth.currentUser
 
@@ -52,16 +51,12 @@ class FirebaseInteractor @Inject constructor() {
         fun onRegisterSuccess()
     }
 
-    init {
-        if (firebaseAuth.currentUser != null) {
-            firestoreDb.document("users/${firebaseUser?.uid}").get()
-                .addOnSuccessListener { it2 ->
-                    val getUser: User? = it2.toObject()
-                    if (getUser != null) {
-                        user = getUser
-                    }
-                }
-        }
+    suspend fun getUserRole(): String? {
+        val dc = firestoreDb.document("users/${firebaseUser?.uid}").get().await()
+        dc ?: return null
+        val user: User? = dc.toObject()
+        user ?: return null
+        return user.role
     }
 
     fun loginFirebase(
@@ -74,7 +69,7 @@ class FirebaseInteractor @Inject constructor() {
             .signInWithEmailAndPassword(email, password)
             .addOnSuccessListener(onSuccessListener)
             .addOnFailureListener(onFailureListener)
-            .addOnCompleteListener { it ->
+            .addOnCompleteListener {
                 if (it.isSuccessful) {
                     firestoreDb.document("users/${firebaseUser?.uid}").get()
                         .addOnSuccessListener { it2 ->
@@ -87,8 +82,6 @@ class FirebaseInteractor @Inject constructor() {
                                     photo = firebaseUser?.photoUrl.toString()
                                 )
                                 firestoreDb.collection("users").document(newUser.uid).set(newUser)
-                            } else {
-                                user = getUser
                             }
                         }
                 }
@@ -150,15 +143,16 @@ class FirebaseInteractor @Inject constructor() {
     }
 
 
-    suspend fun deleteNewShop(shopId: String) {
+    fun deleteNewShop(shopId: String) {
         Timber.d("Deleting new shop $shopId from firestore")
-        firestoreDb.document("newShops/$shopId").delete().await()
+        firestoreDb.document("newShops/$shopId").delete()
     }
 
-    suspend fun addNewShopToShops(newShop: UploadShop, shopId: String) {
+    fun addNewShopToShops(newShop: UploadShop, shopId: String) {
         Timber.d("Uploading new shop into shops in firestore")
-        firestoreDb.collection("shops").add(newShop).await()
-        deleteNewShop(shopId)
+        firestoreDb.collection("shops").add(newShop).addOnSuccessListener {
+            deleteNewShop(shopId)
+        }
     }
 
     fun uploadShopWithImage(

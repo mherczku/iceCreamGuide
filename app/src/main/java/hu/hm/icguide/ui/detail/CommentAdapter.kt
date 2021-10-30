@@ -21,7 +21,6 @@ class CommentAdapter(private val listener: CommentAdapterListener) :
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CommentAdapter.ViewHolder =
         ViewHolder(RowCommentBinding.inflate(LayoutInflater.from(parent.context), parent, false))
 
-
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val comment = getItem(position)
         holder.item = comment

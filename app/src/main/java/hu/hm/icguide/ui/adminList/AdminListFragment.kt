@@ -48,7 +48,7 @@ class AdminListFragment : RainbowCakeFragment<AdminListViewState, AdminListViewM
     }
 
     override fun render(viewState: AdminListViewState) {
-        Timber.d("Received ${viewState.shops.size} new shops to display in list")
+        Timber.d("Received ${viewState.shops.size} new shops to display in admin list")
         adapter.submitList(viewState.shops)
         binding.swipeRefreshLayout.isRefreshing = viewState.isRefreshing
     }
@@ -71,6 +71,7 @@ class AdminListFragment : RainbowCakeFragment<AdminListViewState, AdminListViewM
     }
 
     private fun setupToolbar() {
+        binding.navigationView.inflateMenu(R.menu.drawer_list_admin)
         binding.toolbar.title = getString(R.string.waiting_for_approval)
         binding.toolbar.setNavigationOnClickListener {
             binding.drawerLayout.openDrawer(GravityCompat.START)
@@ -106,6 +107,9 @@ class AdminListFragment : RainbowCakeFragment<AdminListViewState, AdminListViewM
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
+            R.id.action_drawer_one -> {
+                navigator?.pop()
+            }
             R.id.action_drawer_two -> {
                 navigator?.add(MapFragment())
             }
