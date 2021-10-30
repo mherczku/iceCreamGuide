@@ -1,13 +1,8 @@
 package hu.hm.icguide.ui.detail
 
 import co.zsmb.rainbowcake.base.RainbowCakeViewModel
-import com.google.android.gms.tasks.OnFailureListener
-import com.google.android.gms.tasks.OnSuccessListener
-import com.google.firebase.firestore.QueryDocumentSnapshot
 import dagger.hilt.android.lifecycle.HiltViewModel
-import hu.hm.icguide.interactors.FirebaseInteractor
-import hu.hm.icguide.models.Comment
-import hu.hm.icguide.models.Shop
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -15,12 +10,25 @@ class DetailViewModel @Inject constructor(
     private val detailPresenter: DetailPresenter
 ) : RainbowCakeViewModel<DetailViewState>(DetailViewState()) {
 
-    fun load() = execute {
-        viewState = DetailViewState()
+    fun load(id: String) = execute {
+        Timber.d("Loading shop and comments for detail fragment")
+        viewState = DetailViewState(detailPresenter.getShop(id), detailPresenter.getComments(id))
     }
 
     fun isNetAvailable(): Boolean = detailPresenter.isNetAvailable()
-    fun postComment(
+
+    internal fun refreshShop(shopId: String) = execute {
+        Timber.d("Refreshing shop for detail fragment")
+        viewState = viewState.copy(shop = detailPresenter.getShop(shopId))
+    }
+
+    fun postComment(shopId: String, c: DetailPresenter.PostComment, feedback: (String?) -> Unit) {
+        Timber.d("Posting comment in detail fragment")
+        detailPresenter.postComment(shopId, c, feedback)
+    }
+
+
+    /*fun postComment(
         shopId: String,
         c: DetailPresenter.PostComment,
         onSuccessListener: OnSuccessListener<Any>,
@@ -35,29 +43,19 @@ class DetailViewModel @Inject constructor(
         toastListener: FirebaseInteractor.OnToastListener
     ) {
         detailPresenter.initCommentsListeners(shopId, listener, toastListener)
-    }
+    }*/
 
-    fun dataChanged(dc: QueryDocumentSnapshot, type: String) {
+    /*fun dataChanged(dc: QueryDocumentSnapshot, type: String) {
         val newList = detailPresenter.dataChanged(dc, type, viewState.comments)
         newList.sortByDescending { it.date }
         viewState = DetailViewState(comments = newList, shop = viewState.shop)
-    }
-
-    fun getShop(id: String) {
-        detailPresenter.getShop(id, ::updateShop)
-    }
-
-    private fun updateShop(shop : Shop){
-        viewState = DetailViewState(comments = viewState.comments, shop = shop)
-    }
-
-    fun updateComments(shopId: String) {
-        detailPresenter.updateComments(shopId, ::updateComments2)
-    }
-
-    private fun updateComments2(comments: MutableList<Comment>){
+    }*/
+    /*private fun updateComments2(comments: MutableList<Comment>){
         comments.sortByDescending { it.date }
         viewState = DetailViewState(comments = comments, shop = viewState.shop)
-    }
+    }*/
+    /*fun updateComments(shopId: String) {
+        detailPresenter.updateComments(shopId, ::updateComments2)
+    }*/
 
 }

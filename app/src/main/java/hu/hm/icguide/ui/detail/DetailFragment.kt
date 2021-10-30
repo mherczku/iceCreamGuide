@@ -4,32 +4,28 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.MotionEvent
 import android.view.View
-import android.widget.Toast
 import co.zsmb.rainbowcake.base.RainbowCakeFragment
 import co.zsmb.rainbowcake.hilt.getViewModelFromFactory
 import co.zsmb.rainbowcake.navigation.navigator
 import com.bumptech.glide.Glide
-import com.google.android.gms.tasks.OnFailureListener
-import com.google.android.gms.tasks.OnSuccessListener
 import com.google.firebase.Timestamp
-import com.google.firebase.firestore.QueryDocumentSnapshot
 import dagger.hilt.android.AndroidEntryPoint
 import hu.hm.icguide.R
 import hu.hm.icguide.databinding.FragmentDetailBinding
 import hu.hm.icguide.extensions.hideKeyboard
+import hu.hm.icguide.extensions.toast
 import hu.hm.icguide.extensions.validateNonEmpty
 import hu.hm.icguide.interactors.FirebaseInteractor
 import hu.hm.icguide.models.Comment
 import hu.hm.icguide.models.Shop
 import hu.hm.icguide.ui.add.AddReviewDialog
+import timber.log.Timber
 import javax.inject.Inject
 
 @AndroidEntryPoint
 class DetailFragment(
     private val shopId: String
-) : RainbowCakeFragment<DetailViewState, DetailViewModel>(), OnSuccessListener<Any>,
-    OnFailureListener, CommentAdapter.CommentAdapterListener,
-    FirebaseInteractor.DataChangedListener, FirebaseInteractor.OnToastListener {
+) : RainbowCakeFragment<DetailViewState, DetailViewModel>(), CommentAdapter.CommentAdapterListener {
 
     override fun provideViewModel() = getViewModelFromFactory()
     override fun getViewResource() = R.layout.fragment_detail
@@ -45,18 +41,15 @@ class DetailFragment(
         binding = FragmentDetailBinding.bind(view)
         setupToolbar()
         setupView()
-
-        // TODO Setup views
     }
 
     override fun onStart() {
         super.onStart()
-        viewModel.load()
-        viewModel.getShop(shopId)
-        //viewModel.initCommentsListeners(shopId, this, this)
+        viewModel.load(shopId)
     }
 
     override fun render(viewState: DetailViewState) {
+        Timber.d("Received ${viewState.comments.size} comments and ${viewState.shop.id} shop to display")
         adapter.submitList(viewState.comments)
         shop = viewState.shop
 
@@ -67,13 +60,11 @@ class DetailFragment(
             .load(shop.photo)
             .placeholder(R.drawable.placeholder)
             .into(binding.imgShop)
-        // TODO Render state
     }
 
     private fun setupRecyclerView() {
         adapter = CommentAdapter(this)
         binding.rvComments.adapter = adapter
-        viewModel.updateComments(shopId)
     }
 
     private fun setupToolbar() {
@@ -87,7 +78,7 @@ class DetailFragment(
 
         binding.ratingBar.setOnTouchListener(View.OnTouchListener { _, event ->
             if (event.action == MotionEvent.ACTION_UP) {
-                AddReviewDialog(shop, viewModel::getShop).show(childFragmentManager, null)
+                AddReviewDialog(shop, viewModel::refreshShop).show(childFragmentManager, null)
             }
             return@OnTouchListener true
         })
@@ -95,45 +86,30 @@ class DetailFragment(
         if (!viewModel.isNetAvailable()) {
             binding.etComment.isEnabled = false
             binding.btnSend.isEnabled = false
-            Toast.makeText(context, getString(R.string.internet_unavailable), Toast.LENGTH_SHORT)
-                .show()
+            toast(getString(R.string.internet_unavailable))
         } else {
             setupRecyclerView()
             binding.btnSend.setOnClickListener {
                 hideKeyboard()
                 if (!binding.etComment.validateNonEmpty()) return@setOnClickListener
-
                 val c = DetailPresenter.PostComment(
                     authorId = firebaseInteractor.firebaseUser?.uid.toString(),
                     content = binding.etComment.text.toString(),
                     date = Timestamp.now()
                 )
-                viewModel.postComment(shopId, c, this, this)
+                viewModel.postComment(shopId, c, this::feedback)
                 binding.etComment.text?.clear()
             }
         }
     }
 
-    override fun onSuccess(p0: Any?) {
-        onToast(getString(R.string.successful_comment))
-        viewModel.updateComments(shopId)
-    }
-
-    override fun onFailure(p0: Exception) {
-        onToast(p0.localizedMessage)
-    }
-
     override fun onItemSelected(comment: Comment) {
-        onToast(comment.content)
+        toast(comment.content)
     }
 
-    override fun dataChanged(dc: QueryDocumentSnapshot, type: String) {
-        viewModel.dataChanged(dc, type)
-    }
-
-    override fun onToast(message: String?) {
-        message ?: return
-        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+    private fun feedback(message: String? = getString(R.string.successful_comment)) {
+        viewModel.refreshShop(shopId)
+        toast(message)
     }
 
 }

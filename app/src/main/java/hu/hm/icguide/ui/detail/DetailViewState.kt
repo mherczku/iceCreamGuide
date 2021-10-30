@@ -4,6 +4,6 @@ import hu.hm.icguide.models.Comment
 import hu.hm.icguide.models.Shop
 
 data class DetailViewState(
-    val comments: MutableList<Comment> = mutableListOf(),
-    val shop : Shop = Shop()
+    val shop : Shop = Shop(),
+    val comments: MutableList<Comment> = mutableListOf()
 )

@@ -7,16 +7,16 @@ import com.google.android.gms.tasks.OnSuccessListener
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.UserProfileChangeRequest
-import com.google.firebase.firestore.DocumentChange
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.QueryDocumentSnapshot
-import com.google.firebase.firestore.QuerySnapshot
+import com.google.firebase.firestore.*
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
-import hu.hm.icguide.models.*
+import hu.hm.icguide.models.Review
+import hu.hm.icguide.models.Shop
+import hu.hm.icguide.models.UploadShop
+import hu.hm.icguide.models.User
 import hu.hm.icguide.ui.detail.DetailPresenter
 import hu.hm.icguide.ui.list.ListPresenter
 import kotlinx.coroutines.tasks.await
@@ -29,11 +29,14 @@ import javax.inject.Inject
 
 class FirebaseInteractor @Inject constructor() {
 
+    //fireAUTH legyen külön
+
     private val firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance()
     private val firestoreDb: FirebaseFirestore = Firebase.firestore
     private val storageReference: StorageReference = FirebaseStorage.getInstance().reference
-    private var users = mutableListOf<User>()
     var user: User? = null
+
+    //TODO ez a usernek legyen jobb megoldás, bevárja  abetöltést stb.. fgvel
     val firebaseUser: FirebaseUser?
         get() = firebaseAuth.currentUser
 
@@ -51,7 +54,6 @@ class FirebaseInteractor @Inject constructor() {
 
     init {
         if (firebaseAuth.currentUser != null) {
-            getUsers()
             firestoreDb.document("users/${firebaseUser?.uid}").get()
                 .addOnSuccessListener { it2 ->
                     val getUser: User? = it2.toObject()
@@ -74,7 +76,6 @@ class FirebaseInteractor @Inject constructor() {
             .addOnFailureListener(onFailureListener)
             .addOnCompleteListener { it ->
                 if (it.isSuccessful) {
-                    getUsers()
                     firestoreDb.document("users/${firebaseUser?.uid}").get()
                         .addOnSuccessListener { it2 ->
                             val getUser: User? = it2.toObject()
@@ -141,27 +142,21 @@ class FirebaseInteractor @Inject constructor() {
     }
 
     fun uploadShop(newShop: UploadShop, done: () -> Unit) {
+        Timber.d("Uploading shop into firestore new shops")
         firestoreDb.collection("newShops").add(newShop).addOnSuccessListener {
             done()
         }
+        //TODO change done to feedback error handling
     }
 
-    fun uploadShop2(
-        newShop: UploadShop,
-        onSuccessListener: OnSuccessListener<Any>,
-        onFailureListener: OnFailureListener
-    ) {
-        firestoreDb.collection("newShops")
-            .add(newShop)
-            .addOnSuccessListener(onSuccessListener)
-            .addOnFailureListener(onFailureListener)
-    }
 
-    suspend fun deleteNewShop(shopId: String){
+    suspend fun deleteNewShop(shopId: String) {
+        Timber.d("Deleting new shop $shopId from firestore")
         firestoreDb.document("newShops/$shopId").delete().await()
     }
 
-    suspend fun addNewShopToShops(newShop: UploadShop, shopId: String){
+    suspend fun addNewShopToShops(newShop: UploadShop, shopId: String) {
+        Timber.d("Uploading new shop into shops in firestore")
         firestoreDb.collection("shops").add(newShop).await()
         deleteNewShop(shopId)
     }
@@ -172,6 +167,7 @@ class FirebaseInteractor @Inject constructor() {
         onFailureListener: OnFailureListener,
         done: () -> Unit
     ) {
+        Timber.d("Uploading image into firestore")
         val newImageName = URLEncoder.encode(UUID.randomUUID().toString(), "UTF-8") + ".jpg"
         val newImageRef = storageReference.child("images/$newImageName")
 
@@ -191,89 +187,38 @@ class FirebaseInteractor @Inject constructor() {
 
     fun postComment(
         comment: DetailPresenter.PostComment, shopId: String,
-        onSuccessListener: OnSuccessListener<Any>,
-        onFailureListener: OnFailureListener
+        feedback: (String?) -> Unit
     ) {
+        Timber.d("Posting comment into firestore for $shopId shop")
         firestoreDb.collection("shops/${shopId}/comments")
             .add(comment)
-            .addOnSuccessListener(onSuccessListener)
-            .addOnFailureListener(onFailureListener)
-    }
-
-    private fun getUsers() {
-        firestoreDb.collection("users").get().addOnSuccessListener {
-            val list = mutableListOf<User>()
-            for (dc in it.documents) {
-                val o = dc.toObject<User>()
-                o ?: continue
-                val user = User(
-                    uid = o.uid,
-                    role = o.role,
-                    name = o.name,
-                    photo = o.photo
-                )
-                list.add(user)
+            .addOnSuccessListener {
+                feedback(null)
             }
-            users = list
-        }
-    }
-
-    fun getComments(shopId: String, callBack: (MutableList<Comment>) -> Unit) {
-        firestoreDb.collection("shops/${shopId}/comments").get().addOnSuccessListener {
-            val list = mutableListOf<Comment>()
-            for (dc in it.documents) {
-                val o = dc.toObject<Comment>()
-                o ?: continue
-                val comment = Comment(
-                    id = dc.id,
-                    authorId = o.authorId,
-                    authorName = users.find { it.uid == o.authorId }?.name ?: o.authorName,
-                    content = o.content,
-                    photo = users.find { it.uid == o.authorId }?.photo ?: o.photo,
-                    date = o.date
-                )
-                list.add(comment)
-            }
-            callBack(list)
-        }
-    }
-
-    fun initCommentsListeners(
-        shopId: String,
-        listener: DataChangedListener,
-        onToastListener: OnToastListener
-    ) {
-        firestoreDb.collection("shops/${shopId}/comments")
-            .addSnapshotListener { snapshots, e ->
-                if (e != null) {
-                    onToastListener.onToast(e.localizedMessage)
-                    return@addSnapshotListener
-                }
-
-                for (dc in snapshots!!.documentChanges) {
-                    when (dc.type) {
-                        DocumentChange.Type.ADDED -> listener.dataChanged(
-                            dc.document,
-                            DetailPresenter.NEW_COMMENT
-                        )
-                        DocumentChange.Type.MODIFIED -> listener.dataChanged(
-                            dc.document,
-                            DetailPresenter.EDIT_COMMENT
-                        )
-                        DocumentChange.Type.REMOVED -> listener.dataChanged(
-                            dc.document, DetailPresenter.REMOVE_COMMENT
-                        )
-                    }
-                }
+            .addOnFailureListener {
+                feedback(it.localizedMessage)
             }
     }
+
+    suspend fun getUsers(): QuerySnapshot? {
+        Timber.d("Downloading firestore users")
+        return firestoreDb.collection("users").get().await()
+    }
+
+    suspend fun getComments(shopId: String): QuerySnapshot? {
+        Timber.d("Downloading firestore $shopId shops comments")
+        return firestoreDb.collection("shops/${shopId}/comments").get().await()
+    }
+
 
     fun getReviews(shopId: String, onSuccessListener: OnSuccessListener<Any>) {
-        firestoreDb.collection("shops/${shopId}/reviews").get()
+        Timber.d("Downloading firestore $shopId shops reviews")
+        firestoreDb.collection("shops/$shopId/reviews").get()
             .addOnSuccessListener(onSuccessListener)
     }
 
     fun getShops(onSuccessListener: OnSuccessListener<QuerySnapshot>) {
+        Timber.d("Downloading firestore shops")
         firestoreDb.collection("shops").get().addOnSuccessListener(onSuccessListener)
     }
 
@@ -282,23 +227,11 @@ class FirebaseInteractor @Inject constructor() {
         return firestoreDb.collection("newShops").get().await()
     }
 
-    fun getShop(shopId: String, myCallback: (Shop) -> Unit) {
-        firestoreDb.document("shops/${shopId}").get().addOnSuccessListener {
-            it ?: return@addOnSuccessListener
-            val o: Shop? = it.toObject()
-            o ?: return@addOnSuccessListener
-            val shop = Shop(
-                id = it.id,
-                name = o.name,
-                address = o.address,
-                geoPoint = o.geoPoint,
-                rate = o.rate,
-                ratings = o.ratings,
-                photo = o.photo
-            )
-            myCallback(shop)
-        }
+    suspend fun getShop(shopId: String): DocumentSnapshot? {
+        Timber.d("Downloading firestore $shopId shop")
+        return firestoreDb.document("shops/${shopId}").get().await()
     }
+
 
     fun postReview(
         shop: Shop,
@@ -407,4 +340,75 @@ class FirebaseInteractor @Inject constructor() {
             callBack()
         }
     }
+
+    /*fun uploadShop2(
+            newShop: UploadShop,
+            onSuccessListener: OnSuccessListener<Any>,
+            onFailureListener: OnFailureListener
+        ) {
+            firestoreDb.collection("newShops")
+                .add(newShop)
+                .addOnSuccessListener(onSuccessListener)
+                .addOnFailureListener(onFailureListener)
+        }*/
+
+    /*fun initCommentsListeners(
+        shopId: String,
+        listener: FirebaseInteractor.DataChangedListener,
+        onToastListener: FirebaseInteractor.OnToastListener
+    ) {
+        firestoreDb.collection("shops/${shopId}/comments")
+            .addSnapshotListener { snapshots, e ->
+                if (e != null) {
+                    onToastListener.onToast(e.localizedMessage)
+                    return@addSnapshotListener
+                }
+
+                for (dc in snapshots!!.documentChanges) {
+                    when (dc.type) {
+                        DocumentChange.Type.ADDED -> listener.dataChanged(
+                            dc.document,
+                            DetailPresenter.NEW_COMMENT
+                        )
+                        DocumentChange.Type.MODIFIED -> listener.dataChanged(
+                            dc.document,
+                            DetailPresenter.EDIT_COMMENT
+                        )
+                        DocumentChange.Type.REMOVED -> listener.dataChanged(
+                            dc.document, DetailPresenter.REMOVE_COMMENT
+                        )
+                    }
+                }
+            }
+    }*/
+
+
+    /*fun postComment(
+        comment: DetailPresenter.PostComment, shopId: String,
+        onSuccessListener: OnSuccessListener<Any>,
+        onFailureListener: OnFailureListener
+    ) {
+        firestoreDb.collection("shops/${shopId}/comments")
+            .add(comment)
+            .addOnSuccessListener(onSuccessListener)
+            .addOnFailureListener(onFailureListener)
+    }*/
+
+    /*private fun getUsers() {
+        firestoreDb.collection("users").get().addOnSuccessListener {
+            val list = mutableListOf<User>()
+            for (dc in it.documents) {
+                val o = dc.toObject<User>()
+                o ?: continue
+                val user = User(
+                    uid = o.uid,
+                    role = o.role,
+                    name = o.name,
+                    photo = o.photo
+                )
+                list.add(user)
+            }
+            users = list
+        }
+    }*/
 }
