@@ -1,10 +1,7 @@
 package hu.hm.icguide.ui.login
 
 import co.zsmb.rainbowcake.base.RainbowCakeViewModel
-import com.google.android.gms.tasks.OnFailureListener
-import com.google.android.gms.tasks.OnSuccessListener
 import dagger.hilt.android.lifecycle.HiltViewModel
-import hu.hm.icguide.interactors.FirebaseInteractor
 import javax.inject.Inject
 
 @HiltViewModel
@@ -19,19 +16,17 @@ class LoginViewModel @Inject constructor(
     fun register(
         email: String,
         password: String,
-        onRegisterSuccessListener: FirebaseInteractor.OnRegisterSuccessListener,
-        onFailureListener: OnFailureListener
+        feedback: (Int, String?) -> Unit
     ) {
-        loginPresenter.register(email, password, onRegisterSuccessListener, onFailureListener)
+        loginPresenter.register(email, password, feedback)
     }
 
     fun login(
         email: String,
         password: String,
-        onSuccessListener: OnSuccessListener<Any>,
-        onFailureListener: OnFailureListener
+        feedback: (Int, String?) -> Unit
     ) {
-        loginPresenter.login(email, password, onSuccessListener, onFailureListener)
+        loginPresenter.login(email, password, feedback)
     }
 
 }

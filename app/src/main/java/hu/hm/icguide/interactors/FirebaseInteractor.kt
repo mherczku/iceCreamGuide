@@ -19,6 +19,7 @@ import hu.hm.icguide.models.UploadShop
 import hu.hm.icguide.models.User
 import hu.hm.icguide.ui.detail.DetailPresenter
 import hu.hm.icguide.ui.list.ListPresenter
+import hu.hm.icguide.ui.login.LoginFragment
 import kotlinx.coroutines.tasks.await
 import timber.log.Timber
 import java.io.ByteArrayOutputStream
@@ -31,11 +32,11 @@ class FirebaseInteractor @Inject constructor() {
 
     //TODO fireAUTH legyen külön
     //TODO az admin jogos kérésekhez még egy ellenőrzés és visszajelzés ha már nincs joga
+    //TODO change functions to handle errors and failures
 
     private val firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance()
     private val firestoreDb: FirebaseFirestore = Firebase.firestore
     private val storageReference: StorageReference = FirebaseStorage.getInstance().reference
-
     val firebaseUser: FirebaseUser?
         get() = firebaseAuth.currentUser
 
@@ -43,12 +44,9 @@ class FirebaseInteractor @Inject constructor() {
         fun dataChanged(dc: QueryDocumentSnapshot, type: String)
     }
 
+    //TODO replace this with sth else
     interface OnToastListener {
         fun onToast(message: String?)
-    }
-
-    interface OnRegisterSuccessListener {
-        fun onRegisterSuccess()
     }
 
     suspend fun getUserRole(): String? {
@@ -62,39 +60,36 @@ class FirebaseInteractor @Inject constructor() {
     fun loginFirebase(
         email: String,
         password: String,
-        onSuccessListener: OnSuccessListener<Any>,
-        onFailureListener: OnFailureListener
+        feedback: (Int, String?) -> Unit
     ) {
         firebaseAuth
             .signInWithEmailAndPassword(email, password)
-            .addOnSuccessListener(onSuccessListener)
-            .addOnFailureListener(onFailureListener)
-            .addOnCompleteListener {
-                if (it.isSuccessful) {
-                    firestoreDb.document("users/${firebaseUser?.uid}").get()
-                        .addOnSuccessListener { it2 ->
-                            val getUser: User? = it2.toObject()
-                            if (getUser == null) {
-                                val newUser = User(
-                                    uid = firebaseUser?.uid!!,
-                                    role = "user",
-                                    name = firebaseUser?.displayName.toString(),
-                                    photo = firebaseUser?.photoUrl.toString()
-                                )
-                                firestoreDb.collection("users").document(newUser.uid).set(newUser)
-                            }
+            .addOnSuccessListener {
+                firestoreDb.document("users/${firebaseUser?.uid}").get()
+                    .addOnSuccessListener { it2 ->
+                        val getUser: User? = it2.toObject()
+                        if (getUser == null) {
+                            val newUser = User(
+                                uid = firebaseUser?.uid!!,
+                                role = "user",
+                                name = firebaseUser?.displayName.toString(),
+                                photo = firebaseUser?.photoUrl.toString()
+                            )
+                            firestoreDb.collection("users").document(newUser.uid).set(newUser)
                         }
-                }
+                        feedback(LoginFragment.LOGIN_SUCCESS, null)
+                    }
+            }
+            .addOnFailureListener {
+                feedback(LoginFragment.FAILURE, it.localizedMessage)
             }
     }
 
     fun registerFirebase(
         email: String,
         password: String,
-        onRegisterSuccessListener: OnRegisterSuccessListener,
-        onFailureListener: OnFailureListener
+        feedback: (Int, String?) -> Unit
     ) {
-
         firebaseAuth
             .createUserWithEmailAndPassword(email, password)
             .addOnSuccessListener {
@@ -103,12 +98,17 @@ class FirebaseInteractor @Inject constructor() {
                     .setDisplayName(newFirebaseUser?.email?.substringBefore('@'))
                     .build()
                 newFirebaseUser?.updateProfile(profileChangeRequest)
-                onRegisterSuccessListener.onRegisterSuccess()
+                feedback(LoginFragment.REGISTRATION_SUCCESS, null)
             }
-            .addOnFailureListener(onFailureListener)
+            .addOnFailureListener {
+                feedback(LoginFragment.FAILURE, it.localizedMessage)
+            }
     }
 
-    fun initShopsListener(listener: DataChangedListener, toastListenerListener: OnToastListener) {
+    fun initShopsListener(
+        listener: DataChangedListener,
+        toastListenerListener: OnToastListener
+    ) {
         firestoreDb.collection("shops")
             .addSnapshotListener { snapshots, e ->
                 if (e != null) {
@@ -334,75 +334,4 @@ class FirebaseInteractor @Inject constructor() {
             callBack()
         }
     }
-
-    /*fun uploadShop2(
-            newShop: UploadShop,
-            onSuccessListener: OnSuccessListener<Any>,
-            onFailureListener: OnFailureListener
-        ) {
-            firestoreDb.collection("newShops")
-                .add(newShop)
-                .addOnSuccessListener(onSuccessListener)
-                .addOnFailureListener(onFailureListener)
-        }*/
-
-    /*fun initCommentsListeners(
-        shopId: String,
-        listener: FirebaseInteractor.DataChangedListener,
-        onToastListener: FirebaseInteractor.OnToastListener
-    ) {
-        firestoreDb.collection("shops/${shopId}/comments")
-            .addSnapshotListener { snapshots, e ->
-                if (e != null) {
-                    onToastListener.onToast(e.localizedMessage)
-                    return@addSnapshotListener
-                }
-
-                for (dc in snapshots!!.documentChanges) {
-                    when (dc.type) {
-                        DocumentChange.Type.ADDED -> listener.dataChanged(
-                            dc.document,
-                            DetailPresenter.NEW_COMMENT
-                        )
-                        DocumentChange.Type.MODIFIED -> listener.dataChanged(
-                            dc.document,
-                            DetailPresenter.EDIT_COMMENT
-                        )
-                        DocumentChange.Type.REMOVED -> listener.dataChanged(
-                            dc.document, DetailPresenter.REMOVE_COMMENT
-                        )
-                    }
-                }
-            }
-    }*/
-
-
-    /*fun postComment(
-        comment: DetailPresenter.PostComment, shopId: String,
-        onSuccessListener: OnSuccessListener<Any>,
-        onFailureListener: OnFailureListener
-    ) {
-        firestoreDb.collection("shops/${shopId}/comments")
-            .add(comment)
-            .addOnSuccessListener(onSuccessListener)
-            .addOnFailureListener(onFailureListener)
-    }*/
-
-    /*private fun getUsers() {
-        firestoreDb.collection("users").get().addOnSuccessListener {
-            val list = mutableListOf<User>()
-            for (dc in it.documents) {
-                val o = dc.toObject<User>()
-                o ?: continue
-                val user = User(
-                    uid = o.uid,
-                    role = o.role,
-                    name = o.name,
-                    photo = o.photo
-                )
-                list.add(user)
-            }
-            users = list
-        }
-    }*/
 }
