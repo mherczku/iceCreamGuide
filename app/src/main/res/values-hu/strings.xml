@@ -73,7 +73,7 @@
     <string name="logout">Kijelentkezés</string>
     <string name="reauthenticate">azonosítás</string>
     <string name="authenticate">Azonositás</string>
-    <string name="authenticateSuccess">Sikeres azonosítás, mostmár módosíthatja!</string>
+    <string name="authenticate_success">Sikeres azonosítás, mostmár módosíthatja!</string>
     <string name="verification_email_sent">A megadott email címre elküldtük a visszaigazoló üzenetet</string>
     <string name="password_updated">Jelszó sikeresen módositva</string>
     <string name="user_settings">Felhasználói beállitások</string>
@@ -85,5 +85,6 @@
     <string name="have_no_permission">Nincs engedélyed a belépéshez</string>
     <string name="delete">Törlés</string>
     <string name="approve">Jóváhagyás</string>
+    <string name="reauth_succes">Sikeres azonosítás</string>
 
 </resources>

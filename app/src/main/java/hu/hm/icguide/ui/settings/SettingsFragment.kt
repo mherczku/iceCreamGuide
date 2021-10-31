@@ -15,7 +15,6 @@ import android.text.InputType
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -56,7 +55,7 @@ class SettingsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        user = firebaseInteractor.firebaseUser!!
+        user = firebaseInteractor.firebaseUser ?: return
         setupView()
     }
 
@@ -66,14 +65,12 @@ class SettingsFragment : Fragment() {
         childFragmentManager.beginTransaction().add(R.id.container, SettingsPreference()).commit()
         permReqLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) {
             if (it) {
-                Toast.makeText(context, getString(R.string.permission_granted), Toast.LENGTH_SHORT)
-                    .show()
+                toast(getString(R.string.permission_granted))
                 isPermissionGranted = true
                 pickImage()
 
             } else {
-                Toast.makeText(context, getString(R.string.permission_denied), Toast.LENGTH_SHORT)
-                    .show()
+                toast(getString(R.string.permission_denied))
             }
         }
         startForResultCamera =
@@ -87,7 +84,7 @@ class SettingsFragment : Fragment() {
                         binding.ivUser.height,
                         false
                     )
-                    firebaseInteractor.uploadImage(scaledBitmap, ::updatePic)
+                    firebaseInteractor.uploadImage(scaledBitmap, this::feedBack)
                 }
             }
         startForResultGallery =
@@ -112,7 +109,7 @@ class SettingsFragment : Fragment() {
                         binding.ivUser.height,
                         false
                     )
-                    firebaseInteractor.uploadImage(scaledBitmap, ::updatePic)
+                    firebaseInteractor.uploadImage(scaledBitmap, this::feedBack)
                 }
             }
     }
@@ -121,7 +118,7 @@ class SettingsFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         binding = FragmentSettingsBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -161,12 +158,12 @@ class SettingsFragment : Fragment() {
 
         binding.btnEditName.setOnClickListener {
             summonEditText(tvName.text.toString(), InputType.TYPE_TEXT_FLAG_CAP_WORDS) {
-                firebaseInteractor.updateProfile(name = it, myCallback = ::updateView)
+                firebaseInteractor.updateProfile(name = it, feedBack = ::updateView)
             }
         }
         btnEditEmail.setOnClickListener {
             summonEditText(tvEmail.text.toString(), InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS) {
-                firebaseInteractor.updateProfile(email = it, myCallback = ::updateView)
+                firebaseInteractor.updateProfile(email = it, feedBack = ::updateView)
             }
         }
         btnLogout.setOnClickListener {
@@ -178,8 +175,10 @@ class SettingsFragment : Fragment() {
             reAuthenticate()
         }
         btnVerifyEmail.setOnClickListener {
-            firebaseInteractor.verifyEmail()
-            toast(getString(R.string.verification_email_sent))
+            firebaseInteractor.verifyEmail{
+                val m = it ?: getString(R.string.verification_email_sent)
+                toast(m)
+            }
             btnVerifyEmail.isEnabled = false
         }
         btnEditPassword.setOnClickListener {
@@ -188,7 +187,10 @@ class SettingsFragment : Fragment() {
                 InputType.TYPE_TEXT_VARIATION_PASSWORD,
                 TextInputLayout.END_ICON_PASSWORD_TOGGLE
             ) {
-                firebaseInteractor.updatePassword(it) { toast(getString(R.string.password_updated)) }
+                firebaseInteractor.updatePassword(it) { it2 ->
+                    val m = it2 ?: getString(R.string.password_updated)
+                    toast(m)
+                }
             }
         }
     }
@@ -219,21 +221,23 @@ class SettingsFragment : Fragment() {
         editTextDialog.hint = getString(R.string.password)
         editTextDialog.textFieldEndIconMode = TextInputLayout.END_ICON_PASSWORD_TOGGLE
         editTextDialog.toolbarTitle = getString(R.string.authenticate)
-        editTextDialog.setListener {
-            firebaseInteractor.authenticate(it)
-            toast(getString(R.string.authenticateSuccess))
+        editTextDialog.setListener { it ->
+            firebaseInteractor.authenticate(it) { it2 ->
+                val message = it2 ?: getString(R.string.reauth_succes)
+                toast(message)
+            }
         }
         editTextDialog.show(childFragmentManager, null)
     }
 
-    private fun updatePic(
+    private fun feedBack(
         message: String? = getString(R.string.upload_successful),
         photo: Uri? = null
     ) {
         toast(message)
         if (photo != null) firebaseInteractor.updateProfile(
             photo = photo,
-            myCallback = ::updateView
+            feedBack = ::updateView
         )
     }
 

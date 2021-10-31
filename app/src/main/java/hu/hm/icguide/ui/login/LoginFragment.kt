@@ -6,15 +6,12 @@ import android.widget.ProgressBar
 import co.zsmb.rainbowcake.base.RainbowCakeFragment
 import co.zsmb.rainbowcake.hilt.getViewModelFromFactory
 import co.zsmb.rainbowcake.navigation.navigator
-import com.google.android.gms.tasks.OnFailureListener
-import com.google.android.gms.tasks.OnSuccessListener
 import dagger.hilt.android.AndroidEntryPoint
 import hu.hm.icguide.R
 import hu.hm.icguide.databinding.FragmentLoginBinding
 import hu.hm.icguide.extensions.hideKeyboard
 import hu.hm.icguide.extensions.toast
 import hu.hm.icguide.extensions.validateNonEmpty
-import hu.hm.icguide.interactors.FirebaseInteractor
 import hu.hm.icguide.ui.list.ListFragment
 
 @AndroidEntryPoint
@@ -45,9 +42,7 @@ class LoginFragment : RainbowCakeFragment<LoginViewState, LoginViewModel>() {
         viewModel.load()
     }
 
-    override fun render(viewState: LoginViewState) {
-        //TODO render state
-    }
+    override fun render(viewState: LoginViewState) {}
 
     private fun showProgressDialog() {
         progressBar.visibility = View.VISIBLE
@@ -104,6 +99,4 @@ class LoginFragment : RainbowCakeFragment<LoginViewState, LoginViewModel>() {
         }
     }
 
-
 }
-

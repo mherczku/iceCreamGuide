@@ -5,22 +5,24 @@ import android.app.Dialog
 import android.os.Bundle
 import android.view.LayoutInflater
 import androidx.fragment.app.DialogFragment
-import com.google.android.gms.tasks.OnFailureListener
-import com.google.android.gms.tasks.OnSuccessListener
-import com.google.firebase.firestore.QuerySnapshot
+import androidx.lifecycle.lifecycleScope
 import com.google.firebase.firestore.ktx.toObject
 import dagger.hilt.android.AndroidEntryPoint
 import hu.hm.icguide.R
 import hu.hm.icguide.databinding.DialogReviewBinding
+import hu.hm.icguide.extensions.toast
 import hu.hm.icguide.interactors.FirebaseInteractor
 import hu.hm.icguide.models.Review
 import hu.hm.icguide.models.Shop
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 
 @AndroidEntryPoint
 class AddReviewDialog(private val shop: Shop, private val refreshDetailFragment: (String) -> Unit) :
-    DialogFragment(), OnSuccessListener<Any>, OnFailureListener {
+    DialogFragment() {
 
     @Inject
     lateinit var firebaseInteractor: FirebaseInteractor
@@ -35,7 +37,26 @@ class AddReviewDialog(private val shop: Shop, private val refreshDetailFragment:
     }
 
     private fun setup() {
-        firebaseInteractor.getReviews(shop.id, this)
+        lifecycleScope.launch(Dispatchers.IO) {
+            val qs = firebaseInteractor.getReviews(shop.id)
+            val reviews = mutableListOf<Review>()
+            if (qs != null) {
+                for (d in qs.documents) {
+                    val o = d.toObject<Review>()
+                    if (o != null) {
+                        val r = Review(
+                            id = d.id,
+                            userId = o.userId,
+                            rate = o.rate
+                        )
+                        reviews.add(r)
+                    }
+                }
+            }
+            withContext(Dispatchers.Main) {
+                setupReviewButton(reviews)
+            }
+        }
     }
 
     private fun addClick() {
@@ -44,30 +65,9 @@ class AddReviewDialog(private val shop: Shop, private val refreshDetailFragment:
             userId = firebaseInteractor.firebaseUser!!.uid,
             rate = binding.ratingBar.rating
         )
-        firebaseInteractor.postReview(shop, review, this, this)
-    }
-
-    private fun toast(message: String?) {
-        toast(message)
-    }
-
-    override fun onSuccess(p0: Any?) {
-        if (p0 is QuerySnapshot) {
-            val reviews = mutableListOf<Review>()
-            for (d in p0.documents) {
-                val o = d.toObject<Review>()
-                if (o != null) {
-                    val r = Review(
-                        id = d.id,
-                        userId = o.userId,
-                        rate = o.rate
-                    )
-                    reviews.add(r)
-                }
-            }
-            setupReviewButton(reviews)
-        } else {
-            toast(getString(R.string.review_success))
+        firebaseInteractor.postReview(shop, review) {
+            val m = it ?: getString(R.string.review_success)
+            toast(m)
             refreshDetailFragment(shop.id)
             this.dismiss()
         }
@@ -81,18 +81,16 @@ class AddReviewDialog(private val shop: Shop, private val refreshDetailFragment:
             binding.btnAdd.text = getString(R.string.edit)
             binding.btnAdd.setOnClickListener {
                 if (binding.ratingBar.rating != review.rate) {
-                    firebaseInteractor.updateReview(shop, review, binding.ratingBar.rating)
+                    firebaseInteractor.updateReview(shop, review, binding.ratingBar.rating) {
+                        val m = it ?: getString(R.string.review_success)
+                        toast(m)
+                        refreshDetailFragment(shop.id)
+                        this.dismiss()
+                    }
                     refreshDetailFragment(shop.id)
                     this.dismiss()
                 }
             }
         } else binding.btnAdd.setOnClickListener { addClick() }
     }
-
-    override fun onFailure(p0: Exception) {
-        toast(p0.localizedMessage)
-        refreshDetailFragment(shop.id)
-        this.dismiss()
-    }
-
 }

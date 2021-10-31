@@ -19,10 +19,10 @@ class ListViewModel @Inject constructor(
 
     fun initShopListeners(
         listener: FirebaseInteractor.DataChangedListener,
-        toastListener: FirebaseInteractor.OnToastListener
+        feedBack: (String?) -> Unit
     ) {
-        Timber.d("Initializing listeners in list fragment to listen for data change")
-        listPresenter.initShopListeners(listener, toastListener)
+        Timber.d("Initializing listener in list fragment to listen for data changes")
+        listPresenter.initShopListeners(listener, feedBack)
     }
 
     fun dataChanged(dc: QueryDocumentSnapshot, type: String) {

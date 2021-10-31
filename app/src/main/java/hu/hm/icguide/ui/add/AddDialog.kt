@@ -77,7 +77,9 @@ class AddDialog(private val position: LatLng) : DialogFragment(), OnFailureListe
                         val source =
                             ImageDecoder.createSource(requireActivity().contentResolver, uri)
                         ImageDecoder.decodeBitmap(source)
-                    } else { MediaStore.Images.Media.getBitmap(requireActivity().contentResolver, uri) }
+                    } else {
+                        MediaStore.Images.Media.getBitmap(requireActivity().contentResolver, uri)
+                    }
                     imageBitmap ?: return@registerForActivityResult
                     binding.imgAttach.setImageBitmap(
                         Bitmap.createScaledBitmap(
@@ -135,12 +137,12 @@ class AddDialog(private val position: LatLng) : DialogFragment(), OnFailureListe
         )
 
         if (!imageSet) {
-            uploadShop(newShop, this::successfulUpload)
+            firebaseInteractor.uploadShop(newShop, this::feedBack)
             binding.btnAdd.isEnabled = false
         } else {
             try {
                 val bitmap: Bitmap = (binding.imgAttach.drawable as BitmapDrawable).bitmap
-                uploadShopWithImage(newShop, bitmap, this, this::successfulUpload)
+                uploadShopWithImage(newShop, bitmap, this, this::feedBack)
                 binding.btnAdd.isEnabled = false
             } catch (e: Exception) {
                 toast(e.message)
@@ -148,8 +150,9 @@ class AddDialog(private val position: LatLng) : DialogFragment(), OnFailureListe
         }
     }
 
-    private fun successfulUpload(){
-        toast(getString(R.string.upload_successful))
+    private fun feedBack(message: String?) {
+        val m = message ?: getString(R.string.upload_successful)
+        toast(m)
         this.dismiss()
     }
 
@@ -162,15 +165,11 @@ class AddDialog(private val position: LatLng) : DialogFragment(), OnFailureListe
         }
     }
 
-    private fun uploadShop(newShop: UploadShop, done: () -> Unit) {
-        firebaseInteractor.uploadShop(newShop, done)
-    }
-
     private fun uploadShopWithImage(
         newShop: UploadShop,
         bitmap: Bitmap,
         onFailureListener: OnFailureListener,
-        done: () -> Unit
+        feedBack: (String?) -> Unit
     ) {
         val baos = ByteArrayOutputStream()
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos)
@@ -180,7 +179,7 @@ class AddDialog(private val position: LatLng) : DialogFragment(), OnFailureListe
             imageInBytes,
             newShop,
             onFailureListener,
-            done
+            feedBack
         )
     }
 

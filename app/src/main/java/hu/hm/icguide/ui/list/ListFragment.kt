@@ -29,8 +29,7 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class ListFragment : RainbowCakeFragment<ListViewState, ListViewModel>(),
-    NavigationView.OnNavigationItemSelectedListener, FirebaseInteractor.DataChangedListener,
-    FirebaseInteractor.OnToastListener {
+    NavigationView.OnNavigationItemSelectedListener, FirebaseInteractor.DataChangedListener{
 
     override fun provideViewModel() = getViewModelFromFactory()
     override fun getViewResource() = R.layout.fragment_list
@@ -51,7 +50,7 @@ class ListFragment : RainbowCakeFragment<ListViewState, ListViewModel>(),
     override fun onStart() {
         super.onStart()
         viewModel.load()
-        viewModel.initShopListeners(this, this)
+        viewModel.initShopListeners(this){ toast(it)}
     }
 
     override fun render(viewState: ListViewState) {
@@ -138,10 +137,6 @@ class ListFragment : RainbowCakeFragment<ListViewState, ListViewModel>(),
 
     override fun dataChanged(dc: QueryDocumentSnapshot, type: String) {
         viewModel.dataChanged(dc, type)
-    }
-
-    override fun onToast(message: String?) {
-        toast(message)
     }
 
 }

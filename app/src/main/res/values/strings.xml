@@ -73,7 +73,7 @@
     <string name="logout">Logout</string>
     <string name="reauthenticate">Reauthenticate</string>
     <string name="authenticate">Authenticate</string>
-    <string name="authenticateSuccess">Authentication successful, now you can edit!</string>
+    <string name="authenticate_success">Authentication successful, now you can edit!</string>
     <string name="verification_email_sent">The verification email was sent to the given email address</string>
     <string name="password_updated">Password edit successful</string>
     <string name="user_settings">User settings</string>
@@ -85,4 +85,5 @@
     <string name="have_no_permission">You have no permission to enter</string>
     <string name="delete">Delete</string>
     <string name="approve">Approve</string>
+    <string name="reauth_succes">Successful reauthentication</string>
 </resources>

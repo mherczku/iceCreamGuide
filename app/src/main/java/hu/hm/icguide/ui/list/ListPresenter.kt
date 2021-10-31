@@ -43,9 +43,9 @@ class ListPresenter @Inject constructor(private val firebaseInteractor: Firebase
 
     fun initShopListeners(
         listener: FirebaseInteractor.DataChangedListener,
-        toastListener: FirebaseInteractor.OnToastListener
+        feedBack: (String?) -> Unit
     ) {
-        firebaseInteractor.initShopsListener(listener, toastListener)
+        firebaseInteractor.initShopsListener(listener, feedBack)
     }
 
 }

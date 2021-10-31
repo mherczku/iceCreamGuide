@@ -3,7 +3,6 @@ package hu.hm.icguide.interactors
 import android.graphics.Bitmap
 import android.net.Uri
 import com.google.android.gms.tasks.OnFailureListener
-import com.google.android.gms.tasks.OnSuccessListener
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.UserProfileChangeRequest
@@ -31,8 +30,6 @@ import javax.inject.Inject
 class FirebaseInteractor @Inject constructor() {
 
     //TODO fireAUTH legyen külön
-    //TODO az admin jogos kérésekhez még egy ellenőrzés és visszajelzés ha már nincs joga
-    //TODO change functions to handle errors and failures
 
     private val firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance()
     private val firestoreDb: FirebaseFirestore = Firebase.firestore
@@ -44,12 +41,8 @@ class FirebaseInteractor @Inject constructor() {
         fun dataChanged(dc: QueryDocumentSnapshot, type: String)
     }
 
-    //TODO replace this with sth else
-    interface OnToastListener {
-        fun onToast(message: String?)
-    }
-
     suspend fun getUserRole(): String? {
+        Timber.d("Downloading user role")
         val dc = firestoreDb.document("users/${firebaseUser?.uid}").get().await()
         dc ?: return null
         val user: User? = dc.toObject()
@@ -62,6 +55,7 @@ class FirebaseInteractor @Inject constructor() {
         password: String,
         feedback: (Int, String?) -> Unit
     ) {
+        Timber.d("Logging in")
         firebaseAuth
             .signInWithEmailAndPassword(email, password)
             .addOnSuccessListener {
@@ -90,6 +84,7 @@ class FirebaseInteractor @Inject constructor() {
         password: String,
         feedback: (Int, String?) -> Unit
     ) {
+        Timber.d("Registering user")
         firebaseAuth
             .createUserWithEmailAndPassword(email, password)
             .addOnSuccessListener {
@@ -107,15 +102,15 @@ class FirebaseInteractor @Inject constructor() {
 
     fun initShopsListener(
         listener: DataChangedListener,
-        toastListenerListener: OnToastListener
+        feedBack: (String?) -> Unit
     ) {
+        Timber.d("Initializing shops listeners")
         firestoreDb.collection("shops")
             .addSnapshotListener { snapshots, e ->
                 if (e != null) {
-                    toastListenerListener.onToast(e.localizedMessage)
+                    feedBack(e.localizedMessage)
                     return@addSnapshotListener
                 }
-
                 for (dc in snapshots!!.documentChanges) {
                     when (dc.type) {
                         DocumentChange.Type.ADDED -> listener.dataChanged(
@@ -134,14 +129,12 @@ class FirebaseInteractor @Inject constructor() {
             }
     }
 
-    fun uploadShop(newShop: UploadShop, done: () -> Unit) {
+    fun uploadShop(newShop: UploadShop, feedBack: (String?) -> Unit) {
         Timber.d("Uploading shop into firestore new shops")
-        firestoreDb.collection("newShops").add(newShop).addOnSuccessListener {
-            done()
-        }
-        //TODO change done to feedback error handling
+        firestoreDb.collection("newShops").add(newShop)
+            .addOnSuccessListener { feedBack(null) }
+            .addOnFailureListener { feedBack(it.localizedMessage) }
     }
-
 
     fun deleteNewShop(shopId: String) {
         Timber.d("Deleting new shop $shopId from firestore")
@@ -159,7 +152,7 @@ class FirebaseInteractor @Inject constructor() {
         imageInBytes: ByteArray,
         newShop: UploadShop,
         onFailureListener: OnFailureListener,
-        done: () -> Unit
+        feedBack: (String?) -> Unit
     ) {
         Timber.d("Uploading image into firestore")
         val newImageName = URLEncoder.encode(UUID.randomUUID().toString(), "UTF-8") + ".jpg"
@@ -175,7 +168,7 @@ class FirebaseInteractor @Inject constructor() {
             }
             .addOnSuccessListener { downloadUri ->
                 newShop.photo = downloadUri.toString()
-                uploadShop(newShop, done)
+                uploadShop(newShop, feedBack)
             }
     }
 
@@ -186,12 +179,8 @@ class FirebaseInteractor @Inject constructor() {
         Timber.d("Posting comment into firestore for $shopId shop")
         firestoreDb.collection("shops/${shopId}/comments")
             .add(comment)
-            .addOnSuccessListener {
-                feedback(null)
-            }
-            .addOnFailureListener {
-                feedback(it.localizedMessage)
-            }
+            .addOnSuccessListener { feedback(null) }
+            .addOnFailureListener { feedback(it.localizedMessage) }
     }
 
     suspend fun getUsers(): QuerySnapshot? {
@@ -204,11 +193,9 @@ class FirebaseInteractor @Inject constructor() {
         return firestoreDb.collection("shops/${shopId}/comments").get().await()
     }
 
-
-    fun getReviews(shopId: String, onSuccessListener: OnSuccessListener<Any>) {
+    suspend fun getReviews(shopId: String): QuerySnapshot? {
         Timber.d("Downloading firestore $shopId shops reviews")
-        firestoreDb.collection("shops/$shopId/reviews").get()
-            .addOnSuccessListener(onSuccessListener)
+        return firestoreDb.collection("shops/$shopId/reviews").get().await()
     }
 
     suspend fun getShops(): QuerySnapshot? {
@@ -226,73 +213,79 @@ class FirebaseInteractor @Inject constructor() {
         return firestoreDb.document("shops/${shopId}").get().await()
     }
 
-
     fun postReview(
         shop: Shop,
         review: Review,
-        onSuccessListener: OnSuccessListener<Any>,
-        onFailureListener: OnFailureListener
+        feedBack: (String?) -> Unit
     ) {
+        Timber.d("Uploading review for ${shop.id} shop to firestore")
         firestoreDb.collection("shops/${shop.id}/reviews")
             .add(review)
-            .addOnSuccessListener(onSuccessListener)
-            .addOnFailureListener(onFailureListener)
+            .addOnSuccessListener {
+                feedBack(null)
+                Timber.d("Updating ${shop.id} shop's rate and ratings")
+                val newRate =
+                    ((shop.rate * shop.ratings) / (shop.ratings + 1)) + (review.rate / (shop.ratings + 1))
+                firestoreDb.document("shops/${shop.id}").update("rate", newRate)
+                firestoreDb.document("shops/${shop.id}").update("ratings", shop.ratings + 1)
 
-        // Update shop's rate and ratings
-        val newRate =
-            ((shop.rate * shop.ratings) / (shop.ratings + 1)) + (review.rate / (shop.ratings + 1))
-        firestoreDb.document("shops/${shop.id}").update("rate", newRate)
-        firestoreDb.document("shops/${shop.id}").update("ratings", shop.ratings + 1)
+            }
+            .addOnFailureListener { feedBack(it.localizedMessage) }
     }
 
-    fun updateReview(shop: Shop, review: Review, newRate: Float) {
+    fun updateReview(shop: Shop, review: Review, newRate: Float, feedBack: (String?) -> Unit) {
+        Timber.d("Updating ${review.id} review for ${shop.id} shop")
         firestoreDb.document("shops/${shop.id}/reviews/${review.id}").update("rate", newRate)
-        // Update the shop's rate
-        val newShopRate = (shop.rate * shop.ratings - review.rate + newRate) / (shop.ratings)
-        firestoreDb.document("shops/${shop.id}").update("rate", newShopRate)
-    }
-
-    fun updateUserRole(role: Int = 0) {
-        when (role) {
-            0 -> firestoreDb.document("users/${firebaseUser?.uid}").update("role", "user")
-            1 -> firestoreDb.document("users/${firebaseUser?.uid}").update("role", "admin")
-        }
+            .addOnSuccessListener {
+                feedBack(null)
+                Timber.d("Updating ${shop.id} shop's rate and ratings")
+                val newShopRate =
+                    (shop.rate * shop.ratings - review.rate + newRate) / (shop.ratings)
+                firestoreDb.document("shops/${shop.id}").update("rate", newShopRate)
+            }
+            .addOnFailureListener { feedBack(it.localizedMessage) }
     }
 
     fun updateProfile(
         name: String? = null,
         email: String? = null,
         photo: Uri? = null,
-        myCallback: (String?) -> Unit
+        feedBack: (String?) -> Unit
     ) {
+        Timber.d("Updating firebase user profile")
         val profileUpdate = UserProfileChangeRequest.Builder()
         if (name != null) profileUpdate.displayName = name
         if (photo != null) profileUpdate.photoUri = photo
 
         if (name != null || photo != null) {
-            firebaseUser?.updateProfile(profileUpdate.build())?.addOnSuccessListener {
-                myCallback(null)
-            }
+            firebaseUser?.updateProfile(profileUpdate.build())
+                ?.addOnSuccessListener { feedBack(null) }
+                ?.addOnFailureListener { feedBack(it.localizedMessage) }
             if (name != null) {
                 firestoreDb.document("users/${firebaseUser?.uid}").update("name", name)
+                    .addOnSuccessListener { feedBack(null) }
+                    .addOnFailureListener { feedBack(it.localizedMessage) }
             }
             if (photo != null) {
                 firestoreDb.document("users/${firebaseUser?.uid}").update("photo", photo.toString())
+                    .addOnFailureListener { feedBack(it.localizedMessage) }
+                    .addOnSuccessListener { feedBack(null) }
             }
 
         }
         if (email != null) {
             firebaseUser?.updateEmail(email)
                 ?.addOnSuccessListener {
-                    myCallback(null)
+                    feedBack(null)
                 }
                 ?.addOnFailureListener {
-                    myCallback(it.localizedMessage)
+                    feedBack(it.localizedMessage)
                 }
         }
     }
 
-    fun uploadImage(imageBitmap: Bitmap, myCallback: (String?, Uri?) -> Unit) {
+    fun uploadImage(imageBitmap: Bitmap, feedBack: (String?, Uri?) -> Unit) {
+        Timber.d("Uploading photo to firebase storage")
 
         val newImageName = URLEncoder.encode(UUID.randomUUID().toString(), "UTF-8") + ".jpg"
         val newImageRef = storageReference.child("userImages/$newImageName")
@@ -303,7 +296,7 @@ class FirebaseInteractor @Inject constructor() {
 
         newImageRef.putBytes(imageInBytes)
             .addOnFailureListener {
-                myCallback(it.localizedMessage, null)
+                feedBack(it.localizedMessage, null)
             }
             .continueWithTask { task ->
                 if (!task.isSuccessful) {
@@ -312,26 +305,38 @@ class FirebaseInteractor @Inject constructor() {
                 newImageRef.downloadUrl
             }
             .addOnSuccessListener { downloadUri ->
-                myCallback(null, downloadUri)
+                feedBack(null, downloadUri)
             }
     }
 
     fun logout() {
+        Timber.d("Logging out")
         firebaseAuth.signOut()
     }
 
-    fun authenticate(password: String) {
+    fun authenticate(password: String, feedBack: (String?) -> Unit) {
+        Timber.d("Re-authenticating")
         firebaseUser ?: return
         firebaseAuth.signInWithEmailAndPassword(firebaseUser!!.email!!, password)
+            .addOnSuccessListener {
+                feedBack(null)
+            }
+            .addOnFailureListener {
+                feedBack(it.localizedMessage)
+            }
     }
 
-    fun verifyEmail() {
+    fun verifyEmail(feedBack: (String?) -> Unit) {
+        Timber.d("Sending verification email")
         firebaseUser?.sendEmailVerification()
+            ?.addOnSuccessListener { feedBack(null) }
+            ?.addOnFailureListener { feedBack(it.localizedMessage) }
     }
 
-    fun updatePassword(password: String, callBack: () -> Unit) {
-        firebaseUser?.updatePassword(password)?.addOnSuccessListener {
-            callBack()
-        }
+    fun updatePassword(password: String, feedBack: (String?) -> Unit) {
+        Timber.d("Updating firebase user password")
+        firebaseUser?.updatePassword(password)
+            ?.addOnSuccessListener { feedBack(null) }
+            ?.addOnFailureListener { feedBack(it.localizedMessage) }
     }
 }
