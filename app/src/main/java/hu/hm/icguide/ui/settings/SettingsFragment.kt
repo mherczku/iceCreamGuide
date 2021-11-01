@@ -162,8 +162,13 @@ class SettingsFragment : Fragment() {
             }
         }
         btnEditEmail.setOnClickListener {
-            summonEditText(tvEmail.text.toString(), InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS) {
-                firebaseInteractor.updateProfile(email = it, feedBack = ::updateView)
+            authenticateThenDo {
+                summonEditText(
+                    tvEmail.text.toString(),
+                    InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS
+                ) {
+                    firebaseInteractor.updateProfile(email = it, feedBack = ::updateView)
+                }
             }
         }
         btnLogout.setOnClickListener {
@@ -171,25 +176,24 @@ class SettingsFragment : Fragment() {
             navigator?.popUntil<ListFragment>()
             navigator?.replace(LoginFragment())
         }
-        btnAuthenticate.setOnClickListener {
-            reAuthenticate()
-        }
         btnVerifyEmail.setOnClickListener {
-            firebaseInteractor.verifyEmail{
+            firebaseInteractor.verifyEmail {
                 val m = it ?: getString(R.string.verification_email_sent)
                 toast(m)
             }
             btnVerifyEmail.isEnabled = false
         }
         btnEditPassword.setOnClickListener {
-            summonEditText(
-                null,
-                InputType.TYPE_TEXT_VARIATION_PASSWORD,
-                TextInputLayout.END_ICON_PASSWORD_TOGGLE
-            ) {
-                firebaseInteractor.updatePassword(it) { it2 ->
-                    val m = it2 ?: getString(R.string.password_updated)
-                    toast(m)
+            authenticateThenDo {
+                summonEditText(
+                    null,
+                    InputType.TYPE_TEXT_VARIATION_PASSWORD,
+                    TextInputLayout.END_ICON_PASSWORD_TOGGLE
+                ) {
+                    firebaseInteractor.updatePassword(it) { it2 ->
+                        val m = it2 ?: getString(R.string.password_updated)
+                        toast(m)
+                    }
                 }
             }
         }
@@ -213,18 +217,22 @@ class SettingsFragment : Fragment() {
         editTextDialog.show(childFragmentManager, null)
     }
 
-    private fun reAuthenticate() {
+    private fun authenticateThenDo(doIfSuccess: () -> Unit) {
         val editTextDialog = EditTextDialog()
         editTextDialog.btnText = getString(R.string.authenticate)
         editTextDialog.toolbarNavigationIcon =
             ResourcesCompat.getDrawable(resources, R.drawable.security_light, null)
         editTextDialog.hint = getString(R.string.password)
         editTextDialog.textFieldEndIconMode = TextInputLayout.END_ICON_PASSWORD_TOGGLE
+        editTextDialog.editTextInputType = InputType.TYPE_TEXT_VARIATION_PASSWORD
         editTextDialog.toolbarTitle = getString(R.string.authenticate)
         editTextDialog.setListener { it ->
             firebaseInteractor.authenticate(it) { it2 ->
-                val message = it2 ?: getString(R.string.reauth_succes)
-                toast(message)
+                if (!it2.isNullOrBlank()) toast(it2)
+                else if (it2 == null) {
+                    toast(getString(R.string.reauth_succes))
+                    doIfSuccess()
+                }
             }
         }
         editTextDialog.show(childFragmentManager, null)

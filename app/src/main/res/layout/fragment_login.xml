@@ -23,11 +23,11 @@
 
         <ImageView
             android:layout_width="wrap_content"
-            android:layout_height="72dp"
+            android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginBottom="24dp"
             android:contentDescription="@string/cd_login_image"
-            android:src="@mipmap/ic_launcher" />
+            android:src="@drawable/icecreams" />
 
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"

@@ -1,6 +1,7 @@
 package hu.hm.icguide.ui.list
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import android.widget.Filter
 import android.widget.Filterable
@@ -36,6 +37,7 @@ class ShopAdapter(private val admin: Boolean = false) :
         holder.nameText.text = shop.name
         holder.addressText.text = shop.address
         holder.rateText.text = shop.rate.toString()
+        if(admin) holder.arrowImage.visibility = View.INVISIBLE
         if (shop.photo.isNotBlank()) {
             Glide.with(holder.shopImage)
                 .load(shop.photo)
@@ -64,6 +66,7 @@ class ShopAdapter(private val admin: Boolean = false) :
         val addressText: TextView = binding.addressText
         val rateText: TextView = binding.rateText
         val shopImage: ImageView = binding.rivShop
+        val arrowImage: ImageView = binding.arrowIcon
 
         var item: Shop? = null
 

@@ -29,8 +29,6 @@ import javax.inject.Inject
 
 class FirebaseInteractor @Inject constructor() {
 
-    //TODO fireAUTH legyen külön
-
     private val firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance()
     private val firestoreDb: FirebaseFirestore = Firebase.firestore
     private val storageReference: StorageReference = FirebaseStorage.getInstance().reference
