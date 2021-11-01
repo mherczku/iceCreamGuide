@@ -226,7 +226,7 @@ class SettingsFragment : Fragment() {
         editTextDialog.textFieldEndIconMode = TextInputLayout.END_ICON_PASSWORD_TOGGLE
         editTextDialog.editTextInputType = InputType.TYPE_TEXT_VARIATION_PASSWORD
         editTextDialog.toolbarTitle = getString(R.string.authenticate)
-        editTextDialog.setListener { it ->
+        editTextDialog.setListener {
             firebaseInteractor.authenticate(it) { it2 ->
                 if (!it2.isNullOrBlank()) toast(it2)
                 else if (it2 == null) {

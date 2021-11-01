@@ -22,12 +22,25 @@ Tulajdonságai:
 
 #### Felhasznált technológiák
 
-- Firebase
+- Firebase:
   - FirebaseAuth - Autentikációhoz
-  - FIreStore - Backend, adatok tárolása (fagylaltozók adatai)
-  - Firebase Realtime Database - Felhasználói adatok tárolása
+  - FireStore - Backend, adatok tárolása (fagylaltozók adatai), Felhasználói adatok tárolása
+  - Storage: Képek tárolása (felhasználói, fagylaltozóké egyaránt)
 - Google Maps SDK Android - Térképen történő megjelenítéshez
-  
+- Kotlin Coroutines: Lehetővé teszik az aszinkron kódok írását
+- Hilt Dependency Injection
+- Android Lifecycle: Életciklus tudatos aszinkron kódok írását teszi lehetővé, azaz az aszinkron műveleteknek megszabhatunk hatóköröket, hogy azon belül fussanak.
+- UI:
+  - Google Material: Az alkalmazás kinézete nagyrészt a google material design elvét követi
+  - ConstraitLayout: Komplex felhasználó felületek elkészítésére
+  - SwipeRefreshLayout: Lista nézetek manuális frissítéséhez
+  - RecyclerView: Elemek megjelenítése listában
+  - Android Preference: SharedPreference egyszerű használata beállítási értékekhez
+  - RoundedImageView: Kerek képek megjelenítése
+  - Glide: Képek betöltése internetről
+  - NavigationDrawer: Elhúzható navigációs ablak
+  - Többnyelvűség támogatása (angol, magyar)
+  - Sötét téma támogatása
 
 #### Use-Case Diagram
 
