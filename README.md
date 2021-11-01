@@ -29,7 +29,9 @@ Tulajdonságai:
 - Google Maps SDK Android - Térképen történő megjelenítéshez
 - Kotlin Coroutines: Lehetővé teszik az aszinkron kódok írását
 - Hilt Dependency Injection
+- Timber: Loggolás, hibakezelés segítése
 - Android Lifecycle: Életciklus tudatos aszinkron kódok írását teszi lehetővé, azaz az aszinkron műveleteknek megszabhatunk hatóköröket, hogy azon belül fussanak.
+- SharedPreferences: Kulcs pár értekek eltárolása, beállítási értékekhez
 - UI:
   - Google Material: Az alkalmazás kinézete nagyrészt a google material design elvét követi
   - ConstraitLayout: Komplex felhasználó felületek elkészítésére
@@ -44,5 +46,5 @@ Tulajdonságai:
 
 #### Use-Case Diagram
 
-![](https://i.ibb.co/0YQqWWK/k-p.png)
+![](https://i.ibb.co/0hbd5HN/k-p.png)
 
