@@ -17,45 +17,19 @@ class DetailViewModel @Inject constructor(
 
     fun isNetAvailable(): Boolean = detailPresenter.isNetAvailable()
 
-    internal fun refreshShop(shopId: String) = execute {
+    fun refreshShop(shopId: String) = execute {
         Timber.d("Refreshing shop for detail fragment")
         viewState = viewState.copy(shop = detailPresenter.getShop(shopId))
+    }
+
+    fun refreshComments(shopId: String) = execute {
+        Timber.d("Refreshing comments for detail fragment")
+        viewState = viewState.copy(comments = detailPresenter.getComments(shopId))
     }
 
     fun postComment(shopId: String, c: DetailPresenter.PostComment, feedback: (String?) -> Unit) {
         Timber.d("Posting comment in detail fragment")
         detailPresenter.postComment(shopId, c, feedback)
     }
-
-
-    /*fun postComment(
-        shopId: String,
-        c: DetailPresenter.PostComment,
-        onSuccessListener: OnSuccessListener<Any>,
-        onFailureListener: OnFailureListener
-    ) {
-        detailPresenter.postComment(shopId, c, onSuccessListener, onFailureListener)
-    }
-
-    fun initCommentsListeners(
-        shopId: String,
-        listener: FirebaseInteractor.DataChangedListener,
-        toastListener: FirebaseInteractor.OnToastListener
-    ) {
-        detailPresenter.initCommentsListeners(shopId, listener, toastListener)
-    }*/
-
-    /*fun dataChanged(dc: QueryDocumentSnapshot, type: String) {
-        val newList = detailPresenter.dataChanged(dc, type, viewState.comments)
-        newList.sortByDescending { it.date }
-        viewState = DetailViewState(comments = newList, shop = viewState.shop)
-    }*/
-    /*private fun updateComments2(comments: MutableList<Comment>){
-        comments.sortByDescending { it.date }
-        viewState = DetailViewState(comments = comments, shop = viewState.shop)
-    }*/
-    /*fun updateComments(shopId: String) {
-        detailPresenter.updateComments(shopId, ::updateComments2)
-    }*/
 
 }

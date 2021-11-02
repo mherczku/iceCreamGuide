@@ -108,7 +108,7 @@ class DetailFragment(
     }
 
     private fun feedback(message: String? = getString(R.string.successful_comment)) {
-        viewModel.refreshShop(shopId)
+        viewModel.refreshComments(shopId)
         toast(message)
     }
 

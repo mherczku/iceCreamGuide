@@ -86,48 +86,4 @@ class DetailPresenter @Inject constructor(
         firebaseInteractor.postComment(c, shopId, feedback)
     }
 
-    /*companion object {
-        const val NEW_COMMENT = "NEW_DATA"
-        const val EDIT_COMMENT = "EDIT_DATA"
-        const val REMOVE_COMMENT = "REMOVE_DATA"
-    }
-
-    fun initCommentsListeners(
-        shopId: String,
-        listener: FirebaseInteractor.DataChangedListener,
-        toastListener: FirebaseInteractor.OnToastListener
-    ) {
-        firebaseInteractor.initCommentsListeners(shopId, listener, toastListener)
-    }
-
-    fun dataChanged(
-        dc: QueryDocumentSnapshot,
-        type: String,
-        list: MutableList<Comment>
-    ): MutableList<Comment> {
-        val objectComment: Comment = dc.toObject()
-        val comment = Comment(
-            id = dc.id,
-            authorId = objectComment.authorId,
-            authorName = objectComment.authorName,
-            content = objectComment.content,
-            photo = objectComment.photo,
-            date = objectComment.date
-        )
-        when (type) {
-            NEW_COMMENT -> list.add(comment)
-            EDIT_COMMENT -> {
-                val old = list.find { it.id == comment.id }
-                list.remove(old)
-                list.add(comment)
-            }
-            REMOVE_COMMENT -> list.remove(comment)
-        }
-        return list
-    }
-
-    fun getShop(id: String, callback: KFunction1<Shop, Unit>) {
-        firebaseInteractor.getShop(id, callback)
-    }*/
-
 }
