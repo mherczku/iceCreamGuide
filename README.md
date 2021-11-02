@@ -41,6 +41,7 @@ Tulajdonságai:
   - RoundedImageView: Kerek képek megjelenítése
   - Glide: Képek betöltése internetről
   - NavigationDrawer: Elhúzható navigációs ablak
+  - Filterable + SearchView: Keresés támogatása a lista nézetekben
   - Többnyelvűség támogatása (angol, magyar)
   - Sötét téma támogatása
 
