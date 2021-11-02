@@ -8,7 +8,7 @@ class LoginPresenter @Inject constructor(private val interactor: FirebaseInterac
     fun register(
         email: String,
         password: String,
-        feedback: (Int, String?) -> Unit
+        feedback: (String?) -> Unit
     ) {
         interactor.registerFirebase(email, password, feedback)
     }
@@ -16,9 +16,13 @@ class LoginPresenter @Inject constructor(private val interactor: FirebaseInterac
     fun login(
         email: String,
         password: String,
-        feedback: (Int, String?) -> Unit
+        feedback: (String?) -> Unit
     ) {
         interactor.loginFirebase(email, password, feedback)
+    }
+
+    fun requestPasswordReset(email: String, feedback: (String?) -> Unit) {
+        interactor.requestPasswordReset(email, feedback)
     }
 
 }

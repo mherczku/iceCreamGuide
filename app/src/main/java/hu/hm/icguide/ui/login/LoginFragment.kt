@@ -1,8 +1,10 @@
 package hu.hm.icguide.ui.login
 
 import android.os.Bundle
+import android.text.InputType
 import android.view.View
 import android.widget.ProgressBar
+import androidx.core.view.isVisible
 import co.zsmb.rainbowcake.base.RainbowCakeFragment
 import co.zsmb.rainbowcake.hilt.getViewModelFromFactory
 import co.zsmb.rainbowcake.navigation.navigator
@@ -13,6 +15,7 @@ import hu.hm.icguide.extensions.hideKeyboard
 import hu.hm.icguide.extensions.toast
 import hu.hm.icguide.extensions.validateNonEmpty
 import hu.hm.icguide.ui.list.ListFragment
+import hu.hm.icguide.ui.settings.EditTextDialog
 
 @AndroidEntryPoint
 class LoginFragment : RainbowCakeFragment<LoginViewState, LoginViewModel>() {
@@ -23,18 +26,27 @@ class LoginFragment : RainbowCakeFragment<LoginViewState, LoginViewModel>() {
     private lateinit var binding: FragmentLoginBinding
     private lateinit var progressBar: ProgressBar
 
-    companion object {
-        const val REGISTRATION_SUCCESS = 101
-        const val LOGIN_SUCCESS = 201
-        const val FAILURE = 444
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding = FragmentLoginBinding.bind(view)
         progressBar = binding.progressBar
         binding.btnRegister.setOnClickListener { registerClick() }
         binding.btnLogin.setOnClickListener { loginClick() }
+        binding.tvForgotPassword.setOnClickListener {
+            val editTextDialog = EditTextDialog()
+            editTextDialog.btnText = getString(R.string.send)
+            editTextDialog.toolbarNavigationIcon
+            editTextDialog.editTextInputType = InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS
+            editTextDialog.toolbarTitle = getString(R.string.send_password_reset_email)
+            editTextDialog.text = binding.etEmail.text.toString()
+            editTextDialog.setListener { email ->
+                viewModel.requestPasswordReset(email){
+                    val m = it ?: getString(R.string.password_reset_email_sent)
+                    toast(m)
+                }
+            }
+            editTextDialog.show(childFragmentManager, null)
+        }
     }
 
     override fun onStart() {
@@ -66,11 +78,11 @@ class LoginFragment : RainbowCakeFragment<LoginViewState, LoginViewModel>() {
             return
         }
         showProgressDialog()
-        viewModel.register(
-            binding.etEmail.text.toString(),
-            binding.etPassword.text.toString(),
-            this::feedback
-        )
+        viewModel.register(binding.etEmail.text.toString(), binding.etPassword.text.toString()){
+            hideProgressDialog()
+            val m = it ?: getString(R.string.registration_successful)
+            toast(m)
+        }
     }
 
     private fun loginClick() {
@@ -80,22 +92,14 @@ class LoginFragment : RainbowCakeFragment<LoginViewState, LoginViewModel>() {
             return
         }
         hideKeyboard()
-        viewModel.login(
-            binding.etEmail.text.toString(),
-            binding.etPassword.text.toString(),
-            this::feedback
-        )
-    }
-
-    private fun feedback(feedback: Int, message: String?) {
-        hideProgressDialog()
-        when (feedback) {
-            REGISTRATION_SUCCESS -> toast(getString(R.string.registration_successful))
-            LOGIN_SUCCESS -> {
-                toast(getString(R.string.login_successful))
+        viewModel.login(binding.etEmail.text.toString(), binding.etPassword.text.toString()) {
+            hideProgressDialog()
+            val m = it ?: getString(R.string.login_successful)
+            toast(m)
+            if(it == null) {
                 navigator?.replace(ListFragment())
             }
-            FAILURE -> toast(message)
+            else binding.tvForgotPassword.isVisible = true
         }
     }
 

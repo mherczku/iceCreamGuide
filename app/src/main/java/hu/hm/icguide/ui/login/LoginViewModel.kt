@@ -18,7 +18,7 @@ class LoginViewModel @Inject constructor(
     fun register(
         email: String,
         password: String,
-        feedback: (Int, String?) -> Unit
+        feedback: (String?) -> Unit
     ) {
         Timber.d("Registering $email user")
         loginPresenter.register(email, password, feedback)
@@ -27,10 +27,15 @@ class LoginViewModel @Inject constructor(
     fun login(
         email: String,
         password: String,
-        feedback: (Int, String?) -> Unit
+        feedback: (String?) -> Unit
     ) {
         Timber.d("Logging in $email user")
         loginPresenter.login(email, password, feedback)
+    }
+
+    fun requestPasswordReset(email: String, feedback: (String?) -> Unit) {
+        Timber.d("Requesting password reset email for $email")
+        loginPresenter.requestPasswordReset(email, feedback)
     }
 
 }

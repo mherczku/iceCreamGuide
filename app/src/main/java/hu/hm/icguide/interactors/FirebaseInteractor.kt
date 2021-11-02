@@ -18,7 +18,6 @@ import hu.hm.icguide.models.UploadShop
 import hu.hm.icguide.models.User
 import hu.hm.icguide.ui.detail.DetailPresenter
 import hu.hm.icguide.ui.list.ListPresenter
-import hu.hm.icguide.ui.login.LoginFragment
 import kotlinx.coroutines.tasks.await
 import timber.log.Timber
 import java.io.ByteArrayOutputStream
@@ -51,7 +50,7 @@ class FirebaseInteractor @Inject constructor() {
     fun loginFirebase(
         email: String,
         password: String,
-        feedback: (Int, String?) -> Unit
+        feedback: (String?) -> Unit
     ) {
         Timber.d("Logging in")
         firebaseAuth
@@ -69,18 +68,18 @@ class FirebaseInteractor @Inject constructor() {
                             )
                             firestoreDb.collection("users").document(newUser.uid).set(newUser)
                         }
-                        feedback(LoginFragment.LOGIN_SUCCESS, null)
+                        feedback(null)
                     }
             }
             .addOnFailureListener {
-                feedback(LoginFragment.FAILURE, it.localizedMessage)
+                feedback(it.localizedMessage)
             }
     }
 
     fun registerFirebase(
         email: String,
         password: String,
-        feedback: (Int, String?) -> Unit
+        feedback: (String?) -> Unit
     ) {
         Timber.d("Registering user")
         firebaseAuth
@@ -91,10 +90,10 @@ class FirebaseInteractor @Inject constructor() {
                     .setDisplayName(newFirebaseUser?.email?.substringBefore('@'))
                     .build()
                 newFirebaseUser?.updateProfile(profileChangeRequest)
-                feedback(LoginFragment.REGISTRATION_SUCCESS, null)
+                feedback(null)
             }
             .addOnFailureListener {
-                feedback(LoginFragment.FAILURE, it.localizedMessage)
+                feedback(it.localizedMessage)
             }
     }
 
@@ -336,5 +335,12 @@ class FirebaseInteractor @Inject constructor() {
         firebaseUser?.updatePassword(password)
             ?.addOnSuccessListener { feedBack(null) }
             ?.addOnFailureListener { feedBack(it.localizedMessage) }
+    }
+
+    fun requestPasswordReset(email: String, feedback: (String?) -> Unit) {
+        Timber.d("Sending passsword reset email to $email")
+        firebaseAuth.sendPasswordResetEmail(email)
+            .addOnSuccessListener {feedback(null)}
+            .addOnFailureListener { feedback(it.localizedMessage) }
     }
 }
