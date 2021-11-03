@@ -78,13 +78,7 @@ class SettingsFragment : Fragment() {
                 if (result.resultCode == Activity.RESULT_OK) {
                     val imageBitmap = result.data?.extras?.get("data") as Bitmap?
                     imageBitmap ?: return@registerForActivityResult
-                    val scaledBitmap = Bitmap.createScaledBitmap(
-                        imageBitmap,
-                        binding.ivUser.width,
-                        binding.ivUser.height,
-                        false
-                    )
-                    firebaseInteractor.uploadImage(scaledBitmap, this::feedBack)
+                    firebaseInteractor.uploadImage(imageBitmap, this::feedBack)
                 }
             }
         startForResultGallery =
@@ -103,13 +97,7 @@ class SettingsFragment : Fragment() {
                         )
                     }
                     imageBitmap ?: return@registerForActivityResult
-                    val scaledBitmap = Bitmap.createScaledBitmap(
-                        imageBitmap,
-                        binding.ivUser.width,
-                        binding.ivUser.height,
-                        false
-                    )
-                    firebaseInteractor.uploadImage(scaledBitmap, this::feedBack)
+                    firebaseInteractor.uploadImage(imageBitmap, this::feedBack)
                 }
             }
     }
@@ -264,9 +252,15 @@ class SettingsFragment : Fragment() {
     }
 
     private fun pickImage() {
-        val getPicIntent = Intent(Intent.ACTION_PICK)
-        getPicIntent.type = "image/*"
-        startForResultGallery.launch(Intent(getPicIntent))
+        val photoPickerIntent = Intent(Intent.ACTION_PICK)
+        photoPickerIntent.type = "image/*"
+        photoPickerIntent.putExtra("crop", "true")
+        photoPickerIntent.putExtra("outputX", 300)
+        photoPickerIntent.putExtra("outputY", 300)
+        photoPickerIntent.putExtra("aspectX", 1)
+        photoPickerIntent.putExtra("aspectY", 1)
+        photoPickerIntent.putExtra("scale", true)
+        startForResultGallery.launch(Intent(photoPickerIntent))
     }
 
     private fun showRationaleDialog(

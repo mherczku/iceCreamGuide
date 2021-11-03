@@ -17,7 +17,6 @@ import android.view.LayoutInflater
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.RequiresApi
 import androidx.annotation.StringRes
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -36,6 +35,7 @@ import hu.hm.icguide.models.UploadShop
 import java.io.ByteArrayOutputStream
 import javax.inject.Inject
 
+
 @AndroidEntryPoint
 class AddDialog(private val position: LatLng) : DialogFragment(), OnFailureListener {
 
@@ -49,7 +49,6 @@ class AddDialog(private val position: LatLng) : DialogFragment(), OnFailureListe
     private lateinit var permReqLauncher: ActivityResultLauncher<String>
 
 
-    @RequiresApi(Build.VERSION_CODES.P)
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
 
         binding = DialogAddBinding.inflate(LayoutInflater.from(context))
@@ -81,14 +80,7 @@ class AddDialog(private val position: LatLng) : DialogFragment(), OnFailureListe
                         MediaStore.Images.Media.getBitmap(requireActivity().contentResolver, uri)
                     }
                     imageBitmap ?: return@registerForActivityResult
-                    binding.imgAttach.setImageBitmap(
-                        Bitmap.createScaledBitmap(
-                            imageBitmap,
-                            binding.imgAttach.width,
-                            binding.imgAttach.height,
-                            false
-                        )
-                    )
+                    binding.imgAttach.setImageBitmap(imageBitmap)
                     imageSet = true
                 }
             }
@@ -119,6 +111,18 @@ class AddDialog(private val position: LatLng) : DialogFragment(), OnFailureListe
     private fun attachImage() {
         val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
         startForResult.launch(Intent(takePictureIntent))
+    }
+
+    private fun pickImage() {
+        val photoPickerIntent = Intent(Intent.ACTION_PICK)
+        photoPickerIntent.type = "image/*"
+        photoPickerIntent.putExtra("crop", "true")
+        photoPickerIntent.putExtra("outputX", 300)
+        photoPickerIntent.putExtra("outputY", 300)
+        photoPickerIntent.putExtra("aspectX", 1)
+        photoPickerIntent.putExtra("aspectY", 1)
+        photoPickerIntent.putExtra("scale", true)
+        startForResultGallery.launch(Intent(photoPickerIntent))
     }
 
     private fun addClick() {
@@ -187,12 +191,6 @@ class AddDialog(private val position: LatLng) : DialogFragment(), OnFailureListe
         toast(getString(R.string.add_unsuccessful))
         toast(p0.localizedMessage)
         this.dismiss()
-    }
-
-    private fun pickImage() {
-        val getPicIntent = Intent(Intent.ACTION_PICK)
-        getPicIntent.type = "image/*"
-        startForResultGallery.launch(Intent(getPicIntent))
     }
 
     private fun geocode(latLng: LatLng): String {

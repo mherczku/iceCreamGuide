@@ -3,10 +3,7 @@ package hu.hm.icguide.ui.list
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Filter
-import android.widget.Filterable
-import android.widget.ImageView
-import android.widget.TextView
+import android.widget.*
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -36,7 +33,7 @@ class ShopAdapter(private val admin: Boolean = false) :
         holder.item = shop
         holder.nameText.text = shop.name
         holder.addressText.text = shop.address
-        holder.rateText.text = shop.rate.toString()
+        holder.rate.rating = shop.rate
         if(admin) holder.arrowImage.visibility = View.INVISIBLE
         if (shop.photo.isNotBlank()) {
             Glide.with(holder.shopImage)
@@ -64,7 +61,7 @@ class ShopAdapter(private val admin: Boolean = false) :
     inner class ViewHolder(binding: RowShopBinding) : RecyclerView.ViewHolder(binding.root) {
         val nameText: TextView = binding.nameText
         val addressText: TextView = binding.addressText
-        val rateText: TextView = binding.rateText
+        val rate: RatingBar = binding.ratingBar
         val shopImage: ImageView = binding.rivShop
         val arrowImage: ImageView = binding.arrowIcon
 
@@ -108,7 +105,6 @@ class ShopAdapter(private val admin: Boolean = false) :
                 val filteredList = p1?.values as MutableList<Shop>
                 submitFilterList(filteredList)
             }
-
         }
     }
 

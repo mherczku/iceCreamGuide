@@ -38,6 +38,7 @@
                 android:id="@+id/shopList"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:paddingTop="4dp"
                 android:orientation="vertical"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 tools:listitem="@layout/row_shop" />
@@ -53,6 +54,6 @@
         android:layout_gravity="start"
         android:fitsSystemWindows="true"
         app:headerLayout="@layout/drawer_header"
-        app:itemIconTint="@color/colorPrimary"/>
+        app:itemIconTint="@color/colorPrimary" />
 
 </androidx.drawerlayout.widget.DrawerLayout>

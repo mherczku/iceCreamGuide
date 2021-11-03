@@ -5,4 +5,8 @@
     <color name="colorAccent">#67daff</color>
     <color name="colorTextContra">#000000</color>
     <color name="colorToolbarTitle">#FFFFFF</color>
+    <color name="list_comment_center">#CAF2FF</color>
+    <color name="list_comment_corner">#67daff</color>
+    <color name="list_shop_center">#67daff</color>
+    <color name="list_shop_corner">#03a9f4</color>
 </resources>

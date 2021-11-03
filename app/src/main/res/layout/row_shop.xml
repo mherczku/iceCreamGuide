@@ -4,20 +4,21 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="16dp">
+    android:layout_margin="4dp"
+    android:background="@drawable/list_item_background"
+    android:padding="8dp">
 
     <com.makeramen.roundedimageview.RoundedImageView
         android:id="@+id/rivShop"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp"
-        app:layout_constraintBottom_toBottomOf="@+id/addressText"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:adjustViewBounds="true"
+        android:scaleType="centerCrop"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintDimensionRatio="1"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:riv_corner_radius="24dp"
-        tools:srcCompat="@tools:sample/avatars" />
+        app:riv_corner_radius="40dp" />
 
     <TextView
         android:id="@+id/nameText"
@@ -47,25 +48,17 @@
         app:layout_constraintTop_toBottomOf="@+id/nameText"
         tools:text="1142 Fagyi utca 12" />
 
-    <ImageView
-        android:id="@+id/rateIcon"
+    <RatingBar
+        android:id="@+id/ratingBar"
+        style="@style/Widget.AppCompat.RatingBar.Small"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="4dp"
-        android:contentDescription="@string/rate_icon_desc"
-        app:layout_constraintRight_toLeftOf="@+id/rateText"
-        app:layout_constraintTop_toTopOf="@id/rateText"
-        app:srcCompat="@drawable/outline_star_outline_24" />
-
-    <TextView
-        android:id="@+id/rateText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_marginLeft="8dp"
         android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        app:layout_constraintRight_toLeftOf="@+id/arrowIcon"
-        app:layout_constraintTop_toBottomOf="@+id/addressText"
-        tools:text="5" />
+        android:isIndicator="true"
+        android:progressTint="#FFCC01"
+        app:layout_constraintLeft_toRightOf="@+id/rivShop"
+        app:layout_constraintTop_toBottomOf="@id/addressText" />
 
     <ImageView
         android:id="@+id/arrowIcon"

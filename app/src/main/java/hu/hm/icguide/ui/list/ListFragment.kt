@@ -105,7 +105,6 @@ class ListFragment : RainbowCakeFragment<ListViewState, ListViewModel>(),
                                 adapter.filter.filter(newText)
                                 return true
                             }
-
                         }
                     )
                 }
