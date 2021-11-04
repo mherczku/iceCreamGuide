@@ -16,6 +16,7 @@ import hu.hm.icguide.R
 import hu.hm.icguide.databinding.FragmentListBinding
 import hu.hm.icguide.extensions.toast
 import hu.hm.icguide.interactors.FirebaseInteractor
+import hu.hm.icguide.interactors.SystemInteractor
 import hu.hm.icguide.ui.adminList.AdminListFragment
 import hu.hm.icguide.ui.detail.DetailFragment
 import hu.hm.icguide.ui.login.LoginFragment
@@ -36,6 +37,8 @@ class ListFragment : RainbowCakeFragment<ListViewState, ListViewModel>(),
 
     @Inject
     lateinit var firebaseInteractor: FirebaseInteractor
+    @Inject
+    lateinit var systemInteractor: SystemInteractor
     private lateinit var binding: FragmentListBinding
     private lateinit var adapter: ShopAdapter
 
@@ -84,7 +87,6 @@ class ListFragment : RainbowCakeFragment<ListViewState, ListViewModel>(),
                 setupDrawer(role)
             }
         }
-
         binding.toolbar.setOnMenuItemClickListener {
             when (it.itemId) {
                 R.id.menuItemSearch -> {
@@ -100,7 +102,6 @@ class ListFragment : RainbowCakeFragment<ListViewState, ListViewModel>(),
                             override fun onQueryTextSubmit(query: String?): Boolean {
                                 return true
                             }
-
                             override fun onQueryTextChange(newText: String?): Boolean {
                                 adapter.filter.filter(newText)
                                 return true
@@ -114,22 +115,28 @@ class ListFragment : RainbowCakeFragment<ListViewState, ListViewModel>(),
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-
-            R.id.action_drawer_admin -> {
-                navigator?.add(AdminListFragment())
-            }
-            R.id.action_drawer_two -> {
-                navigator?.add(MapFragment())
-            }
-            R.id.action_drawer_three -> {
-                navigator?.add(SettingsFragment())
-            }
-            R.id.action_drawer_four -> {
-                firebaseInteractor.logout()
-                navigator?.replace(LoginFragment())
+        if(systemInteractor.isInternetAvailable()) {
+            when (item.itemId) {
+                R.id.action_drawer_admin -> {
+                    Timber.d("Navigate to AdminListFragment")
+                    navigator?.add(AdminListFragment())
+                }
+                R.id.action_drawer_two -> {
+                    Timber.d("Navigate to MapFragment")
+                    navigator?.add(MapFragment())
+                }
+                R.id.action_drawer_three -> {
+                    Timber.d("Navigate to SettingsFragment")
+                    navigator?.add(SettingsFragment())
+                }
+                R.id.action_drawer_four -> {
+                    Timber.d("Logout, navigate to LoginFragment")
+                    firebaseInteractor.logout()
+                    navigator?.replace(LoginFragment())
+                }
             }
         }
+        else toast(getString(R.string.no_internet))
         binding.drawerLayout.closeDrawer(GravityCompat.START)
         return true
     }

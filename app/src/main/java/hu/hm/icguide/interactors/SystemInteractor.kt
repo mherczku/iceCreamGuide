@@ -23,9 +23,7 @@ class SystemInteractor @Inject constructor() {
             Timber.d("Faking internet being available for debug on emulator")
             return true
         }
-
         val runtime = Runtime.getRuntime()
-
         try {
             val ipProcess = runtime.exec("/system/bin/ping -c 1 8.8.8.8")
             val exitValue = ipProcess.waitFor()
@@ -33,8 +31,6 @@ class SystemInteractor @Inject constructor() {
         } catch (e: Exception) {
             e.printStackTrace()
         }
-
         return false
     }
-
 }
