@@ -56,6 +56,7 @@ class SettingsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         user = firebaseInteractor.firebaseUser ?: return
+        user.reload()
         setupView()
     }
 

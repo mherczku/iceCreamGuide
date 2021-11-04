@@ -24,8 +24,9 @@ import java.io.ByteArrayOutputStream
 import java.net.URLEncoder
 import java.util.*
 import javax.inject.Inject
+import javax.inject.Singleton
 
-
+@Singleton
 class FirebaseInteractor @Inject constructor() {
 
     private val firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance()
