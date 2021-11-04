@@ -103,10 +103,13 @@ class MapFragment : RainbowCakeFragment<MapViewState, MapViewModel>(),
         val budapest = LatLng(47.4979, 19.0402)
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(budapest, 10F))
         googleMap.setOnMapLongClickListener {
+            Timber.d("Long clicked on map at $it, open addDialog")
             AddDialog(it).show(childFragmentManager, null)
         }
-        googleMap.setOnInfoWindowLongClickListener {
-            it.tag ?: return@setOnInfoWindowLongClickListener
+        googleMap.setOnInfoWindowClickListener {
+            Timber.d("Clicked on ${it.id} marker's info window")
+            it.tag ?: return@setOnInfoWindowClickListener
+            Timber.d("Navigate to DetailFragment id: ${it.tag}")
             navigator?.add(DetailFragment(it.tag!! as String))
         }
     }
