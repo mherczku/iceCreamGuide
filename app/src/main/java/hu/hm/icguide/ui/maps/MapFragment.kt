@@ -11,6 +11,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.StringRes
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.preference.PreferenceManager
 import co.zsmb.rainbowcake.base.RainbowCakeFragment
 import co.zsmb.rainbowcake.hilt.getViewModelFromFactory
 import co.zsmb.rainbowcake.navigation.navigator
@@ -19,6 +20,7 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.android.gms.maps.model.MarkerOptions
 import dagger.hilt.android.AndroidEntryPoint
 import hu.hm.icguide.R
@@ -99,6 +101,9 @@ class MapFragment : RainbowCakeFragment<MapViewState, MapViewModel>(),
         googleMap.uiSettings.setAllGesturesEnabled(true)
 
         googleMap.isMyLocationEnabled = isPermissionGranted
+        val sp = PreferenceManager.getDefaultSharedPreferences(requireActivity().applicationContext)
+        val darkMode = sp.getBoolean("darkTheme", false)
+        if (darkMode) googleMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(requireContext(), R.raw.mapstyle_dark))
 
         val budapest = LatLng(47.4979, 19.0402)
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(budapest, 10F))

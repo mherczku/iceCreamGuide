@@ -54,7 +54,9 @@ class LoginFragment : RainbowCakeFragment<LoginViewState, LoginViewModel>() {
         viewModel.load()
     }
 
-    override fun render(viewState: LoginViewState) {}
+    override fun render(viewState: LoginViewState) {
+        /*Empty since the viewState is always empty, there are no different states for this view.*/
+    }
 
     private fun showProgressDialog() {
         progressBar.visibility = View.VISIBLE

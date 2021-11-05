@@ -9,10 +9,12 @@ import androidx.lifecycle.lifecycleScope
 import co.zsmb.rainbowcake.base.RainbowCakeFragment
 import co.zsmb.rainbowcake.hilt.getViewModelFromFactory
 import co.zsmb.rainbowcake.navigation.navigator
+import com.bumptech.glide.Glide
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.firestore.QueryDocumentSnapshot
 import dagger.hilt.android.AndroidEntryPoint
 import hu.hm.icguide.R
+import hu.hm.icguide.databinding.DrawerHeaderBinding
 import hu.hm.icguide.databinding.FragmentListBinding
 import hu.hm.icguide.extensions.toast
 import hu.hm.icguide.interactors.FirebaseInteractor
@@ -65,7 +67,9 @@ class ListFragment : RainbowCakeFragment<ListViewState, ListViewModel>(),
     private fun setupRecyclerView() {
         adapter = ShopAdapter()
         adapter.setItemSelectedListener {
-            navigator?.add(DetailFragment(it.id))
+            if(systemInteractor.isInternetAvailable())
+                navigator?.add(DetailFragment(it.id))
+            else toast(getString(R.string.no_internet))
         }
         binding.shopList.adapter = adapter
     }
@@ -73,6 +77,13 @@ class ListFragment : RainbowCakeFragment<ListViewState, ListViewModel>(),
     private fun setupDrawer(role: String?) {
         if ( role == "admin") binding.navigationView.inflateMenu(R.menu.drawer_list_admin)
         else binding.navigationView.inflateMenu(R.menu.drawer_list)
+        val headerView = binding.navigationView.getHeaderView(0)
+        val headerBinding = DrawerHeaderBinding.bind(headerView)
+        headerBinding.textView.text = firebaseInteractor.firebaseUser?.displayName
+        Glide.with(headerBinding.imageView)
+            .load(firebaseInteractor.firebaseUser?.photoUrl)
+            .placeholder(R.drawable.outline_account_circle_24)
+            .into(headerBinding.imageView)
     }
 
     private fun setupToolbar() {

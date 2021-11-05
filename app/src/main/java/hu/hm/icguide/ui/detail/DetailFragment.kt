@@ -86,7 +86,7 @@ class DetailFragment(
         if (!viewModel.isNetAvailable()) {
             binding.etComment.isEnabled = false
             binding.btnSend.isEnabled = false
-            toast(getString(R.string.internet_unavailable))
+            toast(getString(R.string.no_internet))
         } else {
             setupRecyclerView()
             binding.btnSend.setOnClickListener {

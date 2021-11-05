@@ -9,4 +9,5 @@
     <color name="list_comment_corner">#67daff</color>
     <color name="list_shop_center">#67daff</color>
     <color name="list_shop_corner">#03a9f4</color>
+    <color name="navIconTint">#03a9f4</color>
 </resources>
