@@ -26,12 +26,14 @@ import dagger.hilt.android.AndroidEntryPoint
 import hu.hm.icguide.R
 import hu.hm.icguide.databinding.FragmentMapsBinding
 import hu.hm.icguide.extensions.toast
+import hu.hm.icguide.models.Shop
 import hu.hm.icguide.ui.add.AddDialog
 import hu.hm.icguide.ui.detail.DetailFragment
 import timber.log.Timber
 
 @AndroidEntryPoint
-class MapFragment : RainbowCakeFragment<MapViewState, MapViewModel>(),
+class MapFragment(private val targetShop: Shop? = null) :
+    RainbowCakeFragment<MapViewState, MapViewModel>(),
     ActivityCompat.OnRequestPermissionsResultCallback {
 
     override fun provideViewModel() = getViewModelFromFactory()
@@ -91,6 +93,17 @@ class MapFragment : RainbowCakeFragment<MapViewState, MapViewModel>(),
                     .title(it.name)
             )
             marker?.tag = it.id
+            if(it.id == targetShop?.id){
+                map.moveCamera(
+                    CameraUpdateFactory.newLatLngZoom(
+                        LatLng(
+                            targetShop.geoPoint.latitude,
+                            targetShop.geoPoint.longitude
+                        ), 15F
+                    )
+                )
+                marker?.showInfoWindow()
+            }
         }
     }
 
@@ -103,7 +116,12 @@ class MapFragment : RainbowCakeFragment<MapViewState, MapViewModel>(),
         googleMap.isMyLocationEnabled = isPermissionGranted
         val sp = PreferenceManager.getDefaultSharedPreferences(requireActivity().applicationContext)
         val darkMode = sp.getBoolean("darkTheme", false)
-        if (darkMode) googleMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(requireContext(), R.raw.mapstyle_dark))
+        if (darkMode) googleMap.setMapStyle(
+            MapStyleOptions.loadRawResourceStyle(
+                requireContext(),
+                R.raw.mapstyle_dark
+            )
+        )
 
         val budapest = LatLng(47.4979, 19.0402)
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(budapest, 10F))

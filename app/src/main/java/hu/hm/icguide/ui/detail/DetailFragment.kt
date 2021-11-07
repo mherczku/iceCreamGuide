@@ -19,6 +19,7 @@ import hu.hm.icguide.interactors.FirebaseInteractor
 import hu.hm.icguide.models.Comment
 import hu.hm.icguide.models.Shop
 import hu.hm.icguide.ui.add.AddReviewDialog
+import hu.hm.icguide.ui.maps.MapFragment
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -75,7 +76,9 @@ class DetailFragment(
 
     @SuppressLint("ClickableViewAccessibility")
     private fun setupView() {
-
+        binding.tvAddress.setOnClickListener {
+            navigator?.add(MapFragment(shop))
+        }
         binding.ratingBar.setOnTouchListener(View.OnTouchListener { _, event ->
             if (event.action == MotionEvent.ACTION_UP) {
                 AddReviewDialog(shop, viewModel::refreshShop).show(childFragmentManager, null)
