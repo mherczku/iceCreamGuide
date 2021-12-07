@@ -4,6 +4,8 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.pm.PackageManager
+import android.location.Location
+import android.location.LocationManager
 import android.os.Bundle
 import android.view.View
 import androidx.activity.result.ActivityResultLauncher
@@ -135,6 +137,14 @@ class MapFragment(private val targetShop: Shop? = null) :
             Timber.d("Navigate to DetailFragment id: ${it.tag}")
             navigator?.add(DetailFragment(it.tag!! as String))
         }
+        googleMap.setOnMarkerClickListener {
+            var distance: String
+            distance = if(!isPermissionGranted){
+                getString(R.string.distance_no_permission)
+            } else " ${getString(R.string.distance)} ${getDistance(it.position)} km"
+            it.snippet = distance
+            false
+        }
     }
 
     private fun showRationaleDialog(
@@ -181,6 +191,15 @@ class MapFragment(private val targetShop: Shop? = null) :
 
     private fun requestLocationPermission() {
         permReqLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun getDistance(position: LatLng): Float {
+        if(!isPermissionGranted) return 0F
+        val location = Location(LocationManager.GPS_PROVIDER)
+        location.latitude = position.latitude
+        location.longitude = position.longitude
+        return location.distanceTo(map.myLocation) / 1000
     }
 
 }

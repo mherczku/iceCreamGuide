@@ -90,5 +90,6 @@
     <string name="send_password_reset_email">Jelszó-visszaállító email küldése</string>
     <string name="password_reset_email_sent">Jelszó-visszaállitó email elküldve</string>
     <string name="no_internet">Internet nem elérhető</string>
-
+    <string name="distance_no_permission">Távolság: Az alkalmazásnak nincs engedélye a helyadatokhoz</string>
+    <string name="distance">Távolság:</string>
 </resources>

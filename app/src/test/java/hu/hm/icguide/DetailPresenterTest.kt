@@ -1,6 +1,7 @@
 package hu.hm.icguide
 
 import co.zsmb.rainbowcake.test.base.PresenterTest
+import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.GeoPoint
 import com.nhaarman.mockito_kotlin.doReturn
 import com.nhaarman.mockito_kotlin.mock
@@ -33,6 +34,7 @@ class DetailPresenterTest : PresenterTest() {
             photo = "https://cdn3.vectorstock.com/i/1000x1000/04/77/facade-of-ice-cream-shop-flat-vector-15200477.jpg"
         )
 
+
     }
 
     @Test
@@ -43,5 +45,15 @@ class DetailPresenterTest : PresenterTest() {
 
         verify(systemInteractor).isInternetAvailable()
         Assert.assertEquals(true, result)
+    }
+
+
+    @Test
+    fun `firebaseInteractor test 1`() = runBlockingTest {
+        whenever(detailPresenter.getShop("test000")) doReturn MOCK_SHOP
+
+        val result = detailPresenter.getShop("test000").name
+        verify(detailPresenter).getShop("test000").name
+        Assert.assertEquals("Test Shop", result)
     }
 }
