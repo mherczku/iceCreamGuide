@@ -104,10 +104,6 @@ class ListFragment : RainbowCakeFragment<ListViewState, ListViewModel>(),
                     val searchView = it.actionView as SearchView
                     searchView.queryHint = getString(R.string.search)
                     it.expandActionView()
-                    /*searchView.setOnQueryTextFocusChangeListener { v, hasFocus ->
-                        if (!hasFocus)
-                            it.collapseActionView()
-                    }*/
                     searchView.setOnQueryTextListener(
                         object : SearchView.OnQueryTextListener {
                             override fun onQueryTextSubmit(query: String?): Boolean {
@@ -157,5 +153,3 @@ class ListFragment : RainbowCakeFragment<ListViewState, ListViewModel>(),
     }
 
 }
-
-

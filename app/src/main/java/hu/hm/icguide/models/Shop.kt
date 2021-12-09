@@ -2,7 +2,6 @@ package hu.hm.icguide.models
 
 import com.google.firebase.firestore.GeoPoint
 
-
 data class Shop(
     val id: String = "",
     val name: String = "",

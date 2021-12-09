@@ -30,7 +30,7 @@ import javax.inject.Singleton
 class FirebaseInteractor @Inject constructor() {
 
     private val firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance()
-    private val firestoreDb: FirebaseFirestore = Firebase.firestore
+    private var firestoreDb: FirebaseFirestore = Firebase.firestore
     private val storageReference: StorageReference = FirebaseStorage.getInstance().reference
     val firebaseUser: FirebaseUser?
         get() = firebaseAuth.currentUser
@@ -57,6 +57,8 @@ class FirebaseInteractor @Inject constructor() {
         firebaseAuth
             .signInWithEmailAndPassword(email, password)
             .addOnSuccessListener {
+                Timber.d("Opening new connection to Firestore")
+                firestoreDb = Firebase.firestore
                 firestoreDb.document("users/${firebaseUser?.uid}").get()
                     .addOnSuccessListener { it2 ->
                         val getUser: User? = it2.toObject()
@@ -308,7 +310,8 @@ class FirebaseInteractor @Inject constructor() {
     }
 
     fun logout() {
-        Timber.d("Logging out")
+        Timber.d("Logging out and terminating the connection with Firestore")
+        firestoreDb.terminate()
         firebaseAuth.signOut()
     }
 

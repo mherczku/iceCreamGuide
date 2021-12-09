@@ -32,23 +32,4 @@ class AdminListViewModel @Inject constructor(
         adminListPresenter.deleteNewShop(id)
     }
 
-    /*fun dataChanged(dc: QueryDocumentSnapshot, type: String) {
-        val newList = adminListPresenter.dataChanged(dc, type, viewState.shops)
-        newList.sortBy { it.name }
-        viewState = AdminListViewState(shops = newList)
-    }*/
-
-    /*fun initShopListeners(
-        listener: FirebaseInteractor.DataChangedListener,
-        toastListener: FirebaseInteractor.OnToastListener
-    ) {
-        adminListPresenter.initShopListeners(listener, toastListener)
-    }*/
-
-    /*fun getNewShops(){
-        adminListPresenter.getNewShops {
-            viewState = AdminListViewState(shops = it, isRefreshing = false)
-        }
-    }*/
-
 }

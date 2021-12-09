@@ -138,10 +138,9 @@ class MapFragment(private val targetShop: Shop? = null) :
             navigator?.add(DetailFragment(it.tag!! as String))
         }
         googleMap.setOnMarkerClickListener {
-            var distance: String
-            distance = if(!isPermissionGranted){
+            val distance: String = if(!isPermissionGranted){
                 getString(R.string.distance_no_permission)
-            } else " ${getString(R.string.distance)} ${getDistance(it.position)} km"
+            } else "${getString(R.string.distance)} ${String.format("%.1f" ,getDistance(it.position))} km"
             it.snippet = distance
             false
         }
