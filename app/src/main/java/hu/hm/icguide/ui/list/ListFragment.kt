@@ -16,6 +16,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import hu.hm.icguide.R
 import hu.hm.icguide.databinding.DrawerHeaderBinding
 import hu.hm.icguide.databinding.FragmentListBinding
+import hu.hm.icguide.extensions.isNetAvailable
 import hu.hm.icguide.extensions.toast
 import hu.hm.icguide.interactors.FirebaseInteractor
 import hu.hm.icguide.interactors.SystemInteractor
@@ -67,7 +68,7 @@ class ListFragment : RainbowCakeFragment<ListViewState, ListViewModel>(),
     private fun setupRecyclerView() {
         adapter = ShopAdapter()
         adapter.setItemSelectedListener {
-            if(systemInteractor.isInternetAvailable())
+            if(this.isNetAvailable())    // if real environment systemInteractor.isInternetAvailable()
                 navigator?.add(DetailFragment(it.id))
             else toast(getString(R.string.no_internet))
         }
@@ -122,7 +123,7 @@ class ListFragment : RainbowCakeFragment<ListViewState, ListViewModel>(),
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
-        if(systemInteractor.isInternetAvailable()) {
+        if(this.isNetAvailable()) {  // if real environment systemInteractor.isInternetAvailable()
             when (item.itemId) {
                 R.id.action_drawer_admin -> {
                     Timber.d("Navigate to AdminListFragment")

@@ -1,7 +1,9 @@
 package hu.hm.icguide.extensions
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
+import android.net.ConnectivityManager
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
@@ -33,6 +35,13 @@ fun Fragment.toast(message: String?, length: Int = Toast.LENGTH_SHORT) {
 
 fun Fragment.hideKeyboard() {
     view?.let { activity?.hideKeyboard(it) }
+}
+
+@SuppressLint("MissingPermission")
+fun Fragment.isNetAvailable(): Boolean {
+    val connectivityManager = requireContext().getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+    val activeNetworkInfo = connectivityManager.activeNetworkInfo
+    return (activeNetworkInfo != null && activeNetworkInfo.isConnected)
 }
 
 fun Context.hideKeyboard(view: View) {

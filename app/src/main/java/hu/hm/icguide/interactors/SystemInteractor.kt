@@ -25,7 +25,7 @@ class SystemInteractor @Inject constructor() {
         }
         val runtime = Runtime.getRuntime()
         try {
-            val ipProcess = runtime.exec("/system/bin/ping -c 1 8.8.8.8")
+            val ipProcess = runtime.exec("ping -c 1 google.com")
             val exitValue = ipProcess.waitFor()
             return exitValue == 0
         } catch (e: Exception) {

@@ -13,6 +13,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import hu.hm.icguide.R
 import hu.hm.icguide.databinding.FragmentDetailBinding
 import hu.hm.icguide.extensions.hideKeyboard
+import hu.hm.icguide.extensions.isNetAvailable
 import hu.hm.icguide.extensions.toast
 import hu.hm.icguide.extensions.validateNonEmpty
 import hu.hm.icguide.interactors.FirebaseInteractor
@@ -86,7 +87,7 @@ class DetailFragment(
             return@OnTouchListener true
         })
 
-        if (!viewModel.isNetAvailable()) {
+        if (!this.isNetAvailable()) {    // if real environment -> !viewModel.isNetAvailable()
             binding.etComment.isEnabled = false
             binding.btnSend.isEnabled = false
             toast(getString(R.string.no_internet))
