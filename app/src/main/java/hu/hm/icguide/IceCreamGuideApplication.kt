@@ -4,7 +4,6 @@ import android.app.Application
 import co.zsmb.rainbowcake.config.Loggers
 import co.zsmb.rainbowcake.config.rainbowCake
 import co.zsmb.rainbowcake.timber.TIMBER
-import com.example.icguide.BuildConfig
 import dagger.hilt.android.HiltAndroidApp
 import timber.log.Timber
 

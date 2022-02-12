@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#00288C</color>
+    <color name="colorPrimaryDark">#001240</color>
+    <color name="colorAccent">#03a9f4</color>
+    <color name="colorTextContra">#FFFFFF</color>
+    <color name="colorToolbarTitle">#FDFDFD</color>
+    <color name="list_comment_center">#001240</color>
+    <color name="list_comment_corner">#00288C</color>
+    <color name="list_shop_center">#001240</color>
+    <color name="list_shop_corner">#00288C</color>
+    <color name="navIconTint">#FFFFFF</color>
+</resources>

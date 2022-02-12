@@ -10,7 +10,7 @@ class MapViewModel @Inject constructor(
 ) : RainbowCakeViewModel<MapViewState>(MapViewState()) {
 
     fun load() = execute {
-        viewState = MapViewState(mapPresenter.getData())
+        viewState = MapViewState(mapPresenter.getMarkers())
     }
 
 }

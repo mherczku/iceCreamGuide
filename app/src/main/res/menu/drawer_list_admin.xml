@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/action_drawer_admin"
+        android:icon="@drawable/outline_list_24"
+        android:title="@string/waiting_for_approval" />
+    <item
+        android:id="@+id/action_drawer_one"
+        android:icon="@drawable/outline_list_24"
+        android:title="@string/drawer_item_one" />
+    <item
+        android:id="@+id/action_drawer_two"
+        android:icon="@drawable/outline_map_24"
+        android:title="@string/drawer_item_two" />
+    <item
+        android:id="@+id/action_drawer_three"
+        android:icon="@drawable/outline_settings_24"
+        android:title="@string/drawer_item_three" />
+    <item
+        android:id="@+id/action_drawer_four"
+        android:icon="@drawable/outline_logout_24"
+        android:title="@string/drawer_item_four" />
+
+</menu>
